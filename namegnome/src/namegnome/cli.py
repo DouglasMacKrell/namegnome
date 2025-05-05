@@ -1,6 +1,5 @@
 """Command-line interface for namegnome."""
 
-
 import typer
 from rich.console import Console
 from rich.traceback import install
