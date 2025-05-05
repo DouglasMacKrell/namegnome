@@ -598,7 +598,9 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 
 ## 8 · Completed
 
-* **0.1 Repo Bootstrap, Pre‑commit & CI** (2024-11-27) - Initialized Hatch project with Python 3.12, set up dev dependencies in pyproject.toml, created pre-commit hooks for Black/Ruff/Mypy/Pytest, added GitHub Actions CI workflow, and established main/develop branch workflow.
+* **0.1 Repo Bootstrap, Pre‑commit & CI** (2025-05-05) - Initialized Hatch project with Python 3.12, set up dev dependencies in pyproject.toml, created pre-commit hooks for Black/Ruff/Mypy/Pytest, added GitHub Actions CI workflow, and established main/develop branch workflow.
+* **0.2 Package Skeleton** (2025-05-05) - Created directory structure with core modules, set up __init__.py files with version export, implemented CLI with Typer app object and commands, made package executable via python -m namegnome.
+* **0.3 Domain Models** (2025-05-05) - Implemented core data models using Pydantic v2, including MediaFile, RenamePlanItem, RenamePlan, and ScanResult. Added enums for MediaType and PlanStatus. Wrote comprehensive tests with 100% coverage for model serialization, validation, and error handling.
 
 ---
 

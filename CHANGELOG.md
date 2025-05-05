@@ -4,7 +4,16 @@ All notable changes to the namegnome project will be documented in this file.
 
 ## [Unreleased]
 
-## [0.1.0] - 2024-11-27
+## [0.2.0] - 2025-05-05
+
+### Added
+- Created proper package structure with all required modules
+- Added models directory for upcoming domain models
+- Implemented CLI module with Typer app and version command
+- Made package executable via `python -m namegnome`
+- Fixed import structure for better maintainability
+
+## [0.1.0] - 2025-05-05
 
 ### Added
 - Initialized project with Hatch, set up Python 3.12 support
