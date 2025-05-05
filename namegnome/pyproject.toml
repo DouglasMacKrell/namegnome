@@ -1,0 +1,114 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "namegnome"
+dynamic = ["version"]
+description = 'A tool to analyze, rename and reorganize media files for media servers'
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+keywords = ["media", "rename", "organize", "plex", "jellyfin", "emby"]
+authors = [
+  { name = "DouglasMacKrell", email = "d.mackrell@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
+]
+dependencies = [
+  "typer>=0.9.0",
+  "rich>=13.3.5",
+  "httpx>=0.24.1",
+  "pydantic>=2.0.0",
+  "structlog>=23.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black",
+  "ruff",
+  "mypy",
+  "pytest",
+  "pytest-cov",
+  "pre-commit",
+]
+
+[project.urls]
+Documentation = "https://github.com/DouglasMacKrell/namegnome#readme"
+Issues = "https://github.com/DouglasMacKrell/namegnome/issues"
+Source = "https://github.com/DouglasMacKrell/namegnome"
+
+[project.scripts]
+namegnome = "namegnome.cli:app"
+
+[tool.hatch.version]
+path = "src/namegnome/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "pytest --cov=namegnome {args:tests} --cov-report=xml --cov-report=term"
+
+[tool.hatch.envs.lint]
+dependencies = [
+  "black>=23.1.0",
+  "ruff>=0.0.243",
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.lint.scripts]
+fmt = "black {args:.}"
+check = "black --check {args:.}"
+lint = "ruff check {args:.}"
+typing = "mypy --strict {args:src/namegnome tests}"
+all = ["fmt", "lint", "typing"]
+
+[tool.black]
+target-version = ["py312"]
+line-length = 88
+preview = true
+
+[tool.ruff]
+target-version = "py312"
+line-length = 88
+select = [
+  "E",  # pycodestyle errors
+  "F",  # pyflakes
+  "I",  # isort
+  "UP", # pyupgrade
+]
+ignore = []
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_unused_configs = true
+
+[tool.coverage.run]
+source_pkgs = ["namegnome", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/namegnome/__about__.py",
+]
+
+[tool.coverage.paths]
+namegnome = ["src/namegnome", "*/namegnome/src/namegnome"]
+tests = ["tests", "*/namegnome/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+fail_under = 80
