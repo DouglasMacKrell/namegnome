@@ -1,5 +1,7 @@
 """Command-line interface for namegnome."""
 
+from typing import Any
+
 import typer
 from rich.console import Console
 from rich.traceback import install
@@ -19,7 +21,7 @@ app = typer.Typer(
 
 
 @app.callback()
-def callback():
+def callback() -> None:
     """NameGnome - Media File Organizer and Renamer.
     
     Analyzes, renames and reorganizes media files for Plex, Jellyfin, Emby and other media servers.
@@ -28,7 +30,7 @@ def callback():
 
 
 @app.command()
-def version():
+def version() -> None:
     """Show the version of namegnome."""
     from namegnome.__about__ import __version__
     console.print(f"NameGnome version: [bold]{__version__}[/bold]")
