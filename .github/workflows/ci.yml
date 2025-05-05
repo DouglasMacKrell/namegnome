@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: [3.12]
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e "namegnome[dev]"
+        
+    - name: Run pre-commit hooks
+      run: |
+        cd namegnome
+        pre-commit run --all-files
+        
+    - name: Test with pytest and coverage
+      run: |
+        cd namegnome
+        python -m pytest --cov=namegnome --cov-fail-under=80 tests/
+        
+    - name: Upload coverage report
+      uses: codecov/codecov-action@v3
+      if: matrix.os == 'ubuntu-latest' 
