@@ -14,6 +14,12 @@ All notable changes to the namegnome project will be documented in this file.
 - Fixed import structure for better maintainability
 - Implemented domain models using Pydantic v2 with comprehensive testing
 
+### Fixed
+- Resolved cross-platform formatting issues in the CI pipeline
+- Added proper type annotations for Typer and pytest decorators
+- Ensured consistent line endings with .gitattributes
+- Improved CI workflow to fix formatting issues automatically before verification
+
 ## [0.1.0] - 2025-05-05
 
 ### Added

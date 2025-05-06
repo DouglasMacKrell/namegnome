@@ -5,8 +5,6 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-from pydantic import ValidationError
-
 from namegnome.models.core import (
     MediaFile,
     MediaType,
@@ -15,6 +13,7 @@ from namegnome.models.core import (
     RenamePlanItem,
     ScanResult,
 )
+from pydantic import ValidationError
 
 
 class TestMediaType:
@@ -22,10 +21,10 @@ class TestMediaType:
 
     def test_enum_values(self) -> None:
         """Test the expected enum values exist."""
-        assert MediaType.TV == "tv"
-        assert MediaType.MOVIE == "movie"
-        assert MediaType.MUSIC == "music"
-        assert MediaType.UNKNOWN == "unknown"
+        assert MediaType.TV.value == "tv"
+        assert MediaType.MOVIE.value == "movie"
+        assert MediaType.MUSIC.value == "music"
+        assert MediaType.UNKNOWN.value == "unknown"
 
     def test_serialization(self) -> None:
         """Test MediaType serializes to string in JSON."""
@@ -45,12 +44,12 @@ class TestPlanStatus:
 
     def test_enum_values(self) -> None:
         """Test the expected enum values exist."""
-        assert PlanStatus.PENDING == "pending"
-        assert PlanStatus.MOVED == "moved"
-        assert PlanStatus.SKIPPED == "skipped"
-        assert PlanStatus.CONFLICT == "conflict"
-        assert PlanStatus.FAILED == "failed"
-        assert PlanStatus.MANUAL == "manual"
+        assert PlanStatus.PENDING.value == "pending"
+        assert PlanStatus.MOVED.value == "moved"
+        assert PlanStatus.SKIPPED.value == "skipped"
+        assert PlanStatus.CONFLICT.value == "conflict"
+        assert PlanStatus.FAILED.value == "failed"
+        assert PlanStatus.MANUAL.value == "manual"
 
 
 class TestMediaFile:
@@ -91,9 +90,9 @@ class TestMediaFile:
             hash="abc123",
             metadata_ids={"tmdb": "12345"},
         )
-        
+
         json_data = original.model_dump_json()
-        
+
         # Manual check of JSON structure
         parsed = json.loads(json_data)
         assert parsed["path"] == str(Path("/tmp/test.mp4").absolute())
@@ -101,11 +100,11 @@ class TestMediaFile:
         assert parsed["media_type"] == "tv"
         assert parsed["hash"] == "abc123"
         assert parsed["metadata_ids"] == {"tmdb": "12345"}
-        
+
         # Convert back to model and verify
         model_dict = original.model_dump()
         reconstructed = MediaFile.model_validate(model_dict)
-        
+
         assert reconstructed.path == original.path
         assert reconstructed.size == original.size
         assert reconstructed.media_type == original.media_type
@@ -116,7 +115,7 @@ class TestMediaFile:
 class TestRenamePlanItem:
     """Tests for the RenamePlanItem model."""
 
-    @pytest.fixture
+    @pytest.fixture  # type: ignore
     def media_file(self) -> MediaFile:
         """Create a sample MediaFile for tests."""
         return MediaFile(
@@ -147,7 +146,7 @@ class TestRenamePlanItem:
                 destination=Path("/absolute/dest.mp4").absolute(),
                 media_file=media_file,
             )
-        
+
         with pytest.raises(ValidationError):
             RenamePlanItem(
                 source=Path("/absolute/source.mp4").absolute(),
@@ -184,7 +183,7 @@ class TestRenamePlanItem:
 class TestRenamePlan:
     """Tests for the RenamePlan model."""
 
-    @pytest.fixture
+    @pytest.fixture  # type: ignore
     def media_file(self) -> MediaFile:
         """Create a sample MediaFile for tests."""
         return MediaFile(
@@ -194,7 +193,7 @@ class TestRenamePlan:
             modified_date=datetime.now(),
         )
 
-    @pytest.fixture
+    @pytest.fixture  # type: ignore
     def plan_item(self, media_file: MediaFile) -> RenamePlanItem:
         """Create a sample RenamePlanItem for tests."""
         return RenamePlanItem(
@@ -234,13 +233,13 @@ class TestRenamePlan:
             metadata_providers=["tmdb", "tvdb"],
             llm_model="deepseek-coder",
         )
-        
+
         # Serialize to dict
         plan_dict = plan.model_dump()
-        
+
         # Deserialize back to RenamePlan
         reconstructed = RenamePlan.model_validate(plan_dict)
-        
+
         assert reconstructed.id == plan.id
         assert reconstructed.created_at == plan.created_at
         assert reconstructed.root_dir == plan.root_dir
@@ -254,7 +253,7 @@ class TestRenamePlan:
 class TestScanResult:
     """Tests for the ScanResult model."""
 
-    @pytest.fixture
+    @pytest.fixture  # type: ignore
     def media_file(self) -> MediaFile:
         """Create a sample MediaFile for tests."""
         return MediaFile(
@@ -263,8 +262,8 @@ class TestScanResult:
             media_type=MediaType.TV,
             modified_date=datetime.now(),
         )
-    
-    @pytest.fixture
+
+    @pytest.fixture  # type: ignore
     def movie_file(self) -> MediaFile:
         """Create a sample movie MediaFile for tests."""
         return MediaFile(
@@ -288,7 +287,7 @@ class TestScanResult:
             scan_duration_seconds=1.5,
             root_dir=Path("/tmp").absolute(),
         )
-        
+
         assert result.total_files == 10
         assert len(result.media_files) == 2
         assert result.skipped_files == 8
@@ -310,11 +309,11 @@ class TestScanResult:
             scan_duration_seconds=1.5,
             root_dir=Path("/tmp").absolute(),
         )
-        
+
         plan = result.as_plan(plan_id="plan-123", platform="plex")
-        
+
         assert plan.id == "plan-123"
         assert plan.root_dir == Path("/tmp").absolute()
         assert plan.platform == "plex"
         assert len(plan.items) == 0  # Empty plan
-        assert sorted(plan.media_types) == sorted([MediaType.TV, MediaType.MOVIE]) 
+        assert sorted(plan.media_types) == sorted([MediaType.TV, MediaType.MOVIE])

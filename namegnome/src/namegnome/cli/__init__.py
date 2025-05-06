@@ -1,5 +1,8 @@
 """Command-line interface for namegnome."""
 
+from collections.abc import Callable
+from typing import Any, TypeVar
+
 import typer
 from rich.console import Console
 from rich.traceback import install
@@ -17,8 +20,10 @@ app = typer.Typer(
     add_completion=True,
 )
 
+F = TypeVar("F", bound=Callable[..., Any])
 
-@app.callback()
+
+@app.callback()  # type: ignore
 def callback() -> None:
     """NameGnome - Media File Organizer and Renamer.
 
@@ -28,7 +33,7 @@ def callback() -> None:
     pass
 
 
-@app.command()
+@app.command()  # type: ignore
 def version() -> None:
     """Show the version of namegnome."""
     from namegnome.__about__ import __version__

@@ -1,9 +1,8 @@
 """Core domain models for namegnome."""
 
 from datetime import datetime
-from enum import Enum, auto
+from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -33,20 +32,20 @@ class MediaFile(BaseModel):
 
     path: Path
     """Absolute path to the file."""
-    
+
     size: int
     """Size of the file in bytes."""
-    
+
     media_type: MediaType = MediaType.UNKNOWN
     """Type of media detected."""
-    
+
     modified_date: datetime
     """Last modification date of the file."""
-    
-    hash: Optional[str] = None
+
+    hash: str | None = None
     """Optional SHA-256 hash of the file, if --verify was specified."""
 
-    metadata_ids: Dict[str, str] = Field(default_factory=dict)
+    metadata_ids: dict[str, str] = Field(default_factory=dict)
     """Dictionary of provider IDs for the file (e.g., {"tmdb": "12345"})."""
 
     @model_validator(mode="after")
@@ -59,26 +58,26 @@ class MediaFile(BaseModel):
 
 class RenamePlanItem(BaseModel):
     """A single file rename/move operation."""
-    
+
     source: Path
     """Absolute source path."""
-    
+
     destination: Path
     """Absolute destination path."""
-    
+
     media_file: MediaFile
     """Original media file reference."""
-    
+
     status: PlanStatus = PlanStatus.PENDING
     """Current status of this rename operation."""
-    
-    reason: Optional[str] = None
+
+    reason: str | None = None
     """Reason for failure or conflict, if applicable."""
-    
+
     manual: bool = False
     """Whether this item requires manual confirmation."""
-    
-    manual_reason: Optional[str] = None
+
+    manual_reason: str | None = None
     """Reason why manual confirmation is required."""
 
     @model_validator(mode="after")
@@ -91,53 +90,53 @@ class RenamePlanItem(BaseModel):
 
 class RenamePlan(BaseModel):
     """A collection of rename operations to be executed together."""
-    
+
     id: str = Field(...)
     """Unique identifier for this plan."""
-    
+
     created_at: datetime = Field(default_factory=datetime.now)
     """When this plan was created."""
-    
+
     root_dir: Path
     """Root directory that was scanned."""
-    
-    items: List[RenamePlanItem] = Field(default_factory=list)
+
+    items: list[RenamePlanItem] = Field(default_factory=list)
     """List of rename operations in this plan."""
-    
+
     platform: str
     """Target platform (e.g., 'plex', 'jellyfin')."""
-    
-    media_types: List[MediaType] = Field(default_factory=list)
+
+    media_types: list[MediaType] = Field(default_factory=list)
     """Types of media found in this plan."""
-    
-    metadata_providers: List[str] = Field(default_factory=list)
+
+    metadata_providers: list[str] = Field(default_factory=list)
     """Metadata providers used for this plan."""
-    
-    llm_model: Optional[str] = None
+
+    llm_model: str | None = None
     """LLM model used for fuzzy matching, if applicable."""
 
 
 class ScanResult(BaseModel):
     """Summary result of scanning a directory."""
-    
+
     total_files: int = 0
     """Total number of files found."""
-    
-    media_files: List[MediaFile] = Field(default_factory=list)
+
+    media_files: list[MediaFile] = Field(default_factory=list)
     """List of media files found."""
-    
+
     skipped_files: int = 0
     """Number of files skipped (non-media or ignored)."""
-    
-    by_media_type: Dict[MediaType, int] = Field(default_factory=dict)
+
+    by_media_type: dict[MediaType, int] = Field(default_factory=dict)
     """Counts per media type."""
-    
-    errors: List[str] = Field(default_factory=list)
+
+    errors: list[str] = Field(default_factory=list)
     """List of errors encountered during scan."""
-    
+
     scan_duration_seconds: float = 0.0
     """Duration of the scan in seconds."""
-    
+
     root_dir: Path
     """Root directory that was scanned."""
 
@@ -149,4 +148,4 @@ class ScanResult(BaseModel):
             platform=platform,
             media_types=list({mf.media_type for mf in self.media_files}),
             items=[],
-        ) 
+        )
