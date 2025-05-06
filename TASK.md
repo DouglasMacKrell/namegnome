@@ -604,6 +604,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **CI Pipeline Fixes** (2025-05-05) - Fixed cross-platform formatting issues in CI pipeline, added proper type annotations for Typer and pytest decorators, and ensured consistent line endings with .gitattributes. All tests now pass on Windows, macOS, and Ubuntu.
 * **0.4 Rule Engine Prototype** (2025-05-05) - Created rule engine with abstract RuleSet base class, implemented PlexRuleSet with regex patterns for TV/Movie path generation, and added comprehensive tests for various filename formats. Follows Plex naming conventions for media files.
 * **CI Pipeline Improvements** (2025-05-08) - Consolidated and fixed ruff configuration to use a single consistent .ruff.toml file. Fixed type annotation issues in Typer app and pytest fixtures. Corrected pre-commit hooks configuration to ensure CI pipeline passes across all operating systems.
+* **0.5 Metadata Provider Stubs** (2025-05-10) - Created metadata provider abstraction layer with async interface, implemented StubTMDBClient and StubTVDBClient using static JSON fixture files, designed MediaMetadata model for normalized provider data, and added unit tests verifying proper data mapping from fixture files. Added a registry for client implementations with a factory function.
 
 ---
 

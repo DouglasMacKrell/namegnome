@@ -4,6 +4,17 @@ All notable changes to the namegnome project will be documented in this file.
 
 ## [Unreleased]
 
+### Added
+- Fixed metadata client tests and type annotations
+- Added missing Any import to metadata models
+- Fixed fixture file loading path
+- Removed duplicate tests directory from root level
+
+### Fixed
+- Corrected fixture file path resolution in metadata utils
+- Added proper type annotation for kwargs in metadata client factory function
+- Removed unnecessary type ignore comment
+
 ## [0.2.0] - 2025-05-05
 
 ### Added
@@ -16,13 +27,16 @@ All notable changes to the namegnome project will be documented in this file.
 - Implemented Rule Engine with abstract RuleSet and Plex naming rules
 - Added regex-based filename parsing for TV shows and movies
 - Fixed CI pipeline with improved configuration and type annotation fixes
+- Added metadata API client abstraction layer with TMDB and TVDB stubs
+- Implemented MediaMetadata model for normalized provider data
+- Created fixture-based metadata clients for testing without network calls
 
 ### Fixed
 - Resolved cross-platform formatting issues in the CI pipeline
 - Added proper type annotations for Typer and pytest decorators
 - Ensured consistent line endings with .gitattributes
-- Improved CI workflow to fix formatting issues automatically before verification
-- Consolidated ruff configuration into a single file
+- Fixed ruff configuration to work correctly in pre-commit hooks
+- Restructured pre-commit hooks to prevent conflicts between formatters
 
 ## [0.1.0] - 2025-05-05
 
