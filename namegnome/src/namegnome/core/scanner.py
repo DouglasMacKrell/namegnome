@@ -20,6 +20,25 @@ MEDIA_EXTENSIONS = {
     MediaType.TV: {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".m4v", ".ts", ".webm"},
     MediaType.MOVIE: {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".m4v", ".ts", ".webm"},
     MediaType.MUSIC: {".mp3", ".flac", ".m4a", ".wav", ".ogg", ".aac", ".wma", ".alac"},
+    # Include UNKNOWN to handle files that don't match specific media types
+    MediaType.UNKNOWN: {
+        ".mp4",
+        ".mkv",
+        ".avi",
+        ".mov",
+        ".wmv",
+        ".m4v",
+        ".ts",
+        ".webm",
+        ".mp3",
+        ".flac",
+        ".m4a",
+        ".wav",
+        ".ogg",
+        ".aac",
+        ".wma",
+        ".alac",
+    },
 }
 
 # Extensions that should be ignored completely
@@ -49,9 +68,11 @@ IGNORED_EXTENSIONS = {
 # Patterns that strongly indicate TV shows
 TV_PATTERNS = [
     r"s\d{1,2}e\d{1,2}",  # S01E01
-    r"\d{1,2}x\d{1,2}",  # 1x01
-    r"season\s\d+",  # Season 1
-    r"episode\s\d+",  # Episode 1
+    r"\bs\d{1,2}\s*e\d{1,2}\b",  # s01 e01, s01e01 with word boundaries
+    r"\b\d{1,2}x\d{1,2}\b",  # 1x01 with word boundaries
+    r"\bseason\s+\d+\b",  # Season 1 with word boundaries
+    r"\bepisode\s+\d+\b",  # Episode 1 with word boundaries
+    r"\b(?:s|season)\s*\d+\b.*\b(?:e|episode)\s*\d+\b",  # Season X Episode Y pattern
 ]
 
 # Directory names that suggest specific media types
@@ -78,17 +99,21 @@ def guess_media_type(path: Path) -> MediaType:
     if not any(ext in extensions for extensions in MEDIA_EXTENSIONS.values()):
         return MediaType.UNKNOWN
 
-    # Check for TV show patterns in the filename
     path_str = str(path).lower()
 
-    # Compile TV show patterns with case insensitivity
+    # First check for movie pattern (year in parentheses) - this is a strong indicator
+    movie_pattern = re.compile(r"\(\d{4}\)", re.IGNORECASE)
+    if movie_pattern.search(path_str):
+        return MediaType.MOVIE
+
+    # Check for TV show patterns in the filename
     tv_patterns_compiled = [re.compile(pattern, re.IGNORECASE) for pattern in TV_PATTERNS]
 
     # Check if any pattern matches
     if any(pattern.search(path_str) for pattern in tv_patterns_compiled):
         return MediaType.TV
 
-    # Look at parent directory names for hints
+    # Look at parent directory names for hints - this is a high-priority check
     for parent in path.parents:
         parent_name = parent.name.lower()
         for media_type, hints in DIRECTORY_HINTS.items():
@@ -130,6 +155,10 @@ def scan_directory(
     if media_types is None:
         media_types = [MediaType.TV, MediaType.MOVIE, MediaType.MUSIC]
 
+    # When include_hidden is True, also include UNKNOWN media type to detect files in hidden dirs
+    if include_hidden and MediaType.UNKNOWN not in media_types:
+        media_types = media_types + [MediaType.UNKNOWN]
+
     # Set of extensions to look for based on requested media types
     target_extensions: set[str] = set()
     for media_type in media_types:
@@ -150,68 +179,86 @@ def scan_directory(
     def is_hidden(path: Path) -> bool:
         return any(part.startswith(".") for part in path.parts)
 
-    # Define the glob pattern based on recursive flag
-    glob_func = root_dir.rglob if recursive else root_dir.glob
+    # Helper function to walk directory recursively, optionally including hidden files/dirs
+    def walk_directory(current_dir: Path) -> None:
+        nonlocal total_files, skipped_files
 
-    try:
-        for path in glob_func("*"):
-            # Skip directories
-            if path.is_dir():
-                continue
+        try:
+            for item in current_dir.iterdir():
+                # Skip hidden items if not included
+                if not include_hidden and is_hidden(item):
+                    if item.is_file():
+                        skipped_files += 1
+                    continue
 
-            # Skip hidden files/directories if not included
-            if not include_hidden and is_hidden(path):
-                skipped_files += 1
-                continue
+                # Process directories recursively if recursive is True
+                if item.is_dir():
+                    if recursive:
+                        walk_directory(item)
+                    continue
 
-            # Count all files for statistics
-            total_files += 1
+                # Process files
+                # Count all files for statistics
+                total_files += 1
 
-            # Skip based on extension
-            ext = path.suffix.lower()
-            if ext in IGNORED_EXTENSIONS:
-                skipped_files += 1
-                continue
-
-            if ext not in target_extensions:
-                skipped_files += 1
-                continue
-
-            try:
-                # Get file stats
-                stats = path.stat()
-                size = stats.st_size
-                modified_date = datetime.fromtimestamp(stats.st_mtime)
-
-                # Guess the media type
-                media_type = guess_media_type(path)
-
-                # Only include media types we're looking for
-                if media_type not in media_types and media_type != MediaType.UNKNOWN:
+                # Skip based on extension
+                ext = item.suffix.lower()
+                if ext in IGNORED_EXTENSIONS:
                     skipped_files += 1
                     continue
 
-                # Create a MediaFile object
-                media_file = MediaFile(
-                    path=path.absolute(),
-                    size=size,
-                    media_type=media_type,
-                    modified_date=modified_date,
-                )
+                if ext not in target_extensions:
+                    skipped_files += 1
+                    continue
 
-                # Add to results
-                media_files.append(media_file)
+                try:
+                    # Get file stats
+                    stats = item.stat()
+                    size = stats.st_size
+                    modified_date = datetime.fromtimestamp(stats.st_mtime)
 
-                # Update type counter
-                if media_type in by_media_type:
-                    by_media_type[media_type] += 1
+                    # Guess the media type
+                    media_type = guess_media_type(item)
 
-            except (PermissionError, OSError) as e:
-                error_msg = f"Error accessing file {path}: {str(e)}"
-                logger.error(error_msg)
-                errors.append(error_msg)
-                continue
+                    # Only include files if their media type is in the requested types
+                    # If the media type is UNKNOWN, skip it unless we're explicitly looking for UNKNOWN
+                    if media_type == MediaType.UNKNOWN:
+                        if MediaType.UNKNOWN not in media_types:
+                            skipped_files += 1
+                            continue
+                    # Skip files that don't match the requested media types
+                    elif media_type not in media_types:
+                        skipped_files += 1
+                        continue
 
+                    # Create a MediaFile object
+                    media_file = MediaFile(
+                        path=item.absolute(),
+                        size=size,
+                        media_type=media_type,
+                        modified_date=modified_date,
+                    )
+
+                    # Add to results
+                    media_files.append(media_file)
+
+                    # Update type counter
+                    if media_type in by_media_type:
+                        by_media_type[media_type] += 1
+
+                except (PermissionError, OSError) as e:
+                    error_msg = f"Error accessing file {item}: {str(e)}"
+                    logger.error(error_msg)
+                    errors.append(error_msg)
+                    continue
+        except (PermissionError, OSError) as e:
+            error_msg = f"Error reading directory {current_dir}: {str(e)}"
+            logger.error(error_msg)
+            errors.append(error_msg)
+
+    try:
+        # Start the walk
+        walk_directory(root_dir)
     except (PermissionError, OSError) as e:
         error_msg = f"Error scanning directory {root_dir}: {str(e)}"
         logger.error(error_msg)
