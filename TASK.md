@@ -606,8 +606,9 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **CI Pipeline Improvements** (2025-05-08) - Consolidated and fixed ruff configuration to use a single consistent .ruff.toml file. Fixed type annotation issues in Typer app and pytest fixtures. Corrected pre-commit hooks configuration to ensure CI pipeline passes across all operating systems.
 * **0.5 Metadata Provider Stubs** (2025-05-10) - Created metadata provider abstraction layer with async interface, implemented StubTMDBClient and StubTVDBClient using static JSON fixture files, designed MediaMetadata model for normalized provider data, and added unit tests verifying proper data mapping from fixture files. Added a registry for client implementations with a factory function.
 * **0.6 Directory Scanner** (2025-05-11) - Implemented file system scanner to recursively search directories for media files, added support for detecting TV shows, movies, and music based on file extensions and path patterns, and created comprehensive test suite with 90% code coverage. Handles hidden files, non-ASCII filenames, and provides detailed scan statistics.
+* **Scanner Media Type Detection Fix** (2025-05-12) - Fixed media type detection to properly classify movies with year patterns in filenames, improved TV show pattern detection with better regex boundaries, and enhanced directory walking logic. Fixed an issue where movies were incorrectly classified as TV shows, causing test failures in the CI pipeline.
 
 ---
 
-*Last updated: 2025‑05‑05*
+*Last updated: 2025‑05‑12*
 
