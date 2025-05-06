@@ -607,6 +607,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **0.5 Metadata Provider Stubs** (2025-05-10) - Created metadata provider abstraction layer with async interface, implemented StubTMDBClient and StubTVDBClient using static JSON fixture files, designed MediaMetadata model for normalized provider data, and added unit tests verifying proper data mapping from fixture files. Added a registry for client implementations with a factory function.
 * **0.6 Directory Scanner** (2025-05-11) - Implemented file system scanner to recursively search directories for media files, added support for detecting TV shows, movies, and music based on file extensions and path patterns, and created comprehensive test suite with 90% code coverage. Handles hidden files, non-ASCII filenames, and provides detailed scan statistics.
 * **Scanner Media Type Detection Fix** (2025-05-12) - Fixed media type detection to properly classify movies with year patterns in filenames, improved TV show pattern detection with better regex boundaries, and enhanced directory walking logic. Fixed an issue where movies were incorrectly classified as TV shows, causing test failures in the CI pipeline.
+* **0.7 Rename Planner** (2024-05-06) - Implemented planner module with conflict detection and JSON serialization. Created comprehensive test suite for plan creation, conflict detection, and JSON serialization with proper datetime handling.
 
 ---
 

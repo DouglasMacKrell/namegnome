@@ -5,6 +5,10 @@ All notable changes to the namegnome project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Rename Planner module for generating conflict-aware rename plans
+- Support for serializing rename plans to JSON with datetime handling
+- Conflict detection for files targeting the same destination
+- Tests for plan creation, conflict detection, and JSON serialization
 - Directory Scanner module for scanning file systems for media files
 - Support for detecting different media types (TV, Movies, Music)
 - Tests for media file detection including non-ASCII filenames and hidden files
