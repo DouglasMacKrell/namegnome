@@ -5,6 +5,15 @@ All notable changes to the namegnome project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Directory Scanner module for scanning file systems for media files
+- Support for detecting different media types (TV, Movies, Music)
+- Tests for media file detection including non-ASCII filenames and hidden files
+
+### Fixed
+
+## [0.2.1] - 2025-05-10
+
+### Added
 - Fixed metadata client tests and type annotations
 - Added missing Any import to metadata models
 - Fixed fixture file loading path
