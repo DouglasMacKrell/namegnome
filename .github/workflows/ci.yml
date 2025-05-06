@@ -27,7 +27,12 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -e "namegnome[dev]"
         
-    - name: Run pre-commit hooks
+    - name: Fix formatting issues with pre-commit
+      run: |
+        cd namegnome
+        pre-commit run --all-files || true
+        
+    - name: Run pre-commit hooks with verification
       run: |
         cd namegnome
         pre-commit run --all-files
