@@ -50,7 +50,11 @@ class TestStubTMDBClient:
         """Test mapping TMDB movie data to MediaMetadata."""
         # Use the generic fixture data
         fixture_path = (
-            Path(__file__).parents[2] / "fixtures" / "stubs" / "tmdb" / "movie_details.json"
+            Path(__file__).parents[2]
+            / "fixtures"
+            / "stubs"
+            / "tmdb"
+            / "movie_details.json"
         )
 
         # Skip if fixture doesn't exist (CI/pipeline)
@@ -86,7 +90,11 @@ class TestStubTMDBClient:
             "name": "Breaking Bad",
             "original_name": "Breaking Bad",
             "first_air_date": "2008-01-20",
-            "overview": "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's future.",
+            "overview": (
+                "A high school chemistry teacher diagnosed with inoperable lung cancer"
+                " turns to manufacturing and selling methamphetamine in order to secure"
+                " his family's future."
+            ),
             "vote_average": 8.8,
             "vote_count": 12345,
             "poster_path": "/mY9Mni5b6KENYLs5uYmz8QsVwPq.jpg",

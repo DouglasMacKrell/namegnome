@@ -48,7 +48,8 @@ class TestPlexRuleSet:
 
         # Check that the path follows Plex conventions
         expected = Path(
-            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray Matter.mp4"
+            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray"
+            " Matter.mp4"
         ).absolute()
         assert target == expected
 
@@ -70,7 +71,8 @@ class TestPlexRuleSet:
 
         # Check that the path follows Plex conventions
         expected = Path(
-            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray Matter.mp4"
+            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray"
+            " Matter.mp4"
         ).absolute()
         assert target == expected
 
@@ -92,7 +94,8 @@ class TestPlexRuleSet:
 
         # Check that the path follows Plex conventions
         expected = Path(
-            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Unknown Episode.mp4"
+            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Unknown"
+            " Episode.mp4"
         ).absolute()
         assert target == expected
 
@@ -114,7 +117,8 @@ class TestPlexRuleSet:
 
         # Check that a default path is created
         expected = Path(
-            "/media/TV Shows/Unknown Show/Season 01/Unknown Show - S01E01 - Unknown Episode.mp4"
+            "/media/TV Shows/Unknown Show/Season 01/Unknown Show - S01E01 - Unknown"
+            " Episode.mp4"
         ).absolute()
         assert target == expected
 
@@ -135,7 +139,9 @@ class TestPlexRuleSet:
         target = rule_set.target_path(media_file, base_dir)
 
         # Check that the path follows Plex conventions
-        expected = Path("/media/Movies/Inception (2010)/Inception (2010).mp4").absolute()
+        expected = Path(
+            "/media/Movies/Inception (2010)/Inception (2010).mp4"
+        ).absolute()
         assert target == expected
 
     def test_movie_path_no_year(self, rule_set: PlexRuleSet) -> None:
@@ -175,7 +181,9 @@ class TestPlexRuleSet:
         target = rule_set.target_path(media_file, base_dir)
 
         # Expected path should have spaces and follow Plex convention with year
-        expected = Path("/media/Movies/The Matrix (1999)/The Matrix (1999).mp4").absolute()
+        expected = Path(
+            "/media/Movies/The Matrix (1999)/The Matrix (1999).mp4"
+        ).absolute()
         assert target == expected
 
     def test_unsupported_media_type(self, rule_set: PlexRuleSet) -> None:

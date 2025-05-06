@@ -7,8 +7,6 @@ import typer
 from rich.console import Console
 from rich.traceback import install
 
-from namegnome.cli.commands import scan
-
 # Install rich traceback handler
 install(show_locals=True)
 
@@ -41,10 +39,6 @@ def version() -> None:
     from namegnome.__about__ import __version__
 
     console.print(f"NameGnome version: [bold]{__version__}[/bold]")
-
-
-# Register commands
-app.command()(scan)
 
 
 if __name__ == "__main__":

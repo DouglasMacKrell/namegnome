@@ -85,7 +85,9 @@ class TestCreateRenamePlan:
         assert len(plan.items) == 2  # Only TV and Movie, Music is not supported by Plex
 
         # Check TV show item
-        tv_item = next(item for item in plan.items if item.media_file.media_type == MediaType.TV)
+        tv_item = next(
+            item for item in plan.items if item.media_file.media_type == MediaType.TV
+        )
         assert tv_item.status == PlanStatus.PENDING
         assert "Breaking Bad" in str(tv_item.destination)
         assert "Season 01" in str(tv_item.destination)
@@ -160,7 +162,9 @@ class TestCreateRenamePlan:
 
         # Music files should be skipped (not in plan items)
         assert len(plan.items) == 2
-        assert not any(item.media_file.media_type == MediaType.MUSIC for item in plan.items)
+        assert not any(
+            item.media_file.media_type == MediaType.MUSIC for item in plan.items
+        )
 
 
 class TestSavePlan:
@@ -196,7 +200,9 @@ class TestSavePlan:
         assert all(isinstance(item["source"], str) for item in saved_plan["items"])
         assert all(isinstance(item["destination"], str) for item in saved_plan["items"])
 
-    def test_create_output_directory(self, scan_result: ScanResult, temp_dir: Path) -> None:
+    def test_create_output_directory(
+        self, scan_result: ScanResult, temp_dir: Path
+    ) -> None:
         """Test that the output directory is created if it doesn't exist."""
         rule_set = PlexRuleSet()
         plan = create_rename_plan(

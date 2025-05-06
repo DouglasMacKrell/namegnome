@@ -1,22 +1,37 @@
 repos:
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: 'v0.3.4'
-  hooks:
-    - id: ruff-format
-    - id: ruff
-      args: [--fix]
-
-# - repo: https://github.com/pre-commit/mirrors-mypy
-#   rev: v1.9.0
-#   hooks:
-#     - id: mypy
-#       additional_dependencies: [types-all]
-
-- repo: local
-  hooks:
-    - id: pytest
-      name: pytest
-      entry: pytest
-      language: system
-      pass_filenames: false
-      always_run: true 
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.292'
+    hooks:
+      - id: ruff-format
+        name: ruff-format
+      
+  - repo: https://github.com/psf/black
+    rev: '23.11.0'
+    hooks:
+      - id: black
+        language_version: python3
+  
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.292'
+    hooks:
+      - id: ruff
+        args: [--fix, --ignore=E501]
+  
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.7.1'
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-requests
+          - types-setuptools
+          - pydantic>=2.0.0
+        args: [--strict, --ignore-missing-imports, --disable-error-code=misc]
+  
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: python -m pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true 

@@ -52,7 +52,9 @@ class TestMetadataFactory:
             ) -> list[dict[str, Any]]:
                 return []
 
-            async def search_tv(self, title: str, year: int | None = None) -> list[dict[str, Any]]:
+            async def search_tv(
+                self, title: str, year: int | None = None
+            ) -> list[dict[str, Any]]:
                 return []
 
             async def get_movie_details(self, movie_id: str) -> dict[str, Any]:
@@ -61,7 +63,9 @@ class TestMetadataFactory:
             async def get_tv_details(self, show_id: str) -> dict[str, Any]:
                 return {}
 
-            async def get_tv_season(self, show_id: str, season_number: int) -> dict[str, Any]:
+            async def get_tv_season(
+                self, show_id: str, season_number: int
+            ) -> dict[str, Any]:
                 return {}
 
             async def get_tv_episode(

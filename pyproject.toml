@@ -4,68 +4,120 @@ build-backend = "hatchling.build"
 
 [project]
 name = "namegnome"
-version = "0.1.0"
-description = "A command-line tool for organizing and renaming media files"
+dynamic = ["version"]
+description = 'A tool to analyze, rename and reorganize media files for media servers'
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
+keywords = ["media", "rename", "organize", "plex", "jellyfin", "emby"]
 authors = [
-    { name = "Douglas Mackrell", email = "douglas.mackrell@gmail.com" }
+  { name = "DouglasMacKrell", email = "d.mackrell@gmail.com" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: Implementation :: CPython",
 ]
 dependencies = [
-    "typer>=0.9.0",
-    "rich>=13.0.0",
-    "pydantic>=2.0.0",
-    "httpx>=0.24.0",
-    "structlog>=23.0.0",
+  "typer>=0.9.0",
+  "rich>=13.3.5",
+  "httpx>=0.24.1",
+  "pydantic>=2.0.0",
+  "structlog>=23.1.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
-    "pytest-cov>=4.0.0",
-    "pytest-asyncio>=0.21.0",
-    "black>=23.0.0",
-    "ruff>=0.1.0",
-    "mypy>=1.0.0",
-    "pre-commit>=3.0.0",
+  "black",
+  "ruff",
+  "mypy",
+  "pytest",
+  "pytest-cov",
+  "pre-commit",
+  "pytest-asyncio",
+  "types-requests",
 ]
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = ["test_*.py"]
-addopts = "-v --cov=namegnome --cov-report=term-missing"
-asyncio_mode = "strict"
-pythonpath = ["src"]
-asyncio_default_fixture_loop_scope = "function"
+[project.urls]
+Documentation = "https://github.com/DouglasMacKrell/namegnome#readme"
+Issues = "https://github.com/DouglasMacKrell/namegnome/issues"
+Source = "https://github.com/DouglasMacKrell/namegnome"
+
+[project.scripts]
+namegnome = "namegnome.cli:app"
+
+[tool.hatch.version]
+path = "src/namegnome/__about__.py"
+
+[tool.hatch.envs.default]
+dependencies = [
+  "pytest",
+  "pytest-cov",
+]
+[tool.hatch.envs.default.scripts]
+test = "pytest {args:tests}"
+test-cov = "pytest --cov=namegnome {args:tests} --cov-report=xml --cov-report=term"
+
+[tool.hatch.envs.lint]
+dependencies = [
+  "black>=23.1.0",
+  "ruff>=0.0.243",
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.lint.scripts]
+fmt = "black {args:.}"
+check = "black --check {args:.}"
+lint = "ruff check {args:.}"
+typing = "mypy --strict {args:src/namegnome tests}"
+all = ["fmt", "lint", "typing"]
+
+[tool.black]
+target-version = ["py312"]
+line-length = 88
+preview = true
 
 [tool.ruff]
-line-length = 88
 target-version = "py312"
+line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "B", "I", "N", "UP", "PL", "RUF"]
-ignore = []
+select = [
+  "E",  # pycodestyle errors
+  "F",  # pyflakes
+  "I",  # isort
+  "UP", # pyupgrade
+]
+ignore = ["E501"]  # Ignore line length errors
 
-[tool.ruff.lint.isort]
-known-first-party = ["namegnome"]
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
 
 [tool.mypy]
 python_version = "3.12"
 strict = true
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-check_untyped_defs = true
-disallow_untyped_decorators = true
-no_implicit_optional = true
 warn_redundant_casts = true
 warn_unused_ignores = true
-warn_no_return = true
-warn_unreachable = true
+warn_unused_configs = true
 
-[[tool.mypy.overrides]]
-module = ["tests.*"]
-disallow_untyped_defs = false
-disallow_incomplete_defs = false 
+[tool.coverage.run]
+source_pkgs = ["namegnome", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/namegnome/__about__.py",
+]
+
+[tool.coverage.paths]
+namegnome = ["src/namegnome", "*/namegnome/src/namegnome"]
+tests = ["tests", "*/namegnome/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+fail_under = 80
