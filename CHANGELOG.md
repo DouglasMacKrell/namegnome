@@ -5,6 +5,12 @@ All notable changes to the namegnome project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- Rich diff renderer with color-coded status indicators and progress spinners
+- Custom DateTimeEncoder for proper JSON serialization of datetime objects
+- Support for --no-color flag to disable ANSI color codes
+- Comprehensive test suite for console output capture and validation
+- Tests for color stripping in no-color mode
+- Tests for JSON output format and validation
 - Rename Planner module for generating conflict-aware rename plans
 - Support for serializing rename plans to JSON with datetime handling
 - Conflict detection for files targeting the same destination
@@ -12,12 +18,19 @@ All notable changes to the namegnome project will be documented in this file.
 - Directory Scanner module for scanning file systems for media files
 - Support for detecting different media types (TV, Movies, Music)
 - Tests for media file detection including non-ASCII filenames and hidden files
+- Proper Python path configuration in conftest.py for consistent test execution
+- Cleaned up project structure by removing duplicate directories
 
 ### Fixed
+- Fixed test failures related to console output capture
+- Fixed JSON serialization issues with datetime objects
 - Fixed media type detection to properly classify movies with year patterns
 - Improved TV show pattern detection with better regex boundaries
 - Enhanced directory walking logic with better error handling
 - Fixed test failures caused by incorrect media type classification
+- Fixed Python path configuration to ensure consistent test execution
+- Removed duplicate test directories causing import conflicts
+- Fixed project structure to follow best practices
 
 ## [0.2.1] - 2025-05-10
 

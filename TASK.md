@@ -608,8 +608,10 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **0.6 Directory Scanner** (2025-05-11) - Implemented file system scanner to recursively search directories for media files, added support for detecting TV shows, movies, and music based on file extensions and path patterns, and created comprehensive test suite with 90% code coverage. Handles hidden files, non-ASCII filenames, and provides detailed scan statistics.
 * **Scanner Media Type Detection Fix** (2025-05-12) - Fixed media type detection to properly classify movies with year patterns in filenames, improved TV show pattern detection with better regex boundaries, and enhanced directory walking logic. Fixed an issue where movies were incorrectly classified as TV shows, causing test failures in the CI pipeline.
 * **0.7 Rename Planner** (2024-05-06) - Implemented planner module with conflict detection and JSON serialization. Created comprehensive test suite for plan creation, conflict detection, and JSON serialization with proper datetime handling.
+* **0.8 Rich Diff Renderer & CLI UX** (2024-05-06) - Implemented rich diff renderer using rich.table.Table with color-coded status indicators and progress spinners. Added support for JSON output with custom DateTimeEncoder for proper datetime serialization. Implemented --no-color flag for plain text output. Created comprehensive test suite for console output capture, including tests for color stripping and JSON output validation. Fixed test failures related to console output capture and JSON serialization. Added proper error handling and exit codes for various scenarios.
+* **Test Configuration Fix** (2024-05-06) - Fixed Python path configuration for tests by updating conftest.py to properly handle module imports. Removed duplicate test directories and cleaned up project structure. All tests now pass consistently across different environments.
 
 ---
 
-*Last updated: 2025‑05‑12*
+*Last updated: 2024‑05‑06*
 
