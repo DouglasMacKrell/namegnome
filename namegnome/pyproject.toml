@@ -77,14 +77,14 @@ preview = true
 
 [tool.ruff]
 target-version = "py312"
-line-length = 88
+line-length = 100
 select = [
   "E",  # pycodestyle errors
   "F",  # pyflakes
   "I",  # isort
   "UP", # pyupgrade
 ]
-ignore = []
+ignore = ["E501"]  # Ignore line length errors
 
 [tool.mypy]
 python_version = "3.12"

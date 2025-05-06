@@ -2,6 +2,7 @@
 
 import re
 from pathlib import Path
+from typing import Optional
 
 from namegnome.models.core import MediaFile, MediaType
 from namegnome.rules.base import RuleSet
@@ -10,10 +11,13 @@ from namegnome.rules.base import RuleSet
 class PlexRuleSet(RuleSet):
     """Rule set for Plex Media Server naming conventions.
 
-    Follows the naming guide at: https://support.plex.tv/articles/naming-and-organizing-your-tv-show-files/
+    Follows the naming guide at:
+    https://support.plex.tv/articles/naming-and-organizing-your-tv-show-files/
 
-    TV Show format:    /TV Shows/Show Name/Season XX/Show Name - SXXEXX - Episode Title.ext
-    Movie format:      /Movies/Movie Name (Year)/Movie Name (Year).ext
+    TV Show format:
+        /TV Shows/Show Name/Season XX/Show Name - SXXEXX - Episode Title.ext
+    Movie format:
+        /Movies/Movie Name (Year)/Movie Name (Year).ext
     """
 
     def __init__(self) -> None:
@@ -68,7 +72,9 @@ class PlexRuleSet(RuleSet):
         """
         return [MediaType.TV, MediaType.MOVIE]
 
-    def target_path(self, media_file: MediaFile, base_dir: Path | None = None) -> Path:
+    def target_path(
+        self, media_file: MediaFile, base_dir: Optional[Path] = None
+    ) -> Path:
         """Generate a target path for a media file using Plex naming conventions.
 
         Args:

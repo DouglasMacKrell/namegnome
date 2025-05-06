@@ -1,0 +1,7 @@
+# Ruff configuration
+line-length = 100
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "UP"]
+ignore = ["E501"]  # Ignore line length errors 
