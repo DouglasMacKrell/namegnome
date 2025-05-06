@@ -10,6 +10,10 @@ All notable changes to the namegnome project will be documented in this file.
 - Tests for media file detection including non-ASCII filenames and hidden files
 
 ### Fixed
+- Fixed media type detection to properly classify movies with year patterns
+- Improved TV show pattern detection with better regex boundaries
+- Enhanced directory walking logic with better error handling
+- Fixed test failures caused by incorrect media type classification
 
 ## [0.2.1] - 2025-05-10
 
