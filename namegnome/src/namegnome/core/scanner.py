@@ -165,7 +165,7 @@ def scan_directory(
         if media_type in MEDIA_EXTENSIONS:
             target_extensions.update(MEDIA_EXTENSIONS[media_type])
 
-    start_time = time.time()
+    start_time = time.perf_counter()
     total_files = 0
     skipped_files = 0
     errors: list[str] = []
@@ -265,7 +265,7 @@ def scan_directory(
         errors.append(error_msg)
 
     # Calculate scan duration
-    scan_duration = time.time() - start_time
+    scan_duration_seconds = time.perf_counter() - start_time
 
     # Create the scan result
     result = ScanResult(
@@ -274,12 +274,12 @@ def scan_directory(
         skipped_files=skipped_files,
         by_media_type=by_media_type,
         errors=errors,
-        scan_duration_seconds=scan_duration,
+        scan_duration_seconds=scan_duration_seconds,
         root_dir=root_dir.absolute(),
     )
 
     logger.info(
-        f"Scan completed in {scan_duration:.2f}s. "
+        f"Scan completed in {scan_duration_seconds:.2f}s. "
         f"Found {len(media_files)} media files out of {total_files} total files."
     )
 
