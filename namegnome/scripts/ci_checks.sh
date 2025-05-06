@@ -17,10 +17,6 @@ fi
 echo "Running ruff format..."
 python -m ruff format .
 
-# Run black formatter
-echo "Running black..."
-python -m black .
-
 # Run ruff linter with fixes
 echo "Running ruff check..."
 python -m ruff check . --fix
