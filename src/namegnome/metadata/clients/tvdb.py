@@ -34,9 +34,7 @@ class StubTVDBClient(MetadataClient):
         """
         return "tvdb"
 
-    async def search_movie(
-        self, title: str, year: int | None = None
-    ) -> list[dict[str, Any]]:
+    async def search_movie(self, title: str, year: int | None = None) -> list[dict[str, Any]]:
         """Search for movies by title and optional year (stub implementation).
 
         Args:
@@ -50,9 +48,7 @@ class StubTVDBClient(MetadataClient):
         # The real implementation would make a similar call to their movie endpoint
         return []
 
-    async def search_tv(
-        self, title: str, year: int | None = None
-    ) -> list[dict[str, Any]]:
+    async def search_tv(self, title: str, year: int | None = None) -> list[dict[str, Any]]:
         """Search for TV shows by title and optional year (stub implementation).
 
         Args:

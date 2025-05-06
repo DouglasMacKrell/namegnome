@@ -47,9 +47,7 @@ class PlexRuleSet(RuleSet):
         )
 
         # Pattern for year at the end of a filename (e.g., The.Matrix.1999.mp4)
-        self.year_pattern = re.compile(
-            r"^(.*?)[\s\._-]*(\d{4})(?:\.[^.]+)?$", re.IGNORECASE
-        )
+        self.year_pattern = re.compile(r"^(.*?)[\s\._-]*(\d{4})(?:\.[^.]+)?$", re.IGNORECASE)
 
     def supports_media_type(self, media_type: MediaType) -> bool:
         """Check if this rule set supports the given media type.
@@ -136,10 +134,7 @@ class PlexRuleSet(RuleSet):
             episode_num = int(match.group(3))
             # If group 4 is empty or just the extension, use "Unknown Episode"
             episode_title_raw = match.group(4).strip() if match.group(4) else ""
-            if (
-                not episode_title_raw
-                or episode_title_raw.lower() == ext.lstrip(".").lower()
-            ):
+            if not episode_title_raw or episode_title_raw.lower() == ext.lstrip(".").lower():
                 episode_title = "Unknown Episode"
             else:
                 episode_title = episode_title_raw.replace(".", " ")

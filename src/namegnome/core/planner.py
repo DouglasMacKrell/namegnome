@@ -68,13 +68,9 @@ def create_rename_plan(
             if target_path in destinations:
                 # Mark both items as conflicting
                 item.status = PlanStatus.CONFLICT
-                item.reason = (
-                    f"Destination already used by {destinations[target_path].source}"
-                )
+                item.reason = f"Destination already used by {destinations[target_path].source}"
                 destinations[target_path].status = PlanStatus.CONFLICT
-                destinations[target_path].reason = (
-                    f"Destination already used by {item.source}"
-                )
+                destinations[target_path].reason = f"Destination already used by {item.source}"
                 logger.warning(
                     f"Conflict detected: {item.source} and"
                     f" {destinations[target_path].source} both target {target_path}"

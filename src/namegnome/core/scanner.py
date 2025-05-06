@@ -107,9 +107,7 @@ def guess_media_type(path: Path) -> MediaType:
         return MediaType.MOVIE
 
     # Check for TV show patterns in the filename
-    tv_patterns_compiled = [
-        re.compile(pattern, re.IGNORECASE) for pattern in TV_PATTERNS
-    ]
+    tv_patterns_compiled = [re.compile(pattern, re.IGNORECASE) for pattern in TV_PATTERNS]
 
     # Check if any pattern matches
     if any(pattern.search(path_str) for pattern in tv_patterns_compiled):

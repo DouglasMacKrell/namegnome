@@ -39,9 +39,7 @@ class StubTMDBClient(MetadataClient):
         """
         return "tmdb"
 
-    async def search_movie(
-        self, title: str, year: int | None = None
-    ) -> list[dict[str, Any]]:
+    async def search_movie(self, title: str, year: int | None = None) -> list[dict[str, Any]]:
         """Search for movies by title and optional year (stub implementation).
 
         Args:
@@ -80,9 +78,7 @@ class StubTMDBClient(MetadataClient):
 
         return filtered_results
 
-    async def search_tv(
-        self, title: str, year: int | None = None
-    ) -> list[dict[str, Any]]:
+    async def search_tv(self, title: str, year: int | None = None) -> list[dict[str, Any]]:
         """Search for TV shows by title and optional year (stub implementation).
 
         Args:
@@ -298,9 +294,7 @@ class StubTMDBClient(MetadataClient):
                     pass
 
             # Extract seasons and episode counts
-            seasons = [
-                season.get("season_number", 0) for season in data.get("seasons", [])
-            ]
+            seasons = [season.get("season_number", 0) for season in data.get("seasons", [])]
             seasons = [s for s in seasons if s > 0]  # Filter out specials (season 0)
 
             return MediaMetadata(

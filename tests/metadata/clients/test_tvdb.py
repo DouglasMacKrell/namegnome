@@ -36,9 +36,7 @@ class TestStubTVDBClient:
         assert results == []
 
     @pytest.mark.asyncio
-    async def test_get_tv_details(
-        self, client: StubTVDBClient, ensure_fixture_dir: None
-    ) -> None:
+    async def test_get_tv_details(self, client: StubTVDBClient, ensure_fixture_dir: None) -> None:
         """Test getting TV show details."""
         # This should use the generic fixture we created
         try:
@@ -54,13 +52,7 @@ class TestStubTVDBClient:
     ) -> None:
         """Test mapping TVDB TV show data to MediaMetadata."""
         # Use the generic fixture data
-        fixture_path = (
-            Path(__file__).parents[2]
-            / "fixtures"
-            / "stubs"
-            / "tvdb"
-            / "tv_details.json"
-        )
+        fixture_path = Path(__file__).parents[2] / "fixtures" / "stubs" / "tvdb" / "tv_details.json"
 
         # Skip if fixture doesn't exist (CI/pipeline)
         if not fixture_path.exists():
@@ -107,9 +99,7 @@ class TestStubTVDBClient:
         }
 
         # Map to MediaMetadata
-        metadata = client.map_to_media_metadata(
-            episode_data, MediaMetadataType.TV_EPISODE
-        )
+        metadata = client.map_to_media_metadata(episode_data, MediaMetadataType.TV_EPISODE)
 
         # Verify mapping
         assert metadata.title == "Breaking Bad - Pilot"
