@@ -602,6 +602,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **0.2 Package Skeleton** (2025-05-05) - Created directory structure with core modules, set up __init__.py files with version export, implemented CLI with Typer app object and commands, made package executable via python -m namegnome.
 * **0.3 Domain Models** (2025-05-05) - Implemented core data models using Pydantic v2, including MediaFile, RenamePlanItem, RenamePlan, and ScanResult. Added enums for MediaType and PlanStatus. Wrote comprehensive tests with 100% coverage for model serialization, validation, and error handling.
 * **CI Pipeline Fixes** (2025-05-05) - Fixed cross-platform formatting issues in CI pipeline, added proper type annotations for Typer and pytest decorators, and ensured consistent line endings with .gitattributes. All tests now pass on Windows, macOS, and Ubuntu.
+* **0.4 Rule Engine Prototype** (2025-05-05) - Created rule engine with abstract RuleSet base class, implemented PlexRuleSet with regex patterns for TV/Movie path generation, and added comprehensive tests for various filename formats. Follows Plex naming conventions for media files.
 
 ---
 

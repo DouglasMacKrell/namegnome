@@ -12,6 +12,8 @@ All notable changes to the namegnome project will be documented in this file.
 - Implemented CLI module with Typer app and version command
 - Made package executable via `python -m namegnome`
 - Fixed import structure for better maintainability
+- Implemented Rule Engine with abstract RuleSet and Plex naming rules
+- Added regex-based filename parsing for TV shows and movies
 
 ### Fixed
 - Resolved cross-platform formatting issues in the CI pipeline
