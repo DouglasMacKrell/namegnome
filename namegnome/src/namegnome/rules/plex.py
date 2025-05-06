@@ -2,7 +2,6 @@
 
 import re
 from pathlib import Path
-from typing import Optional
 
 from namegnome.models.core import MediaFile, MediaType
 from namegnome.rules.base import RuleSet
@@ -72,9 +71,7 @@ class PlexRuleSet(RuleSet):
         """
         return [MediaType.TV, MediaType.MOVIE]
 
-    def target_path(
-        self, media_file: MediaFile, base_dir: Optional[Path] = None
-    ) -> Path:
+    def target_path(self, media_file: MediaFile, base_dir: Path | None = None) -> Path:
         """Generate a target path for a media file using Plex naming conventions.
 
         Args:

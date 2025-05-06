@@ -11,7 +11,7 @@ from namegnome.rules.plex import PlexRuleSet
 class TestPlexRuleSet:
     """Tests for the PlexRuleSet class."""
 
-    @pytest.fixture  # type: ignore[misc]
+    @pytest.fixture
     def rule_set(self) -> PlexRuleSet:
         """Create a PlexRuleSet for testing."""
         return PlexRuleSet()

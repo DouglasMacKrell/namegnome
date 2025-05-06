@@ -115,7 +115,7 @@ class TestMediaFile:
 class TestRenamePlanItem:
     """Tests for the RenamePlanItem model."""
 
-    @pytest.fixture  # type: ignore
+    @pytest.fixture
     def media_file(self) -> MediaFile:
         """Create a sample MediaFile for tests."""
         return MediaFile(
@@ -183,7 +183,7 @@ class TestRenamePlanItem:
 class TestRenamePlan:
     """Tests for the RenamePlan model."""
 
-    @pytest.fixture  # type: ignore
+    @pytest.fixture
     def media_file(self) -> MediaFile:
         """Create a sample MediaFile for tests."""
         return MediaFile(
@@ -193,7 +193,7 @@ class TestRenamePlan:
             modified_date=datetime.now(),
         )
 
-    @pytest.fixture  # type: ignore
+    @pytest.fixture
     def plan_item(self, media_file: MediaFile) -> RenamePlanItem:
         """Create a sample RenamePlanItem for tests."""
         return RenamePlanItem(
@@ -253,22 +253,22 @@ class TestRenamePlan:
 class TestScanResult:
     """Tests for the ScanResult model."""
 
-    @pytest.fixture  # type: ignore
+    @pytest.fixture
     def media_file(self) -> MediaFile:
         """Create a sample MediaFile for tests."""
         return MediaFile(
-            path=Path("/tmp/source.mp4").absolute(),
+            path=Path("/tmp/show.mp4").absolute(),
             size=1024,
             media_type=MediaType.TV,
             modified_date=datetime.now(),
         )
 
-    @pytest.fixture  # type: ignore
+    @pytest.fixture
     def movie_file(self) -> MediaFile:
-        """Create a sample movie MediaFile for tests."""
+        """Create a sample MediaFile for tests."""
         return MediaFile(
             path=Path("/tmp/movie.mp4").absolute(),
-            size=2048,
+            size=1024,
             media_type=MediaType.MOVIE,
             modified_date=datetime.now(),
         )

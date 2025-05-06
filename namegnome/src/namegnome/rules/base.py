@@ -2,7 +2,6 @@
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Optional
 
 from namegnome.models.core import MediaFile, MediaType
 
@@ -23,9 +22,7 @@ class RuleSet(ABC):
         self.platform_name = platform_name
 
     @abstractmethod
-    def target_path(
-        self, media_file: MediaFile, base_dir: Optional[Path] = None
-    ) -> Path:
+    def target_path(self, media_file: MediaFile, base_dir: Path | None = None) -> Path:
         """Generate a target path for the given media file.
 
         This method determines where a file should be moved/renamed to based on
