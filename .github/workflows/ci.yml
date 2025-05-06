@@ -27,20 +27,15 @@ jobs:
         python -m pip install --upgrade pip
         python -m pip install -e "namegnome[dev]"
         
-    - name: Fix formatting issues with pre-commit
+    - name: Fix formatting issues
       run: |
         cd namegnome
-        pre-commit run --all-files || true
+        bash scripts/ci_checks.sh --format-only || true
         
-    - name: Run pre-commit hooks with verification
+    - name: Run full CI checks
       run: |
         cd namegnome
-        pre-commit run --all-files
-        
-    - name: Test with pytest and coverage
-      run: |
-        cd namegnome
-        python -m pytest --cov=namegnome --cov-fail-under=80 tests/
+        bash scripts/ci_checks.sh
         
     - name: Upload coverage report
       uses: codecov/codecov-action@v3

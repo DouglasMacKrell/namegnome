@@ -13,12 +13,16 @@ All notable changes to the namegnome project will be documented in this file.
 - Made package executable via `python -m namegnome`
 - Fixed import structure for better maintainability
 - Implemented domain models using Pydantic v2 with comprehensive testing
+- Implemented Rule Engine with abstract RuleSet and Plex naming rules
+- Added regex-based filename parsing for TV shows and movies
+- Fixed CI pipeline with improved configuration and type annotation fixes
 
 ### Fixed
 - Resolved cross-platform formatting issues in the CI pipeline
 - Added proper type annotations for Typer and pytest decorators
 - Ensured consistent line endings with .gitattributes
 - Improved CI workflow to fix formatting issues automatically before verification
+- Consolidated ruff configuration into a single file
 
 ## [0.1.0] - 2025-05-05
 

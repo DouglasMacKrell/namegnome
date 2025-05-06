@@ -23,7 +23,7 @@ app = typer.Typer(
 F = TypeVar("F", bound=Callable[..., Any])
 
 
-@app.callback()  # type: ignore
+@app.callback()
 def callback() -> None:
     """NameGnome - Media File Organizer and Renamer.
 
@@ -33,7 +33,7 @@ def callback() -> None:
     pass
 
 
-@app.command()  # type: ignore
+@app.command()
 def version() -> None:
     """Show the version of namegnome."""
     from namegnome.__about__ import __version__
