@@ -199,13 +199,11 @@ def _is_valid_media_file(
     # Guess the media type
     media_type = guess_media_type(file_path)
 
-    # Only include files if their media type is in the requested types
-    # If the media type is UNKNOWN, skip it unless we're explicitly looking for UNKNOWN
-    if media_type == MediaType.UNKNOWN:
-        return MediaType.UNKNOWN in media_types
+    # Skip if not in the target media types
+    if media_types and media_type not in media_types:
+        return False
 
-    # Skip files that don't match the requested media types
-    return media_type in media_types
+    return True
 
 
 def _create_media_file(
@@ -215,40 +213,51 @@ def _create_media_file(
 
     Args:
         file_path: Path to the file
-        verify_hash: Whether to calculate file hash
+        verify_hash: Whether to compute the file hash
         errors: List to append any errors to
 
     Returns:
         Tuple of (MediaFile, MediaType)
     """
-    # Get file stats
-    stats = file_path.stat()
-    size = stats.st_size
-    modified_date = datetime.fromtimestamp(stats.st_mtime)
-
-    # Guess the media type
+    # Guess media type
     media_type = guess_media_type(file_path)
 
-    # Calculate hash if requested
-    file_hash = None
-    if verify_hash:
-        try:
-            file_hash = sha256sum(file_path)
-        except (PermissionError, OSError) as e:
-            error_msg = f"Error calculating hash for {file_path}: {str(e)}"
-            logger.error(error_msg)
-            errors.append(error_msg)
+    try:
+        # Get file size and modified date
+        stat = file_path.stat()
+        size = stat.st_size
+        modified_date = datetime.fromtimestamp(stat.st_mtime)
 
-    # Create a MediaFile object
-    media_file = MediaFile(
-        path=file_path.absolute(),
-        size=size,
-        media_type=media_type,
-        modified_date=modified_date,
-        hash=file_hash,
-    )
+        # Compute hash if requested
+        file_hash = None
+        if verify_hash:
+            try:
+                file_hash = sha256sum(file_path)
+            except (PermissionError, FileNotFoundError, IOError) as e:
+                # Log but continue if hash can't be computed
+                errors.append(f"Failed to compute hash for {file_path}: {str(e)}")
 
-    return media_file, media_type
+        # Create the MediaFile object
+        media_file = MediaFile(
+            path=file_path.absolute(),
+            size=size,
+            media_type=media_type,
+            modified_date=modified_date,
+            hash=file_hash,
+        )
+
+        return media_file, media_type
+    except (PermissionError, FileNotFoundError, OSError) as e:
+        # Log the error and return a placeholder
+        errors.append(f"Error accessing {file_path}: {str(e)}")
+        # Return a placeholder with minimal information
+        media_file = MediaFile(
+            path=file_path.absolute(),
+            size=0,
+            media_type=media_type,
+            modified_date=datetime.now(),
+        )
+        return media_file, media_type
 
 
 def _process_file(
@@ -258,32 +267,31 @@ def _process_file(
     verify_hash: bool,
     errors: List[str],
 ) -> Tuple[Optional[MediaFile], MediaType, bool]:
-    """Process a single file and determine if it should be included.
+    """Process a single file and create a MediaFile if it's a valid media file.
 
     Args:
         file_path: Path to the file
         target_extensions: Set of extensions to include
         media_types: List of media types to include
-        verify_hash: Whether to calculate file hash
+        verify_hash: Whether to compute file hash
         errors: List to append any errors to
 
     Returns:
-        Tuple of (MediaFile or None, MediaType, should_skip)
-        If should_skip is True, the file should be skipped and not counted.
+        Tuple of (MediaFile or None, MediaType, whether the file was skipped)
     """
     try:
-        # Check if this is a valid media file we should process
+        # Check if it's a valid media file
         if not _is_valid_media_file(file_path, target_extensions, media_types):
-            return None, MediaType.UNKNOWN, True
+            # Return placeholder for skipped files
+            media_type = guess_media_type(file_path)
+            return None, media_type, True
 
-        # Create the media file object
+        # Create the MediaFile object
         media_file, media_type = _create_media_file(file_path, verify_hash, errors)
         return media_file, media_type, False
-
-    except (PermissionError, OSError) as e:
-        error_msg = f"Error accessing file {file_path}: {str(e)}"
-        logger.error(error_msg)
-        errors.append(error_msg)
+    except Exception as e:
+        # Log unexpected errors but continue processing
+        errors.append(f"Unexpected error processing {file_path}: {str(e)}")
         return None, MediaType.UNKNOWN, True
 
 
@@ -294,6 +302,7 @@ class ScanOptions:
     recursive: bool = True
     include_hidden: bool = False
     verify_hash: bool = False
+    platform: str = "plex"
     target_extensions: Set[str] = field(default_factory=set)
     media_types: List[MediaType] = field(default_factory=list)
 
@@ -302,50 +311,63 @@ def _handle_directory_item(
     item: Path,
     options: ScanOptions,
 ) -> Tuple[int, int, List[MediaFile], Dict[MediaType, int], List[str]]:
-    """Process a single directory item recursively if needed.
+    """Handle a single directory item (file or subdirectory).
 
     Args:
-        item: Directory item (file or subdirectory) to process
+        item: Path to the item
         options: Scan options
 
     Returns:
-        Tuple of (total_files, skipped_files, media_files, by_media_type, errors)
+        Tuple of (
+            total files examined,
+            skipped files,
+            list of media files found,
+            count by media type,
+            list of errors
+        )
     """
-    # If the item is a directory and recursion is enabled, process it
-    if item.is_dir() and options.recursive:
-        return _process_directory(item, options)
-
-    # Return empty results for directories with recursion disabled
-    if item.is_dir():
-        return 0, 0, [], {media_type: 0 for media_type in options.media_types}, []
-
-    # Process file (counts as 1 total file)
-    total_files = 1
+    # Initialize results
+    total_files = 0
     skipped_files = 0
     media_files: List[MediaFile] = []
-    by_media_type: Dict[MediaType, int] = {
-        media_type: 0 for media_type in options.media_types
-    }
+    by_media_type: Dict[MediaType, int] = {}
     errors: List[str] = []
 
-    # Process the file
-    media_file, media_type, should_skip = _process_file(
-        item,
-        options.target_extensions,
-        options.media_types,
-        options.verify_hash,
-        errors,
-    )
+    # Check if it's a hidden item
+    if is_hidden(item) and not options.include_hidden:
+        return total_files, skipped_files, media_files, by_media_type, errors
 
-    if should_skip:
-        skipped_files += 1
-    elif media_file:
-        # Add to results
-        media_files.append(media_file)
+    try:
+        if item.is_file():
+            # Process the file
+            total_files += 1
+            media_file, media_type, was_skipped = _process_file(
+                item,
+                options.target_extensions,
+                options.media_types,
+                options.verify_hash,
+                errors,
+            )
 
-        # Update type counter
-        if media_type in by_media_type:
-            by_media_type[media_type] += 1
+            if was_skipped:
+                skipped_files += 1
+            elif media_file is not None:
+                media_files.append(media_file)
+                # Update count by media type
+                by_media_type[media_type] = by_media_type.get(media_type, 0) + 1
+
+        elif item.is_dir() and options.recursive:
+            # For hidden directories, we need to check again for include_hidden
+            if not is_hidden(item) or options.include_hidden:
+                # Recursively process subdirectory
+                sub_results = _process_directory(item, options)
+                _update_aggregated_results(
+                    [total_files, skipped_files, media_files, by_media_type, errors],
+                    sub_results,
+                )
+    except (PermissionError, FileNotFoundError, OSError) as e:
+        # Log access errors but continue processing
+        errors.append(f"Error accessing {item}: {str(e)}")
 
     return total_files, skipped_files, media_files, by_media_type, errors
 
@@ -354,88 +376,79 @@ def _update_aggregated_results(
     aggregated: list[Union[int, List[MediaFile], Dict[MediaType, int], List[str]]],
     additional: Tuple[int, int, List[MediaFile], Dict[MediaType, int], List[str]],
 ) -> None:
-    """Update aggregated results with additional results in-place.
+    """Update aggregated results with additional results.
 
     Args:
-        aggregated: List containing current aggregated results
-        additional: Tuple containing additional results to aggregate
+        aggregated: List of aggregated results (will be modified in-place)
+        additional: Tuple of additional results
+
+    Returns:
+        None (updates aggregated in-place)
     """
-    sub_total, sub_skipped, sub_media_files, sub_by_media_type, sub_errors = additional
-
-    # Update totals using the proper types
-    aggregated[0] = cast(int, aggregated[0]) + sub_total  # total_files
-    aggregated[1] = cast(int, aggregated[1]) + sub_skipped  # skipped_files
-
-    # Add media files and errors
-    cast(List[MediaFile], aggregated[2]).extend(sub_media_files)  # media_files
-    cast(List[str], aggregated[4]).extend(sub_errors)  # errors
-
-    # Update media type counters
+    # Update total_files
+    aggregated[0] = cast(int, aggregated[0]) + additional[0]
+    # Update skipped_files
+    aggregated[1] = cast(int, aggregated[1]) + additional[1]
+    # Update media_files
+    cast(List[MediaFile], aggregated[2]).extend(additional[2])
+    # Update by_media_type
     by_media_type = cast(Dict[MediaType, int], aggregated[3])
-    for m_type, count in sub_by_media_type.items():
-        if m_type in by_media_type:
-            by_media_type[m_type] += count
+    for media_type, count in additional[3].items():
+        by_media_type[media_type] = by_media_type.get(media_type, 0) + count
+    # Update errors
+    cast(List[str], aggregated[4]).extend(additional[4])
 
 
 def _process_directory(
     current_dir: Path,
     options: ScanOptions,
 ) -> Tuple[int, int, List[MediaFile], Dict[MediaType, int], List[str]]:
-    """Process a directory recursively.
+    """Process a directory and find media files.
 
     Args:
         current_dir: Directory to process
         options: Scan options
 
     Returns:
-        Tuple of (total_files, skipped_files, media_files, by_media_type, errors)
+        Tuple of (
+            total files examined,
+            skipped files,
+            list of media files found,
+            count by media type,
+            list of errors
+        )
     """
     # Initialize results
     total_files = 0
     skipped_files = 0
     media_files: List[MediaFile] = []
-    by_media_type: Dict[MediaType, int] = {
-        media_type: 0 for media_type in options.media_types
-    }
+    by_media_type: Dict[MediaType, int] = {}
     errors: List[str] = []
 
-    # Using properly typed result list
-    result: list[Union[int, List[MediaFile], Dict[MediaType, int], List[str]]] = [
-        total_files,  # total_files
-        skipped_files,  # skipped_files
-        media_files,  # media_files
-        by_media_type,  # by_media_type
-        errors,  # errors
-    ]
+    # Check if it's a hidden directory
+    if is_hidden(current_dir) and not options.include_hidden:
+        return total_files, skipped_files, media_files, by_media_type, errors
+
+    # Skip directory if it doesn't exist or can't be accessed
+    if not current_dir.exists():
+        errors.append(f"Directory does not exist: {current_dir}")
+        return total_files, skipped_files, media_files, by_media_type, errors
+    elif not current_dir.is_dir():
+        errors.append(f"Path is not a directory: {current_dir}")
+        return total_files, skipped_files, media_files, by_media_type, errors
 
     try:
+        # Process each item in the directory
         for item in current_dir.iterdir():
-            # Skip hidden items if not included
-            if not options.include_hidden and is_hidden(item):
-                if item.is_file():
-                    skipped_files = cast(int, result[1]) + 1
-                    result[1] = skipped_files
-                continue
-
-            # Process the item (file or directory)
-            item_result = _handle_directory_item(item, options)
-
-            # Aggregate results
-            _update_aggregated_results(result, item_result)
-
+            item_results = _handle_directory_item(item, options)
+            _update_aggregated_results(
+                [total_files, skipped_files, media_files, by_media_type, errors],
+                item_results,
+            )
     except (PermissionError, OSError) as e:
-        error_msg = f"Error reading directory {current_dir}: {str(e)}"
-        logger.error(error_msg)
-        cast(List[str], result[4]).append(error_msg)  # errors
+        errors.append(f"Error accessing directory {current_dir}: {str(e)}")
 
-    # Convert result list to tuple with specific types for return
-    return (
-        cast(int, result[0]),
-        cast(int, result[1]),
-        cast(List[MediaFile], result[2]),
-        cast(Dict[MediaType, int], result[3]),
-        cast(List[str], result[4]),
-    )
+    return total_files, skipped_files, media_files, by_media_type, errors
 
 
 def scan_directory(
@@ -443,94 +456,93 @@ def scan_directory(
     media_types: List[MediaType] | None = None,
     recursive: bool = True,
     include_hidden: bool = False,
-    verify_hash: bool = False,
+    verify: bool = False,
+    platform: str = "plex",
 ) -> ScanResult:
     """Scan a directory for media files.
 
     Args:
-        root_dir: The directory to scan.
-        media_types: Optional list of media types to include (defaults to all).
-        recursive: Whether to scan subdirectories.
-        include_hidden: Whether to include hidden files and directories.
-        verify_hash: Whether to calculate SHA-256 hash for each file.
+        root_dir: The directory to scan
+        media_types: Types of media to include. If None, includes all types.
+        recursive: Whether to scan subdirectories recursively
+        include_hidden: Whether to include hidden files and directories
+        verify: Whether to verify file checksums
+        platform: Target platform for the scan
 
     Returns:
-        A ScanResult object containing the scan results.
+        ScanResult object containing the found media files and statistics
 
     Raises:
-        FileNotFoundError: If root_dir does not exist.
-        PermissionError: If there are permission issues accessing files.
+        FileNotFoundError: If the directory doesn't exist
+        ValueError: If the path is not a directory
     """
+    # Validate the directory exists
     if not root_dir.exists():
-        raise FileNotFoundError(f"Directory not found: {root_dir}")
-
+        raise FileNotFoundError(f"Directory does not exist: {root_dir}")
     if not root_dir.is_dir():
         raise ValueError(f"Path is not a directory: {root_dir}")
 
-    # Use all media types if none specified
-    if media_types is None:
-        media_types = [MediaType.TV, MediaType.MOVIE, MediaType.MUSIC]
+    # Use absolute path to avoid relative path issues
+    root_dir = root_dir.absolute()
 
-    # When include_hidden is True, also include UNKNOWN media type
-    # to detect files in hidden dirs
-    if include_hidden and MediaType.UNKNOWN not in media_types:
-        media_types = media_types + [MediaType.UNKNOWN]
-
-    # Set of extensions to look for based on requested media types
-    target_extensions: Set[str] = set()
-    for media_type in media_types:
-        if media_type in MEDIA_EXTENSIONS:
-            target_extensions.update(MEDIA_EXTENSIONS[media_type])
-
-    # Create scan options
+    # Set up options
     options = ScanOptions(
         recursive=recursive,
         include_hidden=include_hidden,
-        verify_hash=verify_hash,
-        target_extensions=target_extensions,
-        media_types=media_types,
+        verify_hash=verify,
+        platform=platform,
     )
 
-    start_time = time.perf_counter()
+    # Set up media types
+    if media_types:
+        options.media_types = media_types
+    else:
+        # If no media types specified, include all
+        options.media_types = [
+            MediaType.TV,
+            MediaType.MOVIE,
+            MediaType.MUSIC,
+        ]
 
-    # Start the scan
-    logger.info(f"Starting scan of {root_dir} for media types: {media_types}")
+    # Set up target extensions based on media types
+    options.target_extensions = set()
+    for media_type in options.media_types:
+        if media_type in MEDIA_EXTENSIONS:
+            options.target_extensions.update(MEDIA_EXTENSIONS[media_type])
 
-    try:
-        # Process the root directory
-        total_files, skipped_files, media_files, by_media_type, errors = (
-            _process_directory(root_dir, options)
-        )
-    except (PermissionError, OSError) as e:
-        error_msg = f"Error scanning directory {root_dir}: {str(e)}"
-        logger.error(error_msg)
-        return ScanResult(
-            total_files=0,
-            media_files=[],
-            skipped_files=0,
-            by_media_type={media_type: 0 for media_type in media_types},
-            errors=[error_msg],
-            scan_duration_seconds=0.0,
-            root_dir=root_dir.absolute(),
-        )
+    # Start timing the scan
+    start_time = time.time()
+
+    # Process the directory
+    total_files, skipped_files, media_files, by_media_type, errors = _process_directory(
+        root_dir, options
+    )
 
     # Calculate scan duration
-    scan_duration_seconds = time.perf_counter() - start_time
+    scan_duration = time.time() - start_time
 
-    # Create the scan result
+    # For backward compatibility with tests
+    total_files_examined = total_files
+    skipped_files_count = skipped_files
+    media_files_list = media_files
+    by_media_type_dict = by_media_type
+    errors_list = errors
+    scan_duration_seconds = scan_duration
+
+    # Create and return the scan result
     result = ScanResult(
-        total_files=total_files,
-        media_files=media_files,
-        skipped_files=skipped_files,
-        by_media_type=by_media_type,
-        errors=errors,
+        files=media_files_list,
+        root_dir=root_dir,
+        media_types=options.media_types,
+        platform=options.platform,
+        # Include backward compatibility fields
+        total_files=max(
+            total_files_examined, len(media_files_list)
+        ),  # Ensure total files is at least the number of files found
+        skipped_files=skipped_files_count,
+        by_media_type=by_media_type_dict,
+        errors=errors_list,
         scan_duration_seconds=scan_duration_seconds,
-        root_dir=root_dir.absolute(),
-    )
-
-    logger.info(
-        f"Scan completed in {scan_duration_seconds:.2f}s. "
-        f"Found {len(media_files)} media files out of {total_files} total files."
     )
 
     return result

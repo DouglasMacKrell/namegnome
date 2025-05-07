@@ -1,4 +1,4 @@
-"""Tests for the CLI commands."""
+"""Tests for the namegnome CLI commands."""
 
 from datetime import datetime
 from pathlib import Path
@@ -6,7 +6,9 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-from namegnome.models.core import MediaFile, MediaType, RenamePlan, ScanResult
+
+from namegnome.models.core import MediaFile, MediaType, ScanResult
+from namegnome.models.plan import RenamePlan
 
 
 # Helper function to create an absolute path that's platform-independent
@@ -79,28 +81,36 @@ def scan_result(media_file: MediaFile) -> ScanResult:
     )
 
 
-@pytest.mark.skip(reason="Tests need to be updated for the new scan command implementation")
+@pytest.mark.skip(
+    reason="Tests need to be updated for the new scan command implementation"
+)
 @patch("namegnome.cli.commands.scan_directory")
 def test_scan_command_no_media_type(mock_scan: Any) -> None:
     """Test that scan command requires at least one media type."""
     pass
 
 
-@pytest.mark.skip(reason="Tests need to be updated for the new scan command implementation")
+@pytest.mark.skip(
+    reason="Tests need to be updated for the new scan command implementation"
+)
 @patch("namegnome.cli.commands.scan_directory")
 def test_scan_command_invalid_media_type(mock_scan: Any) -> None:
     """Test that scan command validates media types."""
     pass
 
 
-@pytest.mark.skip(reason="Tests need to be updated for the new scan command implementation")
+@pytest.mark.skip(
+    reason="Tests need to be updated for the new scan command implementation"
+)
 @patch("namegnome.cli.commands.scan_directory")
 def test_scan_command_directory_not_found(mock_scan: Any) -> None:
     """Test that scan command handles non-existent directories."""
     pass
 
 
-@pytest.mark.skip(reason="Tests need to be updated for the new scan command implementation")
+@pytest.mark.skip(
+    reason="Tests need to be updated for the new scan command implementation"
+)
 @patch("namegnome.cli.commands.scan_directory")
 def test_scan_command_json_output(
     mock_scan: Any, capsys: pytest.CaptureFixture[str]
@@ -109,14 +119,18 @@ def test_scan_command_json_output(
     pass
 
 
-@pytest.mark.skip(reason="Tests need to be updated for the new scan command implementation")
+@pytest.mark.skip(
+    reason="Tests need to be updated for the new scan command implementation"
+)
 @patch("namegnome.cli.commands.scan_directory")
 def test_scan_command_no_color(mock_scan: Any) -> None:
     """Test that scan command respects no-color flag."""
     pass
 
 
-@pytest.mark.skip(reason="Tests need to be updated for the new scan command implementation")
+@pytest.mark.skip(
+    reason="Tests need to be updated for the new scan command implementation"
+)
 @patch("namegnome.cli.commands.scan_directory")
 @patch("namegnome.cli.commands.create_rename_plan")
 def test_scan_with_media_type(
@@ -126,7 +140,9 @@ def test_scan_with_media_type(
     pass
 
 
-@pytest.mark.skip(reason="Tests need to be updated for the new scan command implementation")
+@pytest.mark.skip(
+    reason="Tests need to be updated for the new scan command implementation"
+)
 @patch("namegnome.cli.commands.scan_directory")
 @patch("namegnome.cli.commands.create_rename_plan")
 def test_scan_json_output(
@@ -136,7 +152,9 @@ def test_scan_json_output(
     pass
 
 
-@pytest.mark.skip(reason="Tests need to be updated for the new scan command implementation")
+@pytest.mark.skip(
+    reason="Tests need to be updated for the new scan command implementation"
+)
 @patch("namegnome.cli.commands.scan_directory")
 @patch("namegnome.cli.commands.create_rename_plan")
 def test_scan_no_color(
@@ -146,7 +164,9 @@ def test_scan_no_color(
     pass
 
 
-@pytest.mark.skip(reason="Tests need to be updated for the new scan command implementation")
+@pytest.mark.skip(
+    reason="Tests need to be updated for the new scan command implementation"
+)
 @patch("namegnome.cli.commands.scan_directory")
 @patch("namegnome.cli.commands.create_rename_plan")
 def test_scan_with_all_options(
@@ -154,3 +174,41 @@ def test_scan_with_all_options(
 ) -> None:
     """Test that scan command accepts all optional flags."""
     pass
+
+
+@patch("namegnome.cli.commands.scan_directory")
+def test_scan_command_simple(mock_scan):
+    """Test the scan command with simple arguments."""
+    # Set up the mock to return a ScanResult
+    mock_scan.return_value = ScanResult(
+        files=[
+            MediaFile(
+                path=Path("/test/file.mp4").absolute(),
+                size=1024,
+                media_type=MediaType.TV,
+                modified_date=datetime.now(),
+            )
+        ],
+        root_dir=Path("/test").absolute(),
+        media_types=[MediaType.TV],
+        platform="plex",
+    )
+
+
+@patch("namegnome.cli.commands.scan_directory")
+def test_scan_command_with_options(mock_scan):
+    """Test the scan command with various options."""
+    # Set up the mock to return a ScanResult
+    mock_scan.return_value = ScanResult(
+        files=[
+            MediaFile(
+                path=Path("/test/file.mp4").absolute(),
+                size=1024,
+                media_type=MediaType.TV,
+                modified_date=datetime.now(),
+            )
+        ],
+        root_dir=Path("/test").absolute(),
+        media_types=[MediaType.TV],
+        platform="plex",
+    )

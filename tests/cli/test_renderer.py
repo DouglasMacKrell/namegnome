@@ -1,20 +1,16 @@
-"""Tests for the CLI renderer."""
+"""Tests for the renderer module."""
 
-import datetime
 import io
 import re
+from datetime import datetime
 from pathlib import Path
 
 import pytest
-from namegnome.cli.renderer import render_diff
-from namegnome.models.core import (
-    MediaFile,
-    MediaType,
-    PlanStatus,
-    RenamePlan,
-    RenamePlanItem,
-)
 from rich.console import Console
+
+from namegnome.cli.renderer import render_diff
+from namegnome.models.core import MediaFile, MediaType, PlanStatus
+from namegnome.models.plan import RenamePlan, RenamePlanItem
 
 
 # Helper function to create an absolute path that's platform-independent
@@ -38,7 +34,7 @@ def media_file() -> MediaFile:
         path=abs_path("/tmp/source1.mp4"),
         size=1024,
         media_type=MediaType.TV,
-        modified_date=datetime.datetime.now(),
+        modified_date=datetime.now(),
     )
 
 
@@ -47,7 +43,7 @@ def sample_plan(media_file: MediaFile) -> RenamePlan:
     """Create a sample rename plan."""
     return RenamePlan(
         id="test-plan",
-        created_at=datetime.datetime(2025, 5, 6, 16, 22, 7),
+        created_at=datetime(2025, 5, 6, 16, 22, 7),
         root_dir=abs_path("/tmp"),
         items=[
             RenamePlanItem(
@@ -120,7 +116,7 @@ def test_render_diff_empty_plan() -> None:
     """Test rendering an empty plan."""
     plan = RenamePlan(
         id="empty-plan",
-        created_at=datetime.datetime.now(),
+        created_at=datetime.now(),
         root_dir=abs_path("/tmp"),
         items=[],
         platform="plex",

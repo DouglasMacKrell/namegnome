@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 
 import pytest
+
 from namegnome.utils.hash import sha256sum
 
 
@@ -19,7 +20,9 @@ def test_sha256sum() -> None:
         file_hash = sha256sum(temp_path)
 
         # Compare with expected hash for "Hello, World!"
-        expected_hash = "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+        expected_hash = (
+            "dffd6021bb2bd5b0af676290809ec3a53191dd81c7f70a4b28688a362182986f"
+        )
         assert file_hash == expected_hash
     finally:
         # Clean up
@@ -38,7 +41,9 @@ def test_sha256sum_empty_file() -> None:
         file_hash = sha256sum(temp_path)
 
         # Compare with expected hash for empty file
-        expected_hash = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        expected_hash = (
+            "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        )
         assert file_hash == expected_hash
     finally:
         # Clean up

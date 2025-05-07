@@ -8,9 +8,10 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, cast
 
-from namegnome.models.core import PlanStatus, RenamePlan, RenamePlanItem, ScanResult
+from namegnome.models.core import PlanStatus, ScanResult
+from namegnome.models.plan import RenamePlan, RenamePlanItem
 from namegnome.rules.base import RuleSet
 
 # Logger for this module
@@ -60,7 +61,7 @@ def create_rename_plan(
     case_insensitive_destinations: dict[str, RenamePlanItem] = {}
 
     # Process each media file
-    for media_file in scan_result.media_files:
+    for media_file in scan_result.files:
         # Skip if rule set doesn't support this media type
         if not rule_set.supports_media_type(media_file.media_type):
             logger.warning(
@@ -110,9 +111,15 @@ def create_rename_plan(
                     str(target_path).lower()
                 ]
                 item.status = PlanStatus.CONFLICT
-                item.reason = f"Destination conflicts with {conflicting_item.source} (case-insensitive filesystem)"
+                item.reason = (
+                    f"Destination conflicts with {conflicting_item.source} "
+                    f"(case-insensitive filesystem)"
+                )
                 conflicting_item.status = PlanStatus.CONFLICT
-                conflicting_item.reason = f"Destination conflicts with {item.source} (case-insensitive filesystem)"
+                conflicting_item.reason = (
+                    f"Destination conflicts with {item.source} "
+                    f"(case-insensitive filesystem)"
+                )
                 logger.warning(
                     f"Case-insensitive conflict detected: {item.source} and"
                     f" {conflicting_item.source} would conflict on case-insensitive filesystem"
@@ -141,7 +148,7 @@ def create_rename_plan(
 class DateTimeEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles datetime objects."""
 
-    def default(self, obj: Any) -> Any:
+    def default(self: "DateTimeEncoder", obj: object) -> object:
         """Convert datetime objects to ISO format strings.
 
         Args:

@@ -1,9 +1,10 @@
-"""Rich diff renderer for rename plans."""
+"""Render diff tables for rename plans."""
 
 from rich.console import Console
 from rich.table import Table
 
-from namegnome.models.core import PlanStatus, RenamePlan
+from namegnome.models.core import PlanStatus
+from namegnome.models.plan import RenamePlan
 
 
 def render_diff(plan: RenamePlan, console: Console | None = None) -> None:

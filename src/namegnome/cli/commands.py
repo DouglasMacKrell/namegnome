@@ -16,10 +16,11 @@ from rich.traceback import install as install_traceback
 from namegnome.cli.renderer import render_diff
 from namegnome.core.planner import create_rename_plan
 from namegnome.core.scanner import scan_directory
-from namegnome.fs import store_plan, store_run_metadata
 from namegnome.models.core import MediaType
+from namegnome.models.scan import ScanOptions
 from namegnome.rules.plex import PlexRuleSet
 from namegnome.utils.json import DateTimeEncoder
+from namegnome.utils.plan_store import save_plan
 
 # Install rich traceback handler
 install_traceback(show_locals=True)
@@ -244,21 +245,21 @@ def _scan_impl(options: ScanCommandOptions) -> int:
     # Generate plan ID based on current timestamp
     plan_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # Store command arguments for the metadata file
-    cmd_args = {
-        "root": str(options.root),
-        "media_type": options.media_type,
-        "platform": options.platform,
-        "show_name": options.show_name,
-        "movie_year": options.movie_year,
-        "anthology": options.anthology,
-        "adjust_episodes": options.adjust_episodes,
-        "verify": options.verify,
-        "json_output": options.json_output,
-        "llm_model": options.llm_model,
-        "no_color": options.no_color,
-        "strict_directory_structure": options.strict_directory_structure,
-    }
+    # Create scan options model for plan store
+    scan_options_model = ScanOptions(
+        root=options.root,
+        media_types=media_types,
+        platform=options.platform,
+        verify_hash=options.verify,
+        show_name=options.show_name,
+        movie_year=options.movie_year,
+        anthology=options.anthology,
+        adjust_episodes=options.adjust_episodes,
+        json_output=options.json_output,
+        llm_model=options.llm_model,
+        no_color=options.no_color,
+        strict_directory_structure=options.strict_directory_structure,
+    )
 
     try:
         # Create a progress spinner
@@ -271,7 +272,7 @@ def _scan_impl(options: ScanCommandOptions) -> int:
             progress.add_task("Scanning directory...", total=None)
             try:
                 scan_result = scan_directory(
-                    options.root, media_types, verify_hash=options.verify
+                    options.root, media_types, verify=options.verify
                 )
             except (FileNotFoundError, PermissionError, ValueError) as e:
                 console.print(f"[red]Error: {str(e)}[/red]")
@@ -302,16 +303,15 @@ def _scan_impl(options: ScanCommandOptions) -> int:
             )
 
             # Store the plan and metadata
-            if scan_result.total_files > 0:
+            if len(scan_result.files) > 0:
                 progress.update(
                     progress.task_ids[0], description="Storing rename plan..."
                 )
-                plan_path = store_plan(plan)
-                metadata_path = store_run_metadata(plan_id, cmd_args)
 
-                # Log paths for debugging
-                console.log(f"Plan stored at: {plan_path}")
-                console.log(f"Metadata stored at: {metadata_path}")
+                # Save the plan to the plan store
+                plan_id = save_plan(plan, scan_options_model, verify=options.verify)
+
+                console.log(f"Plan stored with ID: {plan_id}")
 
         # Output results
         if options.json_output:

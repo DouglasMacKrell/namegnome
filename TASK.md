@@ -612,8 +612,9 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **Test Configuration Fix** (2024-05-06) - Fixed Python path configuration for tests by updating conftest.py to properly handle module imports. Removed duplicate test directories and cleaned up project structure. All tests now pass consistently across different environments.
 * **Critical Bug Fixes** (2024-05-06) - Fixed Ruff configuration by moving it from .ruff.toml to pyproject.toml for better compatibility. Fixed indentation error in PlexRuleSet's TV show pattern matching. Enhanced conflict detection with case-insensitive path matching for cross-platform compatibility. Fixed mypy type issues by adding proper Pattern[str] type annotations and Generator types in test fixtures.
 * **0.9 CLI `scan` Command** (2023-11-08) - Implemented CLI scan command with plan storage.
+* **0.10 Rollback Plan Store** (2024-07-25) - Implemented UUID-based plan storage with SHA-256 checksums and run metadata. Added plan_store module to handle storing, retrieving, and verifying rename plans. Created a comprehensive test suite for plan storage operations. Fixed backward compatibility issues with the ScanResult model structure.
 
 ---
 
-*Last updated: 2024‑05‑06*
+*Last updated: 2024‑07‑25*
 

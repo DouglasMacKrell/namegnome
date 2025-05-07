@@ -1,19 +1,19 @@
-"""Tests for core domain models."""
+"""Tests for the core models module."""
 
 import json
 from datetime import datetime
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
+
 from namegnome.models.core import (
     MediaFile,
     MediaType,
     PlanStatus,
-    RenamePlan,
-    RenamePlanItem,
     ScanResult,
 )
-from pydantic import ValidationError
+from namegnome.models.plan import RenamePlan, RenamePlanItem
 
 
 class TestMediaType:
@@ -276,8 +276,12 @@ class TestScanResult:
     def test_create_valid(self, media_file: MediaFile, movie_file: MediaFile) -> None:
         """Test creating a valid ScanResult."""
         result = ScanResult(
+            files=[media_file, movie_file],
+            media_types=[MediaType.TV, MediaType.MOVIE],
+            platform="plex",
+            root_dir=Path("/tmp").absolute(),
+            # Backward compatibility fields
             total_files=10,
-            media_files=[media_file, movie_file],
             skipped_files=8,
             by_media_type={
                 MediaType.TV: 1,
@@ -285,35 +289,36 @@ class TestScanResult:
             },
             errors=["Some error occurred"],
             scan_duration_seconds=1.5,
-            root_dir=Path("/tmp").absolute(),
         )
 
-        assert result.total_files == 10
-        assert len(result.media_files) == 2
-        assert result.skipped_files == 8
-        assert result.by_media_type == {MediaType.TV: 1, MediaType.MOVIE: 1}
-        assert result.errors == ["Some error occurred"]
-        assert result.scan_duration_seconds == 1.5
+        assert len(result.files) == 2
         assert result.root_dir == Path("/tmp").absolute()
+        assert len(result.media_types) == 2
+        assert result.platform == "plex"
+        assert result.total_files == 10
+        assert result.skipped_files == 8
+        assert len(result.errors) == 1
+        assert result.scan_duration_seconds == 1.5
 
     def test_as_plan(self, media_file: MediaFile, movie_file: MediaFile) -> None:
         """Test converting ScanResult to RenamePlan."""
         result = ScanResult(
+            files=[media_file, movie_file],
+            media_types=[MediaType.TV, MediaType.MOVIE],
+            platform="plex",
+            root_dir=Path("/tmp").absolute(),
+            # Backward compatibility fields
             total_files=10,
-            media_files=[media_file, movie_file],
             skipped_files=8,
             by_media_type={
                 MediaType.TV: 1,
                 MediaType.MOVIE: 1,
             },
             scan_duration_seconds=1.5,
-            root_dir=Path("/tmp").absolute(),
         )
 
-        plan = result.as_plan(plan_id="plan-123", platform="plex")
-
-        assert plan.id == "plan-123"
+        plan = result.as_plan()
         assert plan.root_dir == Path("/tmp").absolute()
+        assert len(plan.items) == 0  # Initially empty
         assert plan.platform == "plex"
-        assert len(plan.items) == 0  # Empty plan
-        assert sorted(plan.media_types) == sorted([MediaType.TV, MediaType.MOVIE])
+        assert plan.media_types == [MediaType.TV, MediaType.MOVIE]

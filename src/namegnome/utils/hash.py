@@ -1,33 +1,39 @@
-"""Utilities for calculating file hashes."""
+"""Utilities for computing file hashes.
+
+This module provides functions for computing SHA-256 checksums of files.
+"""
 
 import hashlib
 from pathlib import Path
+from typing import Union
 
 
-def sha256sum(path: Path, chunk_size: int = 8_388_608) -> str:
-    """Calculate the SHA-256 hash of a file.
+def sha256sum(path: Union[str, Path], chunk_size: int = 8_388_608) -> str:
+    """Compute the SHA-256 checksum of a file.
 
     Args:
-        path: Path to the file.
-        chunk_size: Size of chunks to read (8MB default).
+        path: The path to the file to hash
+        chunk_size: The size of chunks to read (8 MB default)
 
     Returns:
-        The SHA-256 hash as a hexadecimal string.
+        The hexadecimal digest of the SHA-256 hash
 
     Raises:
-        FileNotFoundError: If the file doesn't exist.
-        PermissionError: If there are permission issues reading the file.
+        FileNotFoundError: If the file does not exist
+        PermissionError: If the file cannot be read
+        ValueError: If the path is not a file
     """
+    if isinstance(path, str):
+        path = Path(path)
+
     if not path.exists():
         raise FileNotFoundError(f"File not found: {path}")
 
     if not path.is_file():
         raise ValueError(f"Path is not a file: {path}")
 
-    sha256 = hashlib.sha256()
-
+    hasher = hashlib.sha256()
     with open(path, "rb") as f:
-        for chunk in iter(lambda: f.read(chunk_size), b""):
-            sha256.update(chunk)
-
-    return sha256.hexdigest()
+        while chunk := f.read(chunk_size):
+            hasher.update(chunk)
+    return hasher.hexdigest()

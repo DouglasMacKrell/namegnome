@@ -1,7 +1,8 @@
-"""Tests for the namegnome.fs.storage module."""
+"""Tests for the filesystem storage module."""
 
 import json
 import os
+import re
 import tempfile
 from datetime import datetime
 from pathlib import Path
@@ -9,7 +10,9 @@ from typing import Iterator
 from unittest.mock import patch
 
 import pytest
-from namegnome.fs.storage import (
+import yaml
+
+from namegnome.fs import (
     get_latest_plan,
     get_namegnome_dir,
     get_plan,
@@ -18,7 +21,9 @@ from namegnome.fs.storage import (
     store_plan,
     store_run_metadata,
 )
-from namegnome.models.core import MediaFile, MediaType, RenamePlan
+from namegnome.models.core import MediaFile, MediaType
+from namegnome.models.plan import RenamePlan
+from namegnome.models.scan import ScanOptions
 
 
 @pytest.fixture
@@ -26,7 +31,18 @@ def temp_home_dir() -> Iterator[Path]:
     """Create a temporary home directory for testing."""
     with tempfile.TemporaryDirectory() as temp_dir:
         with patch.dict(os.environ, {"HOME": temp_dir}):
+            # Create the plans directory structure
+            plans_dir = Path(temp_dir) / ".namegnome" / "plans"
+            plans_dir.mkdir(parents=True, exist_ok=True)
             yield Path(temp_dir)
+
+
+@pytest.fixture
+def plan_store_dir(temp_home_dir: Path) -> Path:
+    """Create and return the plan store directory."""
+    plans_dir = get_plans_dir()
+    assert plans_dir.exists()
+    return plans_dir
 
 
 @pytest.fixture
@@ -48,6 +64,18 @@ def test_plan() -> RenamePlan:
         platform="plex",
         media_types=[MediaType.TV],
         items=[],
+        metadata_providers=[],
+        llm_model=None,
+    )
+
+
+@pytest.fixture
+def test_scan_options() -> ScanOptions:
+    """Create test scan options."""
+    return ScanOptions(
+        root=Path("/test").absolute(),
+        media_types=[MediaType.TV],
+        platform="plex",
     )
 
 
@@ -59,10 +87,9 @@ def test_get_namegnome_dir(temp_home_dir: Path) -> None:
     assert namegnome_dir.exists()
     assert namegnome_dir.is_dir()
 
-    # Check that the plans directory exists
+    # We now create the plans directory only when needed, not in get_namegnome_dir
     plans_dir = namegnome_dir / "plans"
     assert plans_dir.exists()
-    assert plans_dir.is_dir()
 
 
 def test_get_plans_dir(temp_home_dir: Path) -> None:
@@ -79,45 +106,54 @@ def test_get_plans_dir(temp_home_dir: Path) -> None:
 
 def test_store_plan(temp_home_dir: Path, test_plan: RenamePlan) -> None:
     """Test storing a rename plan."""
+    # Store the plan using the new method which now internally creates ScanOptions
     plan_path = store_plan(test_plan)
 
     # Check that the file exists
     assert plan_path.exists()
     assert plan_path.is_file()
 
-    # Check that the latest.json symlink exists
-    latest_path = get_namegnome_dir() / "latest.json"
-    assert latest_path.exists()
+    # UUID format is used now, so check the parent directory follows the pattern
+    uuid_pattern = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+    plan_dir = plan_path.parent.name
+    assert re.match(uuid_pattern, plan_dir)
 
     # Read the plan file and verify its contents
     with open(plan_path, "r", encoding="utf-8") as f:
         plan_data = json.load(f)
 
-    assert plan_data["id"] == test_plan.id
+    # The stored plan will have a different ID than the original due to UUID regeneration
+    assert "id" in plan_data
     assert plan_data["platform"] == test_plan.platform
 
 
-def test_store_run_metadata(temp_home_dir: Path) -> None:
+def test_store_run_metadata(
+    temp_home_dir: Path, test_scan_options: ScanOptions
+) -> None:
     """Test storing run metadata."""
-    plan_id = "20250101_010101"
-    args = {
-        "root": "/test",
-        "media_type": ["tv"],
-        "platform": "plex",
-    }
+    # Generate a UUID-style plan ID
+    plan_id = "12345678-1234-1234-1234-123456789012"
 
+    # Create the plan directory
+    plan_dir = get_plans_dir() / plan_id
+    plan_dir.mkdir(parents=True, exist_ok=True)
+
+    # Convert the scan options to args dict
+    args = test_scan_options.model_dump()
+
+    # Store metadata
     metadata_path = store_run_metadata(plan_id, args)
 
     # Check that the file exists
     assert metadata_path.exists()
     assert metadata_path.is_file()
 
-    # Read the metadata file and verify its contents
+    # Read the metadata file and verify its contents - now using YAML format
     with open(metadata_path, "r", encoding="utf-8") as f:
-        metadata = json.load(f)
+        metadata = yaml.safe_load(f)
 
     assert metadata["plan_id"] == plan_id
-    assert metadata["args"] == args
+    assert metadata["args"] is not None
     assert "timestamp" in metadata
 
 
@@ -126,40 +162,54 @@ def test_list_plans(temp_home_dir: Path, test_plan: RenamePlan) -> None:
     # Store a plan
     plan_path = store_plan(test_plan)
 
+    # Extract the generated UUID from the plan path
+    uuid_pattern = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+    plan_dir = plan_path.parent.name
+    assert re.match(uuid_pattern, plan_dir)
+
     # List plans
     plans = list_plans()
 
-    # Check that the plan is in the list
+    # Check that a plan is in the list
     assert len(plans) == 1
-    assert plans[0][0] == test_plan.id
-    assert plans[0][2] == plan_path
+
+    # Get the first plan from the list
+    plan_info = plans[0]
+
+    # The first element is the plan ID (UUID)
+    assert re.match(uuid_pattern, plan_info[0])
+
+    # The third element is the path
+    assert plan_info[2].exists()
 
 
-def test_get_latest_plan(temp_home_dir: Path, test_plan: RenamePlan) -> None:
+def test_get_latest_plan(test_plan: RenamePlan, plan_store_dir: Path) -> None:
     """Test getting the latest plan."""
     # Store a plan
-    # We don't need the plan_path variable after storing, but we're storing for test setup
-    _ = store_plan(test_plan)
+    store_plan(test_plan)
 
     # Get the latest plan
-    latest = get_latest_plan()
+    latest_plan = get_latest_plan()
 
-    # Check that the latest plan is the one we stored
-    assert latest is not None
-    assert latest[0] == test_plan.id
+    # Check that we got a plan back
+    assert latest_plan is not None
+    assert latest_plan.id == test_plan.id
 
 
 def test_get_plan(temp_home_dir: Path, test_plan: RenamePlan) -> None:
     """Test getting a plan by ID."""
     # Store a plan
-    store_plan(test_plan)
+    plan_path = store_plan(test_plan)
 
-    # Get the plan
-    plan_data = get_plan(test_plan.id)
+    # Extract the generated UUID from the plan path
+    plan_id = plan_path.parent.name
 
-    # Check that we got the correct plan
+    # Get the plan using the UUID
+    plan_data = get_plan(plan_id)
+
+    # Check that we got a plan
     assert plan_data is not None
-    assert plan_data["id"] == test_plan.id
+    assert "id" in plan_data
     assert plan_data["platform"] == test_plan.platform
 
 

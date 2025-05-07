@@ -1,3 +1,5 @@
+![NameGnome](public/images/NameGnome_README_Headder.png)
+
 # NameGnome
 
 A command-line tool for organizing and renaming media files according to platform-specific conventions (e.g., Plex, Jellyfin).

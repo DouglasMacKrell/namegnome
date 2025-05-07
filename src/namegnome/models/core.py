@@ -3,8 +3,13 @@
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from typing import TYPE_CHECKING, Dict, List, Optional
 
 from pydantic import BaseModel, Field, model_validator
+
+# Avoid circular imports with TYPE_CHECKING
+if TYPE_CHECKING:
+    from namegnome.models.plan import RenamePlan
 
 
 class MediaType(str, Enum):
@@ -36,116 +41,120 @@ class MediaFile(BaseModel):
     size: int
     """Size of the file in bytes."""
 
-    media_type: MediaType = MediaType.UNKNOWN
-    """Type of media detected."""
+    media_type: MediaType
+    """Type of media file."""
 
     modified_date: datetime
-    """Last modification date of the file."""
+    """Last modified date of the file."""
 
-    hash: str | None = None
-    """Optional SHA-256 hash of the file, if --verify was specified."""
+    season: Optional[int] = None
+    """Season number for TV shows."""
 
-    metadata_ids: dict[str, str] = Field(default_factory=dict)
-    """Dictionary of provider IDs for the file (e.g., {"tmdb": "12345"})."""
+    episode: Optional[int] = None
+    """Episode number for TV shows."""
+
+    year: Optional[int] = None
+    """Release year for movies."""
+
+    title: Optional[str] = None
+    """Title of the show or movie."""
+
+    hash: Optional[str] = None
+    """SHA-256 hash of the file, if computed."""
+
+    metadata_ids: Dict[str, str] = Field(default_factory=dict)
+    """IDs from external metadata providers, e.g., {'tmdb': '12345'}."""
+
+    def root_relative_path(self, root_dir: Path) -> str:
+        """Get the path relative to the root directory.
+
+        Args:
+            root_dir: The root directory to make the path relative to.
+
+        Returns:
+            The relative path as a string.
+        """
+        try:
+            return str(self.path.relative_to(root_dir))
+        except ValueError:
+            # If the path is not relative to the root, return the full path
+            return str(self.path)
 
     @model_validator(mode="after")
-    def ensure_absolute_path(self) -> "MediaFile":
-        """Ensure path is absolute."""
+    def validate_path(self: "MediaFile") -> "MediaFile":
+        """Ensure the path is absolute."""
         if not self.path.is_absolute():
-            raise ValueError("Path must be absolute")
+            raise ValueError(f"Path must be absolute: {self.path}")
         return self
-
-
-class RenamePlanItem(BaseModel):
-    """A single file rename/move operation."""
-
-    source: Path
-    """Absolute source path."""
-
-    destination: Path
-    """Absolute destination path."""
-
-    media_file: MediaFile
-    """Original media file reference."""
-
-    status: PlanStatus = PlanStatus.PENDING
-    """Current status of this rename operation."""
-
-    reason: str | None = None
-    """Reason for failure or conflict, if applicable."""
-
-    manual: bool = False
-    """Whether this item requires manual confirmation."""
-
-    manual_reason: str | None = None
-    """Reason why manual confirmation is required."""
-
-    @model_validator(mode="after")
-    def ensure_absolute_paths(self) -> "RenamePlanItem":
-        """Ensure both paths are absolute."""
-        if not self.source.is_absolute() or not self.destination.is_absolute():
-            raise ValueError("Paths must be absolute")
-        return self
-
-
-class RenamePlan(BaseModel):
-    """A collection of rename operations to be executed together."""
-
-    id: str = Field(...)
-    """Unique identifier for this plan."""
-
-    created_at: datetime = Field(default_factory=datetime.now)
-    """When this plan was created."""
-
-    root_dir: Path
-    """Root directory that was scanned."""
-
-    items: list[RenamePlanItem] = Field(default_factory=list)
-    """List of rename operations in this plan."""
-
-    platform: str
-    """Target platform (e.g., 'plex', 'jellyfin')."""
-
-    media_types: list[MediaType] = Field(default_factory=list)
-    """Types of media found in this plan."""
-
-    metadata_providers: list[str] = Field(default_factory=list)
-    """Metadata providers used for this plan."""
-
-    llm_model: str | None = None
-    """LLM model used for fuzzy matching, if applicable."""
 
 
 class ScanResult(BaseModel):
-    """Summary result of scanning a directory."""
+    """Result of a media scan operation."""
 
-    total_files: int = 0
-    """Total number of files found."""
-
-    media_files: list[MediaFile] = Field(default_factory=list)
-    """List of media files found."""
-
-    skipped_files: int = 0
-    """Number of files skipped (non-media or ignored)."""
-
-    by_media_type: dict[MediaType, int] = Field(default_factory=dict)
-    """Counts per media type."""
-
-    errors: list[str] = Field(default_factory=list)
-    """List of errors encountered during scan."""
-
-    scan_duration_seconds: float = 0.0
-    """Duration of the scan in seconds."""
+    files: List[MediaFile]
+    """List of media files discovered."""
 
     root_dir: Path
-    """Root directory that was scanned."""
+    """Root directory of the scan."""
 
-    def as_plan(self, plan_id: str, platform: str) -> RenamePlan:
-        """Convert scan result to an empty rename plan."""
+    media_types: List[MediaType]
+    """Types of media scanned for."""
+
+    platform: str
+    """Platform name (e.g., 'plex', 'jellyfin')."""
+
+    scan_time: datetime = Field(default_factory=datetime.now)
+    """When the scan was run."""
+
+    # Backward compatibility fields
+    total_files: int = 0
+    """Total number of files examined (for backward compatibility)."""
+
+    skipped_files: int = 0
+    """Number of files skipped (for backward compatibility)."""
+
+    by_media_type: Dict[MediaType, int] = Field(default_factory=dict)
+    """Count of files by media type (for backward compatibility)."""
+
+    scan_duration_seconds: float = 0.0
+    """Duration of the scan in seconds (for backward compatibility)."""
+
+    errors: List[str] = Field(default_factory=list)
+    """List of errors encountered during the scan (for backward compatibility)."""
+
+    # Alias for backward compatibility
+    @property
+    def media_files(self: "ScanResult") -> List[MediaFile]:
+        """Alias for files (for backward compatibility)."""
+        return self.files
+
+    def as_plan(
+        self: "ScanResult", plan_id: Optional[str] = None, platform: Optional[str] = None
+    ) -> "RenamePlan":
+        """Convert scan result to a rename plan skeleton.
+        
+        Args:
+            plan_id: Optional plan ID to use, defaults to timestamp-based ID
+            platform: Optional platform override, defaults to self.platform
+        
+        Returns:
+            A rename plan with no items (to be filled in by planner).
+        """
+        from namegnome.models.plan import RenamePlan
+        
         return RenamePlan(
-            id=plan_id,
+            id=(
+                plan_id 
+                if plan_id is not None 
+                else datetime.now().strftime("%Y%m%d_%H%M%S")
+            ),
+            created_at=datetime.now(),
             root_dir=self.root_dir,
-            platform=platform,
-            media_types=list({mf.media_type for mf in self.media_files}),
+            platform=(
+                platform 
+                if platform is not None 
+                else self.platform
+            ),
+            media_types=self.media_types,
             items=[],
         )

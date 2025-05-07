@@ -25,6 +25,12 @@ All notable changes to the namegnome project will be documented in this file.
 - Added support for various media type filtering options in scan command
 - Created ScanOptions and ScanCommandOptions data models for better parameter organization
 - Implemented detailed output formatting for scan results with rich tables
+- UUID-based plan storage with SHA-256 checksums for file integrity verification
+- Run metadata storage in YAML format for command tracking and reproducibility
+- Plan store module for saving and retrieving rename plans
+- Automatic creation of .namegnome/plans directory structure
+- Backward compatibility with timestamp-based plan IDs
+- README header image for improved project presentation
 
 ### Fixed
 - Fixed test failures related to console output capture
@@ -41,6 +47,11 @@ All notable changes to the namegnome project will be documented in this file.
 - Fixed mypy type annotations in Pattern objects to use Pattern[str]
 - Added missing Generator type annotations in test fixtures
 - Fixed scanner module complexity by refactoring directory processing into smaller functions
+- Fixed ScanResult model to maintain backward compatibility with older tests
+- Fixed parameter naming inconsistencies in scan_directory function
+- Fixed serialization of Path objects in YAML files
+- Corrected handling of Enum values in YAML serialization
+- Fixed path handling in file checksums computation
 
 ## [0.2.1] - 2025-05-10
 

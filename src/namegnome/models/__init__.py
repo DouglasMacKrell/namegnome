@@ -4,10 +4,10 @@ from namegnome.models.core import (
     MediaFile,
     MediaType,
     PlanStatus,
-    RenamePlan,
-    RenamePlanItem,
     ScanResult,
 )
+from namegnome.models.plan import RenamePlan, RenamePlanItem
+from namegnome.models.scan import ScanOptions
 
 __all__ = [
     "MediaFile",
@@ -16,4 +16,5 @@ __all__ = [
     "RenamePlan",
     "RenamePlanItem",
     "ScanResult",
+    "ScanOptions",
 ]
