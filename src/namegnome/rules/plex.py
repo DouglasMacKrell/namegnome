@@ -69,13 +69,31 @@ class PlexRuleSet(RuleSet):
         """
         return [MediaType.TV, MediaType.MOVIE]
 
-    def target_path(self, media_file: MediaFile, base_dir: Path | None = None) -> Path:
+    def target_path(
+        self,
+        media_file: MediaFile,
+        base_dir: Path | None = None,
+        show_name: str | None = None,
+        movie_year: int | None = None,
+        anthology: bool = False,
+        adjust_episodes: bool = False,
+        verify: bool = False,
+        llm_model: str | None = None,
+        strict_directory_structure: bool = True,
+    ) -> Path:
         """Generate a target path for a media file using Plex naming conventions.
 
         Args:
             media_file: The media file to generate a target path for.
             base_dir: Optional base directory for the target path. If None,
                       the target path will use the same parent as the source.
+            show_name: Optional show name override.
+            movie_year: Optional movie year override.
+            anthology: Whether to treat as an anthology series.
+            adjust_episodes: Whether to adjust episode numbers.
+            verify: Whether to verify metadata.
+            llm_model: Optional LLM model to use for metadata extraction.
+            strict_directory_structure: Whether to enforce strict directory structure.
 
         Returns:
             A Path object representing the target location for this file.
@@ -95,14 +113,43 @@ class PlexRuleSet(RuleSet):
         ext = media_file.path.suffix.lower()
 
         if media_file.media_type == MediaType.TV:
-            return self._tv_show_path(media_file, root_dir, ext)
+            return self._tv_show_path(
+                media_file,
+                root_dir,
+                ext,
+                show_name=show_name,
+                anthology=anthology,
+                adjust_episodes=adjust_episodes,
+                verify=verify,
+                llm_model=llm_model,
+                strict_directory_structure=strict_directory_structure,
+            )
         elif media_file.media_type == MediaType.MOVIE:
-            return self._movie_path(media_file, root_dir, ext)
+            return self._movie_path(
+                media_file,
+                root_dir,
+                ext,
+                movie_year=movie_year,
+                verify=verify,
+                llm_model=llm_model,
+                strict_directory_structure=strict_directory_structure,
+            )
         else:
             # This should never happen due to the earlier check
             raise ValueError(f"Unsupported media type: {media_file.media_type}")
 
-    def _tv_show_path(self, media_file: MediaFile, root_dir: Path, ext: str) -> Path:
+    def _tv_show_path(
+        self,
+        media_file: MediaFile,
+        root_dir: Path,
+        ext: str,
+        show_name: str | None = None,
+        anthology: bool = False,
+        adjust_episodes: bool = False,
+        verify: bool = False,
+        llm_model: str | None = None,
+        strict_directory_structure: bool = True,
+    ) -> Path:
         """Generate a target path for a TV show file.
 
         Format: /TV Shows/Show Name/Season XX/Show Name - SXXEXX - Episode Title.ext
@@ -111,6 +158,12 @@ class PlexRuleSet(RuleSet):
             media_file: The media file to generate a target path for.
             root_dir: The base directory to build the path from.
             ext: The file extension.
+            show_name: Optional show name override.
+            anthology: Whether to treat as an anthology series.
+            adjust_episodes: Whether to adjust episode numbers.
+            verify: Whether to verify metadata.
+            llm_model: Optional LLM model to use for metadata extraction.
+            strict_directory_structure: Whether to enforce strict directory structure.
 
         Returns:
             A Path object for the target file.
@@ -124,12 +177,12 @@ class PlexRuleSet(RuleSet):
         if not match:
             # If no match, try to extract what we can from the file path
             # For now, just use the filename as is
-            show_name = "Unknown Show"
+            show_name = show_name or "Unknown Show"
             season_num = 1
             episode_num = 1
             episode_title = "Unknown Episode"
         else:
-            show_name = match.group(1).strip().replace(".", " ")
+            show_name = show_name or match.group(1).strip().replace(".", " ")
             season_num = int(match.group(2))
             episode_num = int(match.group(3))
             # If group 4 is empty or just the extension, use "Unknown Episode"
@@ -151,7 +204,16 @@ class PlexRuleSet(RuleSet):
 
         return season_dir / target_filename
 
-    def _movie_path(self, media_file: MediaFile, root_dir: Path, ext: str) -> Path:
+    def _movie_path(
+        self,
+        media_file: MediaFile,
+        root_dir: Path,
+        ext: str,
+        movie_year: int | None = None,
+        verify: bool = False,
+        llm_model: str | None = None,
+        strict_directory_structure: bool = True,
+    ) -> Path:
         """Generate a target path for a movie file.
 
         Format: /Movies/Movie Title (Year)/Movie Title (Year).ext
@@ -160,6 +222,10 @@ class PlexRuleSet(RuleSet):
             media_file: The media file to generate a target path for.
             root_dir: The base directory to build the path from.
             ext: The file extension.
+            movie_year: Optional movie year override.
+            verify: Whether to verify metadata.
+            llm_model: Optional LLM model to use for metadata extraction.
+            strict_directory_structure: Whether to enforce strict directory structure.
 
         Returns:
             A Path object for the target file.
@@ -174,17 +240,17 @@ class PlexRuleSet(RuleSet):
         if match and match.group(2):
             # We have a standard "Movie Name (Year)" format
             movie_title = match.group(1).strip().replace(".", " ")
-            year = match.group(2)
+            year = movie_year or match.group(2)
         else:
             # Try the alternate "Movie.Name.Year.ext" format
             alt_match = self.year_pattern.match(filename)
             if alt_match:
                 movie_title = alt_match.group(1).strip().replace(".", " ")
-                year = alt_match.group(2)
+                year = movie_year or alt_match.group(2)
             else:
                 # If no match, try to extract what we can
                 movie_title = filename.rsplit(".", 1)[0].replace(".", " ").strip()
-                year = None
+                year = movie_year
 
         # Create the target path components
         movies_dir = root_dir / "Movies"
@@ -198,5 +264,4 @@ class PlexRuleSet(RuleSet):
             target_filename = f"{movie_title}{ext}"
 
         movie_dir = movies_dir / movie_dir_name
-
         return movie_dir / target_filename

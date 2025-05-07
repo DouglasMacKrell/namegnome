@@ -22,7 +22,18 @@ class RuleSet(ABC):
         self.platform_name = platform_name
 
     @abstractmethod
-    def target_path(self, media_file: MediaFile, base_dir: Path | None = None) -> Path:
+    def target_path(
+        self,
+        media_file: MediaFile,
+        base_dir: Path | None = None,
+        show_name: str | None = None,
+        movie_year: int | None = None,
+        anthology: bool = False,
+        adjust_episodes: bool = False,
+        verify: bool = False,
+        llm_model: str | None = None,
+        strict_directory_structure: bool = True,
+    ) -> Path:
         """Generate a target path for the given media file.
 
         This method determines where a file should be moved/renamed to based on
@@ -32,6 +43,13 @@ class RuleSet(ABC):
             media_file: The media file to generate a target path for.
             base_dir: Optional base directory for the target path. If None,
                       the target path will be absolute.
+            show_name: Optional show name override.
+            movie_year: Optional movie year override.
+            anthology: Whether to treat as an anthology series.
+            adjust_episodes: Whether to adjust episode numbers.
+            verify: Whether to verify metadata.
+            llm_model: Optional LLM model to use for metadata extraction.
+            strict_directory_structure: Whether to enforce strict directory structure.
 
         Returns:
             A Path object representing the target location for this file.

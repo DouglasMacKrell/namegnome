@@ -48,7 +48,7 @@ class TestPlexRuleSet:
 
         # Check that the path follows Plex conventions
         expected = Path(
-            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray" " Matter.mp4"
+            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray Matter.mp4"
         ).absolute()
         assert target == expected
 
@@ -70,7 +70,7 @@ class TestPlexRuleSet:
 
         # Check that the path follows Plex conventions
         expected = Path(
-            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray" " Matter.mp4"
+            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray Matter.mp4"
         ).absolute()
         assert target == expected
 
@@ -92,7 +92,7 @@ class TestPlexRuleSet:
 
         # Check that the path follows Plex conventions
         expected = Path(
-            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Unknown" " Episode.mp4"
+            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Unknown Episode.mp4"
         ).absolute()
         assert target == expected
 
@@ -114,7 +114,7 @@ class TestPlexRuleSet:
 
         # Check that a default path is created
         expected = Path(
-            "/media/TV Shows/Unknown Show/Season 01/Unknown Show - S01E01 - Unknown" " Episode.mp4"
+            "/media/TV Shows/Unknown Show/Season 01/Unknown Show - S01E01 - Unknown Episode.mp4"
         ).absolute()
         assert target == expected
 

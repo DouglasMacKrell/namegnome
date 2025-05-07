@@ -22,6 +22,13 @@ def create_rename_plan(
     rule_set: RuleSet,
     plan_id: str,
     platform: str,
+    show_name: str | None = None,
+    movie_year: int | None = None,
+    anthology: bool = False,
+    adjust_episodes: bool = False,
+    verify: bool = False,
+    llm_model: str | None = None,
+    strict_directory_structure: bool = True,
 ) -> RenamePlan:
     """Create a rename plan from a scan result.
 
@@ -30,6 +37,13 @@ def create_rename_plan(
         rule_set: The rule set to use for generating target paths.
         plan_id: Unique identifier for this plan.
         platform: Target platform name (e.g., 'plex', 'jellyfin').
+        show_name: Optional show name override.
+        movie_year: Optional movie year override.
+        anthology: Whether to treat as an anthology series.
+        adjust_episodes: Whether to adjust episode numbers.
+        verify: Whether to verify metadata.
+        llm_model: Optional LLM model to use for metadata extraction.
+        strict_directory_structure: Whether to enforce strict directory structure.
 
     Returns:
         A RenamePlan object containing the proposed rename operations.
@@ -55,7 +69,16 @@ def create_rename_plan(
 
         try:
             # Generate target path
-            target_path = rule_set.target_path(media_file)
+            target_path = rule_set.target_path(
+                media_file,
+                show_name=show_name,
+                movie_year=movie_year,
+                anthology=anthology,
+                adjust_episodes=adjust_episodes,
+                verify=verify,
+                llm_model=llm_model,
+                strict_directory_structure=strict_directory_structure,
+            )
 
             # Create plan item
             item = RenamePlanItem(
