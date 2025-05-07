@@ -21,6 +21,10 @@ All notable changes to the namegnome project will be documented in this file.
 - Proper Python path configuration in conftest.py for consistent test execution
 - Cleaned up project structure by removing duplicate directories
 - Added case-insensitive conflict detection in the rename planner for cross-platform compatibility
+- Implemented CLI scan command with plan storage to .namegnome directory
+- Added support for various media type filtering options in scan command
+- Created ScanOptions and ScanCommandOptions data models for better parameter organization
+- Implemented detailed output formatting for scan results with rich tables
 
 ### Fixed
 - Fixed test failures related to console output capture
@@ -36,6 +40,7 @@ All notable changes to the namegnome project will be documented in this file.
 - Fixed indentation error in PlexRuleSet for TV show pattern matching
 - Fixed mypy type annotations in Pattern objects to use Pattern[str]
 - Added missing Generator type annotations in test fixtures
+- Fixed scanner module complexity by refactoring directory processing into smaller functions
 
 ## [0.2.1] - 2025-05-10
 
