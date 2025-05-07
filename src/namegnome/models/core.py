@@ -65,7 +65,7 @@ class MediaFile(BaseModel):
     metadata_ids: Dict[str, str] = Field(default_factory=dict)
     """IDs from external metadata providers, e.g., {'tmdb': '12345'}."""
 
-    def root_relative_path(self, root_dir: Path) -> str:
+    def root_relative_path(self: "MediaFile", root_dir: Path) -> str:
         """Get the path relative to the root directory.
 
         Args:
@@ -129,14 +129,16 @@ class ScanResult(BaseModel):
         return self.files
 
     def as_plan(
-        self: "ScanResult", plan_id: Optional[str] = None, platform: Optional[str] = None
+        self: "ScanResult",
+        plan_id: Optional[str] = None,
+        platform: Optional[str] = None,
     ) -> "RenamePlan":
         """Convert scan result to a rename plan skeleton.
-        
+
         Args:
             plan_id: Optional plan ID to use, defaults to timestamp-based ID
             platform: Optional platform override, defaults to self.platform
-        
+
         Returns:
             A rename plan with no items (to be filled in by planner).
         """
@@ -150,11 +152,7 @@ class ScanResult(BaseModel):
             ),
             created_at=datetime.now(),
             root_dir=self.root_dir,
-            platform=(
-                platform
-                if platform is not None
-                else self.platform
-            ),
+            platform=(platform if platform is not None else self.platform),
             media_types=self.media_types,
             items=[],
         )

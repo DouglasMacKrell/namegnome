@@ -11,7 +11,6 @@ from unittest.mock import patch
 
 import pytest
 import yaml
-
 from namegnome.fs import (
     get_latest_plan,
     get_namegnome_dir,
@@ -187,7 +186,7 @@ def test_get_latest_plan(test_plan: RenamePlan, plan_store_dir: Path) -> None:
     """Test getting the latest plan."""
     # Store a plan
     plan_path = store_plan(test_plan)
-    
+
     # Extract the actual plan ID from the path (UUID directory name)
     actual_plan_id = plan_path.parent.name
 
@@ -196,9 +195,11 @@ def test_get_latest_plan(test_plan: RenamePlan, plan_store_dir: Path) -> None:
 
     # Check that we got a plan back
     assert latest_plan is not None
-    
+
     # Check that the plan ID matches the actual ID after storage (not the original ID)
-    plan_id = latest_plan[0] if isinstance(latest_plan, tuple) else latest_plan.id
+    # The latest_plan is a tuple of (plan_id, path)
+    assert isinstance(latest_plan, tuple)
+    plan_id, _ = latest_plan
     assert plan_id == actual_plan_id
 
 

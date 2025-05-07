@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-
 from namegnome.core.scanner import guess_media_type, scan_directory
 from namegnome.models.core import MediaType
 
@@ -152,8 +151,7 @@ class TestScanDirectory:
 
         # Check that the hidden video was found
         hidden_video_found = any(
-            ".hidden" in str(media_file.path)
-            for media_file in result.files
+            ".hidden" in str(media_file.path) for media_file in result.files
         )
 
         # Some implementations may not find it due to OS specifics, so we make this a soft check

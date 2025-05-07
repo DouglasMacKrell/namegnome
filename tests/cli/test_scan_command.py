@@ -8,11 +8,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import typer
-from typer.testing import CliRunner
-
 from namegnome.cli.commands import ExitCode, app
 from namegnome.models.core import MediaFile, MediaType, ScanResult
 from namegnome.models.plan import RenamePlan
+from typer.testing import CliRunner
 
 
 @pytest.fixture
@@ -308,15 +307,21 @@ def test_scan_command_with_all_options(
             [
                 "scan",
                 str(temp_path),
-                "--media-type", "tv",
-                "--media-type", "movie",
-                "--platform", "jellyfin",
+                "--media-type",
+                "tv",
+                "--media-type",
+                "movie",
+                "--platform",
+                "jellyfin",
                 "--verify",
-                "--show-name", "Test Show",
-                "--movie-year", "2023",
+                "--show-name",
+                "Test Show",
+                "--movie-year",
+                "2023",
                 "--anthology",
                 "--adjust-episodes",
-                "--llm-model", "llama-model",
+                "--llm-model",
+                "llama-model",
                 "--no-color",
             ],
         )

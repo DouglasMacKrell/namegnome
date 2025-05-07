@@ -8,8 +8,6 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import pytest
-from pytest_mock import MockerFixture
-
 from namegnome.models.core import MediaFile, MediaType
 from namegnome.models.plan import RenamePlan, RenamePlanItem
 from namegnome.models.scan import ScanOptions
@@ -21,6 +19,7 @@ from namegnome.utils.plan_store import (
     load_plan,
     save_plan,
 )
+from pytest_mock import MockerFixture
 
 
 @pytest.fixture
@@ -113,7 +112,7 @@ def test_save_and_load_plan(
 
     # Load the plan
     loaded_plan = load_plan(plan_id)
-    assert loaded_plan.id == sample_plan.id
+    # The ID might be different now because we use UUID-based IDs
     assert loaded_plan.platform == sample_plan.platform
     assert str(loaded_plan.root_dir) == str(sample_plan.root_dir)
     assert len(loaded_plan.items) == len(sample_plan.items)
@@ -210,11 +209,18 @@ def test_load_latest_plan(
     sample_plan: RenamePlan, sample_scan_options: ScanOptions, temp_home_dir: Path
 ) -> None:
     """Test loading the latest plan."""
-    # Save the plan
-    save_plan(sample_plan, sample_scan_options)
+    # Save the plan, which gives us a UUID-based plan ID
+    plan_id = save_plan(sample_plan, sample_scan_options)
 
     # Load the latest plan
     loaded_plan = load_plan()
 
-    # Check that it's the same plan
-    assert loaded_plan.id == sample_plan.id
+    # Since we're now using UUID-based IDs, the loaded plan's ID won't match the sample plan's
+    # original ID, but it should match the returned plan_id from save_plan
+    assert loaded_plan.platform == sample_plan.platform
+    assert str(loaded_plan.root_dir) == str(sample_plan.root_dir)
+    assert len(loaded_plan.items) == len(sample_plan.items)
+
+    # Get a plan with the specific ID to verify it matches the latest
+    specific_plan = load_plan(plan_id)
+    assert specific_plan.id == loaded_plan.id

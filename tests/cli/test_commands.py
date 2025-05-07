@@ -6,7 +6,6 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
-
 from namegnome.models.core import MediaFile, MediaType, ScanResult
 from namegnome.models.plan import RenamePlan
 
@@ -32,7 +31,7 @@ def mock_scan_result() -> ScanResult:
     file_path = abs_path("/path/to/media/test.mp4")
     return ScanResult(
         root_dir=Path(root_path),
-        media_files=[
+        files=[
             MediaFile(
                 path=Path(file_path),
                 size=1024,
@@ -40,6 +39,8 @@ def mock_scan_result() -> ScanResult:
                 modified_date=datetime.now(),
             )
         ],
+        media_types=[MediaType.TV],
+        platform="plex",
     )
 
 
@@ -76,8 +77,10 @@ def scan_result(media_file: MediaFile) -> ScanResult:
     by_media_type: dict[MediaType, int] = {MediaType.TV: 1}
     return ScanResult(
         root_dir=Path(abs_path("/tmp")),
-        media_files=media_files,
+        files=media_files,
         by_media_type=by_media_type,
+        media_types=[MediaType.TV],
+        platform="plex",
     )
 
 
@@ -177,7 +180,7 @@ def test_scan_with_all_options(
 
 
 @patch("namegnome.cli.commands.scan_directory")
-def test_scan_command_simple(mock_scan):
+def test_scan_command_simple(mock_scan: Any) -> None:
     """Test the scan command with simple arguments."""
     # Set up the mock to return a ScanResult
     mock_scan.return_value = ScanResult(
@@ -196,7 +199,7 @@ def test_scan_command_simple(mock_scan):
 
 
 @patch("namegnome.cli.commands.scan_directory")
-def test_scan_command_with_options(mock_scan):
+def test_scan_command_with_options(mock_scan: Any) -> None:
     """Test the scan command with various options."""
     # Set up the mock to return a ScanResult
     mock_scan.return_value = ScanResult(
