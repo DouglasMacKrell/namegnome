@@ -5,10 +5,10 @@ All new code should use utils.plan_store directly.
 """
 
 import enum
+import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, cast
-import json
+from typing import Any, Dict, List, Optional, Tuple
 
 import yaml
 
@@ -16,7 +16,6 @@ from namegnome.models.plan import RenamePlan
 from namegnome.models.scan import ScanOptions
 from namegnome.utils.plan_store import (
     _ensure_plan_dir,
-    load_plan,
     save_plan,
 )
 from namegnome.utils.plan_store import (

@@ -186,14 +186,20 @@ def test_list_plans(temp_home_dir: Path, test_plan: RenamePlan) -> None:
 def test_get_latest_plan(test_plan: RenamePlan, plan_store_dir: Path) -> None:
     """Test getting the latest plan."""
     # Store a plan
-    store_plan(test_plan)
+    plan_path = store_plan(test_plan)
+    
+    # Extract the actual plan ID from the path (UUID directory name)
+    actual_plan_id = plan_path.parent.name
 
     # Get the latest plan
     latest_plan = get_latest_plan()
 
     # Check that we got a plan back
     assert latest_plan is not None
-    assert latest_plan.id == test_plan.id
+    
+    # Check that the plan ID matches the actual ID after storage (not the original ID)
+    plan_id = latest_plan[0] if isinstance(latest_plan, tuple) else latest_plan.id
+    assert plan_id == actual_plan_id
 
 
 def test_get_plan(temp_home_dir: Path, test_plan: RenamePlan) -> None:

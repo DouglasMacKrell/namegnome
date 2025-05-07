@@ -141,18 +141,18 @@ class ScanResult(BaseModel):
             A rename plan with no items (to be filled in by planner).
         """
         from namegnome.models.plan import RenamePlan
-        
+
         return RenamePlan(
             id=(
-                plan_id 
-                if plan_id is not None 
+                plan_id
+                if plan_id is not None
                 else datetime.now().strftime("%Y%m%d_%H%M%S")
             ),
             created_at=datetime.now(),
             root_dir=self.root_dir,
             platform=(
-                platform 
-                if platform is not None 
+                platform
+                if platform is not None
                 else self.platform
             ),
             media_types=self.media_types,

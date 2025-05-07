@@ -327,15 +327,15 @@ def test_scan_command_with_all_options(
         # Verify that the scanner was called with the right arguments
         mock_scan_directory.assert_called_once()
         call_args = mock_scan_directory.call_args
-        
+
         # Check positional arguments
         assert isinstance(call_args[0][0], Path)
         assert call_args[0][1] == [MediaType.TV, MediaType.MOVIE]
-        
+
         # Check keyword arguments
         kwargs = call_args[1]
         assert kwargs["verify"]
-        
+
         # Verify that the create_rename_plan was called with jellyfin
         mock_create_rename_plan.assert_called_once()
         assert mock_create_rename_plan.call_args[1]["platform"] == "jellyfin"
@@ -343,6 +343,6 @@ def test_scan_command_with_all_options(
         assert mock_create_rename_plan.call_args[1]["movie_year"] == 2023
         assert mock_create_rename_plan.call_args[1]["anthology"]
         assert mock_create_rename_plan.call_args[1]["adjust_episodes"]
-        
+
         # Verify that the storage function was called
         assert mock_storage.called
