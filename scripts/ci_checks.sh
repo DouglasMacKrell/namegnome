@@ -58,16 +58,18 @@ fi
 print_message "$YELLOW" "Running formatting checks..."
 if [[ "$FORMAT_ONLY" == "true" ]]; then
     print_message "$YELLOW" "Fixing formatting issues..."
-    python -m ruff format . || true  # Continue even if formatting fails
+    # Use pre-commit for formatting to match the pre-commit hook behavior
+    pre-commit run ruff --all-files || true  # Continue even if formatting fails
     print_message "$GREEN" "Formatting fixed successfully!"
     exit 0
 else
-    # Run format check but don't fail the build if it fails
-    python -m ruff format . --check || print_message "$YELLOW" "Formatting issues detected but continuing..."
+    # Check formatting using pre-commit to ensure consistency with pre-commit hook
+    pre-commit run ruff --all-files --hook-stage push || print_message "$YELLOW" "Formatting issues detected but continuing..."
 fi
 
 # Run linting checks and fix automatically
 print_message "$YELLOW" "Running linting checks..."
+# Use pre-commit for linting to ensure consistency
 python -m ruff check . --ignore=E501 --fix || true  # Allow linting errors for now
 
 # Run type checking
