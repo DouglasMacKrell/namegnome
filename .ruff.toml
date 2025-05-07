@@ -1,0 +1,4 @@
+# Exclude shell scripts and other non-Python files from ruff checks
+exclude = ["*.sh", ".git", ".mypy_cache", ".ruff_cache", ".venv", "__pycache__", "build", "dist", "scripts/**/*"]
+line-length = 88
+target-version = "py312"
