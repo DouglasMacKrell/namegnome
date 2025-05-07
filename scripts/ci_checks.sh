@@ -20,8 +20,8 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
-# Check if we're in a virtual environment
-if [[ -z "${VIRTUAL_ENV:-}" ]]; then
+# Check if we're in a virtual environment, but skip this check in CI environment
+if [[ -z "${VIRTUAL_ENV:-}" ]] && [[ "${CI:-}" != "true" ]]; then
     print_message "$RED" "Error: Not in a virtual environment. Please activate your virtual environment first."
     exit 1
 fi
@@ -42,7 +42,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Install development dependencies if not already installed
-if ! pip show namegnome[dev] >/dev/null 2>&1; then
+if ! pip show black ruff mypy pytest pytest-cov >/dev/null 2>&1; then
     print_message "$YELLOW" "Installing development dependencies..."
     pip install -e ".[dev]"
 fi
