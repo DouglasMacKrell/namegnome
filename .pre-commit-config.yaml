@@ -2,14 +2,8 @@ repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
     rev: 'v0.3.4'
     hooks:
-      - id: ruff-format
-        name: ruff-format
-      
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.3.4'
-    hooks:
       - id: ruff
-        args: [--fix, --ignore=E501]
+        args: [--fix]
   
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: 'v1.7.1'
@@ -28,4 +22,4 @@ repos:
         entry: python -m pytest -q
         language: system
         pass_filenames: false
-        always_run: true 
+        always_run: true

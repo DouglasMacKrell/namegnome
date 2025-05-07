@@ -20,6 +20,7 @@ All notable changes to the namegnome project will be documented in this file.
 - Tests for media file detection including non-ASCII filenames and hidden files
 - Proper Python path configuration in conftest.py for consistent test execution
 - Cleaned up project structure by removing duplicate directories
+- Added case-insensitive conflict detection in the rename planner for cross-platform compatibility
 
 ### Fixed
 - Fixed test failures related to console output capture
@@ -31,6 +32,10 @@ All notable changes to the namegnome project will be documented in this file.
 - Fixed Python path configuration to ensure consistent test execution
 - Removed duplicate test directories causing import conflicts
 - Fixed project structure to follow best practices
+- Fixed Ruff configuration by moving it from .ruff.toml to pyproject.toml section
+- Fixed indentation error in PlexRuleSet for TV show pattern matching
+- Fixed mypy type annotations in Pattern objects to use Pattern[str]
+- Added missing Generator type annotations in test fixtures
 
 ## [0.2.1] - 2025-05-10
 

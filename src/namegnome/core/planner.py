@@ -56,6 +56,8 @@ def create_rename_plan(
 
     # Track destinations to detect conflicts
     destinations: dict[Path, RenamePlanItem] = {}
+    # Also track a case-insensitive version of destination paths to detect conflicts on case-insensitive filesystems
+    case_insensitive_destinations: dict[str, RenamePlanItem] = {}
 
     # Process each media file
     for media_file in scan_result.media_files:
@@ -91,17 +93,35 @@ def create_rename_plan(
             if target_path in destinations:
                 # Mark both items as conflicting
                 item.status = PlanStatus.CONFLICT
-                item.reason = f"Destination already used by {destinations[target_path].source}"
+                item.reason = (
+                    f"Destination already used by {destinations[target_path].source}"
+                )
                 destinations[target_path].status = PlanStatus.CONFLICT
-                destinations[target_path].reason = f"Destination already used by {item.source}"
+                destinations[
+                    target_path
+                ].reason = f"Destination already used by {item.source}"
                 logger.warning(
                     f"Conflict detected: {item.source} and"
                     f" {destinations[target_path].source} both target {target_path}"
+                )
+            # Also check for case-insensitive conflicts
+            elif str(target_path).lower() in case_insensitive_destinations:
+                conflicting_item = case_insensitive_destinations[
+                    str(target_path).lower()
+                ]
+                item.status = PlanStatus.CONFLICT
+                item.reason = f"Destination conflicts with {conflicting_item.source} (case-insensitive filesystem)"
+                conflicting_item.status = PlanStatus.CONFLICT
+                conflicting_item.reason = f"Destination conflicts with {item.source} (case-insensitive filesystem)"
+                logger.warning(
+                    f"Case-insensitive conflict detected: {item.source} and"
+                    f" {conflicting_item.source} would conflict on case-insensitive filesystem"
                 )
 
             # Add to plan and track destination
             plan.items.append(item)
             destinations[target_path] = item
+            case_insensitive_destinations[str(target_path).lower()] = item
 
         except ValueError as e:
             # Handle errors in path generation

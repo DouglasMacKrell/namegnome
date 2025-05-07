@@ -22,7 +22,9 @@ class MetadataClient(ABC):
         pass
 
     @abstractmethod
-    async def search_movie(self, title: str, year: int | None = None) -> list[dict[str, Any]]:
+    async def search_movie(
+        self, title: str, year: int | None = None
+    ) -> list[dict[str, Any]]:
         """Search for movies by title and optional year.
 
         Args:
@@ -35,7 +37,9 @@ class MetadataClient(ABC):
         pass
 
     @abstractmethod
-    async def search_tv(self, title: str, year: int | None = None) -> list[dict[str, Any]]:
+    async def search_tv(
+        self, title: str, year: int | None = None
+    ) -> list[dict[str, Any]]:
         """Search for TV shows by title and optional year.
 
         Args:

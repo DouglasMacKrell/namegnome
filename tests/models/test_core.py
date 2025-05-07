@@ -5,6 +5,8 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
+
 from namegnome.models.core import (
     MediaFile,
     MediaType,
@@ -13,7 +15,6 @@ from namegnome.models.core import (
     RenamePlanItem,
     ScanResult,
 )
-from pydantic import ValidationError
 
 
 class TestMediaType:

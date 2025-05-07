@@ -4,9 +4,16 @@ import datetime
 from pathlib import Path
 
 import pytest
-from namegnome.cli.renderer import render_diff
-from namegnome.models.core import MediaFile, MediaType, PlanStatus, RenamePlan, RenamePlanItem
 from rich.console import Console
+
+from namegnome.cli.renderer import render_diff
+from namegnome.models.core import (
+    MediaFile,
+    MediaType,
+    PlanStatus,
+    RenamePlan,
+    RenamePlanItem,
+)
 
 
 @pytest.fixture
@@ -75,7 +82,9 @@ def test_render_diff_with_color(
     assert "/tmp/target1.mp4" in captured.out
 
 
-def test_render_diff_no_color(capsys: pytest.CaptureFixture[str], sample_plan: RenamePlan) -> None:
+def test_render_diff_no_color(
+    capsys: pytest.CaptureFixture[str], sample_plan: RenamePlan
+) -> None:
     """Test that the diff renderer respects no-color flag."""
     console = Console(force_terminal=True, no_color=True)
     render_diff(sample_plan, console=console)

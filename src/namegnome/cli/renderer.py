@@ -21,7 +21,9 @@ def render_diff(plan: RenamePlan, console: Console | None = None) -> None:
         # Plain text output for no-color mode
         print("Rename Plan")
         print()
-        print("Status         Source                     Destination                Reason")
+        print(
+            "Status         Source                     Destination                Reason"
+        )
         print("-" * 80)
         for item in plan.items:
             print(

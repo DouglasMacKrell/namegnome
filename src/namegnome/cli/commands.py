@@ -39,7 +39,9 @@ def validate_media_type(value: str) -> MediaType:
         return MediaType(value.lower())
     except ValueError:
         valid_types = [t.value for t in MediaType if t != MediaType.UNKNOWN]
-        raise typer.BadParameter(f"Invalid media type. Must be one of: {', '.join(valid_types)}")
+        raise typer.BadParameter(
+            f"Invalid media type. Must be one of: {', '.join(valid_types)}"
+        )
 
 
 def scan_command(
@@ -88,7 +90,9 @@ def scan_command(
                 return 1
 
             # Generate rename plan
-            progress.update(progress.task_ids[0], description="Generating rename plan...")
+            progress.update(
+                progress.task_ids[0], description="Generating rename plan..."
+            )
             rule_set = PlexRuleSet()  # TODO: Make this configurable based on platform
             plan = create_rename_plan(
                 scan_result=scan_result,

@@ -3,8 +3,10 @@
 import shutil
 import tempfile
 from pathlib import Path
+from typing import Generator
 
 import pytest
+
 from namegnome.core.scanner import guess_media_type, scan_directory
 from namegnome.models.core import MediaType
 
@@ -19,12 +21,18 @@ class TestGuessMediaType:
         # 1x01 pattern
         assert guess_media_type(Path("/tmp/Breaking Bad 1x01.mkv")) == MediaType.TV
         # season/episode pattern
-        assert guess_media_type(Path("/tmp/Breaking Bad Season 1 Episode 1.avi")) == MediaType.TV
+        assert (
+            guess_media_type(Path("/tmp/Breaking Bad Season 1 Episode 1.avi"))
+            == MediaType.TV
+        )
 
     def test_directory_hints(self) -> None:
         """Test that directory hints are used to guess media type."""
         # TV show in TV directory
-        assert guess_media_type(Path("/media/TV Shows/Breaking Bad/episode.mp4")) == MediaType.TV
+        assert (
+            guess_media_type(Path("/media/TV Shows/Breaking Bad/episode.mp4"))
+            == MediaType.TV
+        )
         # Movie in Movies directory
         assert guess_media_type(Path("/media/Movies/Inception.mp4")) == MediaType.MOVIE
         # Music in Music directory
@@ -42,7 +50,7 @@ class TestScanDirectory:
     """Tests for the scan_directory function."""
 
     @pytest.fixture
-    def temp_media_dir(self) -> Path:
+    def temp_media_dir(self) -> Generator[Path, None, None]:
         """Create a temporary directory with media files for testing."""
         # Create a temporary directory
         temp_dir = Path(tempfile.mkdtemp())
@@ -54,7 +62,9 @@ class TestScanDirectory:
         (tv_dir / "Breaking Bad" / "Season 01").mkdir()
         (tv_dir / "Breaking Bad" / "Season 01" / "Breaking Bad S01E01.mp4").touch()
         (tv_dir / "Breaking Bad" / "Season 01" / "Breaking Bad S01E02.mp4").touch()
-        (tv_dir / "Breaking Bad" / "Season 01" / "Breaking Bad S01E01.srt").touch()  # Subtitle file
+        (
+            tv_dir / "Breaking Bad" / "Season 01" / "Breaking Bad S01E01.srt"
+        ).touch()  # Subtitle file
         (tv_dir / "The Office").mkdir()
         (tv_dir / "The Office" / "The Office 1x01.mkv").touch()
 
@@ -136,7 +146,8 @@ class TestScanDirectory:
 
         # Check that the hidden video was found
         hidden_video_found = any(
-            media_file.path.name == "hidden_video.mp4" for media_file in result.media_files
+            media_file.path.name == "hidden_video.mp4"
+            for media_file in result.media_files
         )
         assert hidden_video_found
 
@@ -157,6 +168,7 @@ class TestScanDirectory:
 
         # Check that the Unicode file was found
         unicode_file_found = any(
-            "ユニコード文字" in str(media_file.path) for media_file in result.media_files
+            "ユニコード文字" in str(media_file.path)
+            for media_file in result.media_files
         )
         assert unicode_file_found

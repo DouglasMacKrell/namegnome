@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import cast
 
 import pytest
+
 from namegnome.metadata import get_metadata_client
 from namegnome.metadata.clients.tmdb import StubTMDBClient
 from namegnome.metadata.models import MediaMetadataType
@@ -50,7 +51,11 @@ class TestStubTMDBClient:
         """Test mapping TMDB movie data to MediaMetadata."""
         # Use the generic fixture data
         fixture_path = (
-            Path(__file__).parents[2] / "fixtures" / "stubs" / "tmdb" / "movie_details.json"
+            Path(__file__).parents[2]
+            / "fixtures"
+            / "stubs"
+            / "tmdb"
+            / "movie_details.json"
         )
 
         # Skip if fixture doesn't exist (CI/pipeline)

@@ -2,6 +2,7 @@
 
 import re
 from pathlib import Path
+from typing import ClassVar
 
 from namegnome.models.core import MediaFile, MediaType
 from namegnome.rules.base import RuleSet
@@ -19,8 +20,19 @@ class PlexRuleSet(RuleSet):
         /Movies/Movie Name (Year)/Movie Name (Year).ext
     """
 
+    # Patterns for TV shows and movies
+    tv_pattern: ClassVar[re.Pattern[str]] = re.compile(
+        r"(.*?)[\.|\s]S(\d{2})E(\d{2})(?:[\.|\s](.+))?$", re.IGNORECASE
+    )
+    movie_pattern: ClassVar[re.Pattern[str]] = re.compile(
+        r"(.*?)\s*\((\d{4})\)(?:\.(.+))?$", re.IGNORECASE
+    )
+    year_pattern: ClassVar[re.Pattern[str]] = re.compile(
+        r"(.*?)\.(\d{4})(?:\.(.+))?$", re.IGNORECASE
+    )
+
     def __init__(self) -> None:
-        """Initialize the Plex rule set."""
+        """Initialize the PlexRuleSet."""
         super().__init__("plex")
 
         # Common media extensions
@@ -36,18 +48,6 @@ class PlexRuleSet(RuleSet):
             ".flv",
             ".webm",
         }
-
-        # Patterns for extracting metadata from filenames
-        self.tv_pattern = re.compile(
-            r"^(.*?)[\s\._-]*S(\d{1,2})[\s\._-]*E(\d{1,2})[\s\._-]*(.*?)(?:\.[^.]+)?$",
-            re.IGNORECASE,
-        )
-        self.movie_pattern = re.compile(
-            r"^(.*?)[\s\._-]*(?:\((\d{4})\))?(?:\.[^.]+)?$", re.IGNORECASE
-        )
-
-        # Pattern for year at the end of a filename (e.g., The.Matrix.1999.mp4)
-        self.year_pattern = re.compile(r"^(.*?)[\s\._-]*(\d{4})(?:\.[^.]+)?$", re.IGNORECASE)
 
     def supports_media_type(self, media_type: MediaType) -> bool:
         """Check if this rule set supports the given media type.
@@ -187,10 +187,18 @@ class PlexRuleSet(RuleSet):
             episode_num = int(match.group(3))
             # If group 4 is empty or just the extension, use "Unknown Episode"
             episode_title_raw = match.group(4).strip() if match.group(4) else ""
-            if not episode_title_raw or episode_title_raw.lower() == ext.lstrip(".").lower():
+
+            # Remove the file extension from the episode title if it ends with it
+            if episode_title_raw.endswith(ext):
+                episode_title_raw = episode_title_raw[: -len(ext)]
+
+            if (
+                not episode_title_raw
+                or episode_title_raw.lower() == ext.lstrip(".").lower()
+            ):
                 episode_title = "Unknown Episode"
             else:
-                episode_title = episode_title_raw.replace(".", " ")
+                episode_title = episode_title_raw.replace(".", " ").strip()
 
         # Create the target path components
         tv_dir = root_dir / "TV Shows"

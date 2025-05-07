@@ -6,6 +6,7 @@ from typing import Any
 from unittest.mock import patch
 
 import pytest
+
 from namegnome.cli.commands import scan_command
 from namegnome.models.core import MediaFile, MediaType, RenamePlan, ScanResult
 
@@ -87,7 +88,9 @@ def test_scan_command_directory_not_found(mock_scan: Any) -> None:
 
 
 @patch("namegnome.cli.commands.scan_directory")
-def test_scan_command_json_output(mock_scan: Any, capsys: pytest.CaptureFixture[str]) -> None:
+def test_scan_command_json_output(
+    mock_scan: Any, capsys: pytest.CaptureFixture[str]
+) -> None:
     """Test that scan command can output JSON."""
     # Create a real ScanResult object for the mock to return
     scan_result = ScanResult(

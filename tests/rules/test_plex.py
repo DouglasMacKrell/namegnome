@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
+
 from namegnome.models.core import MediaFile, MediaType
 from namegnome.rules.plex import PlexRuleSet
 
@@ -135,7 +136,9 @@ class TestPlexRuleSet:
         target = rule_set.target_path(media_file, base_dir)
 
         # Check that the path follows Plex conventions
-        expected = Path("/media/Movies/Inception (2010)/Inception (2010).mp4").absolute()
+        expected = Path(
+            "/media/Movies/Inception (2010)/Inception (2010).mp4"
+        ).absolute()
         assert target == expected
 
     def test_movie_path_no_year(self, rule_set: PlexRuleSet) -> None:
@@ -175,7 +178,9 @@ class TestPlexRuleSet:
         target = rule_set.target_path(media_file, base_dir)
 
         # Expected path should have spaces and follow Plex convention with year
-        expected = Path("/media/Movies/The Matrix (1999)/The Matrix (1999).mp4").absolute()
+        expected = Path(
+            "/media/Movies/The Matrix (1999)/The Matrix (1999).mp4"
+        ).absolute()
         assert target == expected
 
     def test_unsupported_media_type(self, rule_set: PlexRuleSet) -> None:
