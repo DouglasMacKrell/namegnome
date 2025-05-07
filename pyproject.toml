@@ -107,6 +107,7 @@ fail_under = 80
 [tool.ruff]
 line-length = 88
 format.quote-style = "double"
+exclude = ["*.sh", ".git", ".mypy_cache", ".ruff_cache", ".venv", "__pycache__", "build", "dist", "scripts/**/*"]
 
 [tool.ruff.lint]
 select = [
