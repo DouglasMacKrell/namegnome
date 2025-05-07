@@ -3,10 +3,9 @@
 import datetime
 import io
 import re
+from pathlib import Path
 
 import pytest
-from rich.console import Console
-
 from namegnome.cli.renderer import render_diff
 from namegnome.models.core import (
     MediaFile,
@@ -15,7 +14,21 @@ from namegnome.models.core import (
     RenamePlan,
     RenamePlanItem,
 )
-from tests.utils import abs_path
+from rich.console import Console
+
+
+# Helper function to create an absolute path that's platform-independent
+def abs_path(path_str: str) -> Path:
+    """Create a platform-independent absolute path."""
+    import os
+    from pathlib import Path
+
+    if os.name == "nt":  # Windows
+        # Convert Unix-style paths to Windows absolute paths
+        if path_str.startswith("/"):
+            return Path("C:" + path_str.replace("/", "\\"))
+    # For Unix systems, keep the path as is
+    return Path(path_str)
 
 
 @pytest.fixture
