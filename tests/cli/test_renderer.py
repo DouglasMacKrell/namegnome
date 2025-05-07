@@ -83,9 +83,7 @@ def test_render_diff_with_color(
     assert "/tmp/target1.mp4" in captured.out
 
 
-def test_render_diff_no_color(
-    sample_plan: RenamePlan
-) -> None:
+def test_render_diff_no_color(sample_plan: RenamePlan) -> None:
     """Test that the diff renderer respects no-color flag."""
     # Use a StringIO to capture output instead of capsys
     string_io = io.StringIO()
@@ -96,7 +94,7 @@ def test_render_diff_no_color(
     output = string_io.getvalue()
 
     # Strip ANSI control sequences
-    cleaned_output = re.sub(r'\x1b\[.*?m', '', output)
+    cleaned_output = re.sub(r"\x1b\[.*?m", "", output)
 
     # Check for table structure in the plain text
     assert "Rename Plan" in cleaned_output
@@ -127,11 +125,11 @@ def test_render_diff_empty_plan() -> None:
     output = string_io.getvalue()
 
     # Strip ANSI control sequences for clean comparison
-    cleaned_output = re.sub(r'\x1b\[.*?m', '', output)
+    cleaned_output = re.sub(r"\x1b\[.*?m", "", output)
 
     # Check for the summary line in the appropriate format
-    assert re.search(r'Total:\s*0', cleaned_output)
-    assert re.search(r'Conflicts:\s*0', cleaned_output)
+    assert re.search(r"Total:\s*0", cleaned_output)
+    assert re.search(r"Conflicts:\s*0", cleaned_output)
 
 
 def test_render_diff_status_colors(

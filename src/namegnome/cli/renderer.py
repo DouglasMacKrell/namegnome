@@ -23,10 +23,10 @@ def render_diff(plan: RenamePlan, console: Console | None = None) -> None:
 
     # Map statuses to styles that match the expected ANSI color codes in tests
     status_styles = {
-        PlanStatus.PENDING: "yellow bold",     # \033[1;33m
+        PlanStatus.PENDING: "yellow bold",  # \033[1;33m
         PlanStatus.MOVED: "green",
         PlanStatus.SKIPPED: "yellow",
-        PlanStatus.CONFLICT: "red bold",       # \033[1;31m
+        PlanStatus.CONFLICT: "red bold",  # \033[1;31m
         PlanStatus.FAILED: "red bold",
         PlanStatus.MANUAL: "bright_red bold",  # \033[1;91m
     }
