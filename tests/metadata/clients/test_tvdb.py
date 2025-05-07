@@ -4,7 +4,6 @@ from pathlib import Path
 from typing import cast
 
 import pytest
-
 from namegnome.metadata import get_metadata_client
 from namegnome.metadata.clients.tvdb import StubTVDBClient
 from namegnome.metadata.models import MediaMetadataType

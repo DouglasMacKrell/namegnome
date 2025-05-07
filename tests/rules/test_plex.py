@@ -4,7 +4,6 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-
 from namegnome.models.core import MediaFile, MediaType
 from namegnome.rules.plex import PlexRuleSet
 

@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-
 from namegnome.core.planner import create_rename_plan, save_plan
 from namegnome.models.core import MediaFile, MediaType, PlanStatus, ScanResult
 from namegnome.rules.plex import PlexRuleSet
