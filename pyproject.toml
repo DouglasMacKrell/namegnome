@@ -36,7 +36,9 @@ dev = [
   "pytest-cov",
   "pre-commit",
   "pytest-asyncio",
+  "pytest-mock",
   "types-requests",
+  "types-PyYAML",
 ]
 
 [project.urls]
@@ -54,6 +56,8 @@ path = "src/namegnome/__about__.py"
 dependencies = [
   "pytest",
   "pytest-cov",
+  "pytest-mock",
+  "types-PyYAML",
 ]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args:tests}"
