@@ -8,10 +8,11 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Optional
 
 from namegnome.models.core import PlanStatus, ScanResult
 from namegnome.models.plan import RenamePlan, RenamePlanItem
-from namegnome.rules.base import RuleSet
+from namegnome.rules.base import RuleSet, RuleSetConfig
 
 # Logger for this module
 logger = logging.getLogger(__name__)
@@ -22,13 +23,8 @@ def create_rename_plan(
     rule_set: RuleSet,
     plan_id: str,
     platform: str,
-    show_name: str | None = None,
-    movie_year: int | None = None,
-    anthology: bool = False,
-    adjust_episodes: bool = False,
-    verify: bool = False,
-    llm_model: str | None = None,
-    strict_directory_structure: bool = True,
+    *,  # Force keyword arguments for better clarity
+    config: Optional[RuleSetConfig] = None,
 ) -> RenamePlan:
     """Create a rename plan from a scan result.
 
@@ -37,13 +33,7 @@ def create_rename_plan(
         rule_set: The rule set to use for generating target paths.
         plan_id: Unique identifier for this plan.
         platform: Target platform name (e.g., 'plex', 'jellyfin').
-        show_name: Optional show name override.
-        movie_year: Optional movie year override.
-        anthology: Whether to treat as an anthology series.
-        adjust_episodes: Whether to adjust episode numbers.
-        verify: Whether to verify metadata.
-        llm_model: Optional LLM model to use for metadata extraction.
-        strict_directory_structure: Whether to enforce strict directory structure.
+        config: Optional configuration for the rule set.
 
     Returns:
         A RenamePlan object containing the proposed rename operations.
@@ -54,9 +44,13 @@ def create_rename_plan(
     # Start with an empty plan
     plan = scan_result.as_plan(plan_id=plan_id, platform=platform)
 
+    # Create default config if none provided
+    if config is None:
+        config = RuleSetConfig()
+
     # Track destinations to detect conflicts
     destinations: dict[Path, RenamePlanItem] = {}
-    # Also track a case-insensitive version of destination paths to detect conflicts on case-insensitive filesystems
+    # Track paths on case-insensitive filesystems
     case_insensitive_destinations: dict[str, RenamePlanItem] = {}
 
     # Process each media file
@@ -70,16 +64,10 @@ def create_rename_plan(
             continue
 
         try:
-            # Generate target path
+            # Generate target path using the config object
             target_path = rule_set.target_path(
                 media_file,
-                show_name=show_name,
-                movie_year=movie_year,
-                anthology=anthology,
-                adjust_episodes=adjust_episodes,
-                verify=verify,
-                llm_model=llm_model,
-                strict_directory_structure=strict_directory_structure,
+                config=config,
             )
 
             # Create plan item
@@ -97,12 +85,13 @@ def create_rename_plan(
                     f"Destination already used by {destinations[target_path].source}"
                 )
                 destinations[target_path].status = PlanStatus.CONFLICT
-                destinations[
-                    target_path
-                ].reason = f"Destination already used by {item.source}"
+                conflict_src = item.source
+                destinations[target_path].reason = (
+                    f"Destination already used by {conflict_src}"
+                )
                 logger.warning(
-                    f"Conflict detected: {item.source} and"
-                    f" {destinations[target_path].source} both target {target_path}"
+                    f"Conflict detected: {item.source} and "
+                    f"{destinations[target_path].source} both target {target_path}"
                 )
             # Also check for case-insensitive conflicts
             elif str(target_path).lower() in case_insensitive_destinations:
@@ -112,16 +101,16 @@ def create_rename_plan(
                 item.status = PlanStatus.CONFLICT
                 item.reason = (
                     f"Destination conflicts with {conflicting_item.source} "
-                    f"(case-insensitive filesystem)"
+                    "(case-insensitive filesystem)"
                 )
                 conflicting_item.status = PlanStatus.CONFLICT
                 conflicting_item.reason = (
                     f"Destination conflicts with {item.source} "
-                    f"(case-insensitive filesystem)"
+                    "(case-insensitive filesystem)"
                 )
                 logger.warning(
-                    f"Case-insensitive conflict detected: {item.source} and"
-                    f" {conflicting_item.source} would conflict on case-insensitive filesystem"
+                    f"Case-insensitive conflict: {item.source} conflicts with "
+                    f"{conflicting_item.source}"
                 )
 
             # Add to plan and track destination
@@ -147,7 +136,7 @@ def create_rename_plan(
 class DateTimeEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles datetime objects."""
 
-    def default(self: "DateTimeEncoder", obj: object) -> object:
+    def default(self, obj: object) -> Any:  # noqa: ANN401
         """Convert datetime objects to ISO format strings.
 
         Args:
@@ -158,6 +147,7 @@ class DateTimeEncoder(json.JSONEncoder):
         """
         if isinstance(obj, datetime):
             return obj.isoformat()
+        # Let the base class default method handle it or raise TypeError
         return super().default(obj)
 
 
@@ -191,7 +181,13 @@ def save_plan(plan: RenamePlan, output_dir: Path) -> Path:
 
     # Write to file using custom encoder for datetime objects
     with output_file.open("w", encoding="utf-8") as f:
-        json.dump(plan_dict, f, indent=2, ensure_ascii=False, cls=DateTimeEncoder)
+        json.dump(
+            plan_dict, 
+            f, 
+            indent=2, 
+            ensure_ascii=False, 
+            cls=DateTimeEncoder
+        )
 
     logger.info(f"Saved rename plan to {output_file}")
     return output_file

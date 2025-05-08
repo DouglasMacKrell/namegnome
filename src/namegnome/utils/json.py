@@ -9,7 +9,7 @@ from typing import Any
 class DateTimeEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles datetime and Path objects."""
 
-    def default(self, obj: Any) -> Any:
+    def default(self, obj: object) -> Any:  # noqa: ANN401
         """Convert objects to JSON-serializable format.
 
         Args:
@@ -22,4 +22,5 @@ class DateTimeEncoder(json.JSONEncoder):
             return obj.isoformat()
         if isinstance(obj, Path):
             return str(obj)
+        # Let the base class default method handle it or raise TypeError
         return super().default(obj)

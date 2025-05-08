@@ -20,13 +20,13 @@ class StubTVDBClient(MetadataClient):
     allowing for testing without making real API calls.
     """
 
-    def __init__(self) -> None:
+    def __init__(self: "StubTVDBClient") -> None:
         """Initialize the stub TVDB client."""
         # Base image URL for constructing image URLs
         self.base_image_url = "https://artworks.thetvdb.com"
 
     @property
-    def provider_name(self) -> str:
+    def provider_name(self: "StubTVDBClient") -> str:
         """Get the name of this metadata provider.
 
         Returns:
@@ -35,7 +35,7 @@ class StubTVDBClient(MetadataClient):
         return "tvdb"
 
     async def search_movie(
-        self, title: str, year: int | None = None
+        self: "StubTVDBClient", title: str, year: int | None = None
     ) -> list[dict[str, Any]]:
         """Search for movies by title and optional year (stub implementation).
 
@@ -51,7 +51,7 @@ class StubTVDBClient(MetadataClient):
         return []
 
     async def search_tv(
-        self, title: str, year: int | None = None
+        self: "StubTVDBClient", title: str, year: int | None = None
     ) -> list[dict[str, Any]]:
         """Search for TV shows by title and optional year (stub implementation).
 
@@ -91,7 +91,9 @@ class StubTVDBClient(MetadataClient):
 
         return filtered_results
 
-    async def get_movie_details(self, movie_id: str) -> dict[str, Any]:
+    async def get_movie_details(
+        self: "StubTVDBClient", movie_id: str
+    ) -> dict[str, Any]:
         """Get detailed information about a specific movie (stub implementation).
 
         Args:
@@ -111,7 +113,9 @@ class StubTVDBClient(MetadataClient):
             # Fallback to generic movie details fixture
             return load_fixture("tvdb", "movie_details")
 
-    async def get_tv_details(self, show_id: str) -> dict[str, Any]:
+    async def get_tv_details(
+        self: "StubTVDBClient", show_id: str
+    ) -> dict[str, Any]:
         """Get detailed information about a specific TV show (stub implementation).
 
         Args:
@@ -130,7 +134,9 @@ class StubTVDBClient(MetadataClient):
             # Fallback to generic TV details fixture
             return load_fixture("tvdb", "tv_details")
 
-    async def get_tv_season(self, show_id: str, season_number: int) -> dict[str, Any]:
+    async def get_tv_season(
+        self: "StubTVDBClient", show_id: str, season_number: int
+    ) -> dict[str, Any]:
         """Get detailed information about a specific TV season (stub implementation).
 
         Args:
@@ -151,7 +157,10 @@ class StubTVDBClient(MetadataClient):
             return load_fixture("tvdb", "tv_season")
 
     async def get_tv_episode(
-        self, show_id: str, season_number: int, episode_number: int
+        self: "StubTVDBClient",
+        show_id: str,
+        season_number: int,
+        episode_number: int,
     ) -> dict[str, Any]:
         """Get detailed information about a specific TV episode (stub implementation).
 
@@ -174,7 +183,7 @@ class StubTVDBClient(MetadataClient):
             return load_fixture("tvdb", "tv_episode")
 
     def map_to_media_metadata(
-        self, data: dict[str, Any], media_type: MediaMetadataType
+        self: "StubTVDBClient", data: dict[str, Any], media_type: MediaMetadataType
     ) -> MediaMetadata:
         """Map TVDB API response to a standardized MediaMetadata object.
 

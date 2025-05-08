@@ -180,12 +180,14 @@ def get_plan(plan_id: str) -> Optional[Dict[str, Any]]:
         plan_file = plan_dir / "plan.json"
         if plan_file.exists():
             with open(plan_file, "r", encoding="utf-8") as f:
-                return json.load(f)
+                plan_data: Dict[str, Any] = json.load(f)
+                return plan_data
 
     # Fall back to the old-style timestamp-based plan files
     plan_file = plans_dir / f"plan_{plan_id}.json"
     if plan_file.exists():
         with open(plan_file, "r", encoding="utf-8") as f:
-            return json.load(f)
+            old_data: Dict[str, Any] = json.load(f)
+            return old_data
 
     return None

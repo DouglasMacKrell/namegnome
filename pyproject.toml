@@ -131,7 +131,8 @@ select = [
 convention = "google"
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["PLR2004", "ANN101", "ANN401", "E501"]  # Ignore missing type annotations, Any, and long lines in tests in tests
+"tests/**/*.py" = ["PLR2004", "ANN101", "ANN401", "E501"]  # Ignore missing type annotations, Any, and long lines in tests
+"**/*.py" = ["ANN101"]  # Ignore missing self parameter annotations in all Python files
 
 [tool.ruff.lint.pylint]
 max-args = 5

@@ -4,7 +4,7 @@ This package provides a standard interface for accessing various
 metadata providers like TMDB, TVDB, MusicBrainz, etc.
 """
 
-from typing import Any
+from typing import Any, Dict
 
 from namegnome.metadata.clients.base import MetadataClient
 from namegnome.metadata.clients.tmdb import StubTMDBClient
@@ -44,7 +44,7 @@ def register_client(name: str, client_class: type[MetadataClient]) -> None:
     _CLIENT_REGISTRY[name.lower()] = client_class
 
 
-def get_metadata_client(name: str, **kwargs: Any) -> MetadataClient | None:
+def get_metadata_client(name: str, **kwargs: Dict[str, Any]) -> MetadataClient | None:
     """Get a metadata client by name.
 
     Args:

@@ -5,6 +5,7 @@ including creating symlinks to the latest plan and storing checksums.
 """
 
 import json
+import logging
 import os
 import shutil
 import uuid
@@ -17,6 +18,9 @@ from pydantic import BaseModel
 
 from namegnome.models.plan import RenamePlan
 from namegnome.models.scan import ScanOptions
+
+# Logger for this module
+logger = logging.getLogger(__name__)
 
 
 class RunMetadata(BaseModel):
@@ -50,6 +54,46 @@ def _get_git_hash() -> Optional[str]:
         return result.stdout.strip()
     except (subprocess.SubprocessError, FileNotFoundError):
         return None
+
+
+def _update_latest_link(plan_dir: Path, plan_id: str, plan_file: Path) -> None:
+    """Update the latest.json symlink or copy to point to the new plan.
+
+    Args:
+        plan_dir: Directory where plans are stored
+        plan_id: ID of the plan to link to
+        plan_file: Path to the plan file
+    """
+    latest_link = plan_dir / "latest.json"
+    if latest_link.exists() or os.path.islink(str(latest_link)):
+        try:
+            if os.path.islink(str(latest_link)):
+                os.unlink(str(latest_link))
+            else:
+                latest_link.unlink(missing_ok=True)
+        except (OSError, PermissionError) as e:
+            # Log the error but continue - not critical
+            logger.warning(f"Warning: Could not remove old latest.json reference: {e}")
+
+    # Use symlinks on Unix-like systems, copy on Windows or when symlinks fail
+    if os.name != 'nt':  # Not Windows
+        try:
+            # Use relative path for symlink to work across different mounts
+            relative_path = plan_id + "/plan.json"
+            os.symlink(relative_path, str(latest_link))
+        except (OSError, PermissionError) as e:
+            # Fall back to copying if symlink fails
+            logger.warning(
+                f"Warning: Could not create symlink, falling back to copy: {e}"
+            )
+            shutil.copy2(plan_file, latest_link)
+    else:
+        # On Windows, always use copy
+        try:
+            shutil.copy2(plan_file, latest_link)
+        except (OSError, PermissionError) as e:
+            # Log the error but continue - not critical
+            logger.warning(f"Warning: Could not create latest.json reference: {e}")
 
 
 def save_plan(plan: RenamePlan, scan_options: ScanOptions, verify: bool = False) -> str:
@@ -116,21 +160,8 @@ def save_plan(plan: RenamePlan, scan_options: ScanOptions, verify: bool = False)
         with open(checksum_file, "w", encoding="utf-8") as f:
             json.dump(checksums, f, indent=2)
 
-    # Create or update symlink to latest plan
-    latest_link = plan_dir / "latest.json"
-    if os.path.exists(latest_link) or os.path.islink(latest_link):
-        try:
-            os.unlink(latest_link)
-        except (OSError, PermissionError):
-            # Fall back to copying if symlink fails
-            shutil.copy2(plan_file, latest_link)
-
-    try:
-        # Use relative path for symlink to work across different mounts
-        os.symlink(plan_id + "/plan.json", latest_link)
-    except (OSError, PermissionError):
-        # Fall back to copying if symlink fails
-        shutil.copy2(plan_file, latest_link)
+    # Create or update latest plan reference
+    _update_latest_link(plan_dir, plan_id, plan_file)
 
     return plan_id
 

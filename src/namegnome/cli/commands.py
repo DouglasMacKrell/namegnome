@@ -2,6 +2,7 @@
 
 import json
 import sys
+import uuid
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
@@ -18,6 +19,7 @@ from namegnome.core.planner import create_rename_plan
 from namegnome.core.scanner import scan_directory
 from namegnome.models.core import MediaType
 from namegnome.models.scan import ScanOptions
+from namegnome.rules.base import RuleSetConfig
 from namegnome.rules.plex import PlexRuleSet
 from namegnome.utils.json import DateTimeEncoder
 from namegnome.utils.plan_store import save_plan
@@ -288,19 +290,27 @@ def _scan_impl(options: ScanCommandOptions) -> int:
             # to support other platforms in the future
             rule_set = PlexRuleSet()  # TODO: Make this configurable based on platform
 
-            plan = create_rename_plan(
-                scan_result=scan_result,
-                rule_set=rule_set,
-                plan_id=plan_id,
-                platform=options.platform,
-                show_name=options.show_name,
-                movie_year=options.movie_year,
-                anthology=options.anthology,
-                adjust_episodes=options.adjust_episodes,
-                verify=options.verify,
-                llm_model=options.llm_model,
-                strict_directory_structure=options.strict_directory_structure,
-            )
+            # Create rename plan with the rule set
+            with console.status("[cyan]Creating rename plan...", spinner="dots"):
+                # Create config for rule set
+                config = RuleSetConfig(
+                    show_name=options.show_name,
+                    movie_year=options.movie_year,
+                    anthology=options.anthology,
+                    adjust_episodes=options.adjust_episodes,
+                    verify=options.verify,
+                    llm_model=options.llm_model,
+                    strict_directory_structure=options.strict_directory_structure,
+                )
+
+                # Create plan
+                plan = create_rename_plan(
+                    scan_result=scan_result,
+                    rule_set=rule_set,
+                    plan_id=str(uuid.uuid4()),
+                    platform=options.platform,
+                    config=config,
+                )
 
             # Store the plan and metadata
             if len(scan_result.files) > 0:

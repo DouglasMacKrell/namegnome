@@ -2,10 +2,10 @@
 
 import re
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Optional
 
 from namegnome.models.core import MediaFile, MediaType
-from namegnome.rules.base import RuleSet
+from namegnome.rules.base import RuleSet, RuleSetConfig
 
 
 class PlexRuleSet(RuleSet):
@@ -72,14 +72,8 @@ class PlexRuleSet(RuleSet):
     def target_path(
         self,
         media_file: MediaFile,
-        base_dir: Path | None = None,
-        show_name: str | None = None,
-        movie_year: int | None = None,
-        anthology: bool = False,
-        adjust_episodes: bool = False,
-        verify: bool = False,
-        llm_model: str | None = None,
-        strict_directory_structure: bool = True,
+        base_dir: Optional[Path] = None,
+        config: Optional[RuleSetConfig] = None,
     ) -> Path:
         """Generate a target path for a media file using Plex naming conventions.
 
@@ -87,13 +81,7 @@ class PlexRuleSet(RuleSet):
             media_file: The media file to generate a target path for.
             base_dir: Optional base directory for the target path. If None,
                       the target path will use the same parent as the source.
-            show_name: Optional show name override.
-            movie_year: Optional movie year override.
-            anthology: Whether to treat as an anthology series.
-            adjust_episodes: Whether to adjust episode numbers.
-            verify: Whether to verify metadata.
-            llm_model: Optional LLM model to use for metadata extraction.
-            strict_directory_structure: Whether to enforce strict directory structure.
+            config: Optional configuration for the rule set.
 
         Returns:
             A Path object representing the target location for this file.
@@ -109,6 +97,10 @@ class PlexRuleSet(RuleSet):
         # Use base_dir or the parent of the original file
         root_dir = base_dir if base_dir else media_file.path.parent
 
+        # Use default config if none provided
+        if config is None:
+            config = RuleSetConfig()
+
         # Get the file extension
         ext = media_file.path.suffix.lower()
 
@@ -117,22 +109,14 @@ class PlexRuleSet(RuleSet):
                 media_file,
                 root_dir,
                 ext,
-                show_name=show_name,
-                anthology=anthology,
-                adjust_episodes=adjust_episodes,
-                verify=verify,
-                llm_model=llm_model,
-                strict_directory_structure=strict_directory_structure,
+                config=config,
             )
         elif media_file.media_type == MediaType.MOVIE:
             return self._movie_path(
                 media_file,
                 root_dir,
                 ext,
-                movie_year=movie_year,
-                verify=verify,
-                llm_model=llm_model,
-                strict_directory_structure=strict_directory_structure,
+                config=config,
             )
         else:
             # This should never happen due to the earlier check
@@ -143,12 +127,7 @@ class PlexRuleSet(RuleSet):
         media_file: MediaFile,
         root_dir: Path,
         ext: str,
-        show_name: str | None = None,
-        anthology: bool = False,
-        adjust_episodes: bool = False,
-        verify: bool = False,
-        llm_model: str | None = None,
-        strict_directory_structure: bool = True,
+        config: Optional[RuleSetConfig] = None,
     ) -> Path:
         """Generate a target path for a TV show file.
 
@@ -158,12 +137,7 @@ class PlexRuleSet(RuleSet):
             media_file: The media file to generate a target path for.
             root_dir: The base directory to build the path from.
             ext: The file extension.
-            show_name: Optional show name override.
-            anthology: Whether to treat as an anthology series.
-            adjust_episodes: Whether to adjust episode numbers.
-            verify: Whether to verify metadata.
-            llm_model: Optional LLM model to use for metadata extraction.
-            strict_directory_structure: Whether to enforce strict directory structure.
+            config: Optional configuration for the rule set.
 
         Returns:
             A Path object for the target file.
@@ -171,18 +145,21 @@ class PlexRuleSet(RuleSet):
         Raises:
             ValueError: If the filename doesn't match expected patterns.
         """
+        if config is None:
+            config = RuleSetConfig()
+
         filename = media_file.path.name
         match = self.tv_pattern.match(filename)
 
         if not match:
             # If no match, try to extract what we can from the file path
             # For now, just use the filename as is
-            show_name = show_name or "Unknown Show"
+            show_name = config.show_name or "Unknown Show"
             season_num = 1
             episode_num = 1
             episode_title = "Unknown Episode"
         else:
-            show_name = show_name or match.group(1).strip().replace(".", " ")
+            show_name = config.show_name or match.group(1).strip().replace(".", " ")
             season_num = int(match.group(2))
             episode_num = int(match.group(3))
             # If group 4 is empty or just the extension, use "Unknown Episode"
@@ -217,23 +194,17 @@ class PlexRuleSet(RuleSet):
         media_file: MediaFile,
         root_dir: Path,
         ext: str,
-        movie_year: int | None = None,
-        verify: bool = False,
-        llm_model: str | None = None,
-        strict_directory_structure: bool = True,
+        config: Optional[RuleSetConfig] = None,
     ) -> Path:
         """Generate a target path for a movie file.
 
-        Format: /Movies/Movie Title (Year)/Movie Title (Year).ext
+        Format: /Movies/Movie Name (Year)/Movie Name (Year).ext
 
         Args:
             media_file: The media file to generate a target path for.
             root_dir: The base directory to build the path from.
             ext: The file extension.
-            movie_year: Optional movie year override.
-            verify: Whether to verify metadata.
-            llm_model: Optional LLM model to use for metadata extraction.
-            strict_directory_structure: Whether to enforce strict directory structure.
+            config: Optional configuration for the rule set.
 
         Returns:
             A Path object for the target file.
@@ -241,6 +212,9 @@ class PlexRuleSet(RuleSet):
         Raises:
             ValueError: If the filename doesn't match expected patterns.
         """
+        if config is None:
+            config = RuleSetConfig()
+
         filename = media_file.path.name
         # First try the standard pattern with (Year)
         match = self.movie_pattern.match(filename)
@@ -248,17 +222,17 @@ class PlexRuleSet(RuleSet):
         if match and match.group(2):
             # We have a standard "Movie Name (Year)" format
             movie_title = match.group(1).strip().replace(".", " ")
-            year = movie_year or match.group(2)
+            year = config.movie_year or match.group(2)
         else:
             # Try the alternate "Movie.Name.Year.ext" format
             alt_match = self.year_pattern.match(filename)
             if alt_match:
                 movie_title = alt_match.group(1).strip().replace(".", " ")
-                year = movie_year or alt_match.group(2)
+                year = config.movie_year or alt_match.group(2)
             else:
                 # If no match, try to extract what we can
                 movie_title = filename.rsplit(".", 1)[0].replace(".", " ").strip()
-                year = movie_year
+                year = config.movie_year
 
         # Create the target path components
         movies_dir = root_dir / "Movies"
@@ -271,5 +245,9 @@ class PlexRuleSet(RuleSet):
             movie_dir_name = movie_title
             target_filename = f"{movie_title}{ext}"
 
-        movie_dir = movies_dir / movie_dir_name
-        return movie_dir / target_filename
+        # Create collection directory if using strict directory structure
+        if config.strict_directory_structure:
+            movie_dir = movies_dir / movie_dir_name
+            return movie_dir / target_filename
+        else:
+            return movies_dir / target_filename

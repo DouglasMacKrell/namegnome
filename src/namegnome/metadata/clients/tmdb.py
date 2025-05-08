@@ -121,7 +121,9 @@ class StubTMDBClient(MetadataClient):
 
         return filtered_results
 
-    async def get_movie_details(self, movie_id: str) -> dict[str, Any]:
+    async def get_movie_details(
+        self, movie_id: str
+    ) -> dict[str, Any]:
         """Get detailed information about a specific movie (stub implementation).
 
         Args:
@@ -140,7 +142,9 @@ class StubTMDBClient(MetadataClient):
             # Fallback to generic movie details fixture
             return load_fixture("tmdb", "movie_details")
 
-    async def get_tv_details(self, show_id: str) -> dict[str, Any]:
+    async def get_tv_details(
+        self, show_id: str
+    ) -> dict[str, Any]:
         """Get detailed information about a specific TV show (stub implementation).
 
         Args:
@@ -159,7 +163,9 @@ class StubTMDBClient(MetadataClient):
             # Fallback to generic TV details fixture
             return load_fixture("tmdb", "tv_details")
 
-    async def get_tv_season(self, show_id: str, season_number: int) -> dict[str, Any]:
+    async def get_tv_season(
+        self, show_id: str, season_number: int
+    ) -> dict[str, Any]:
         """Get detailed information about a specific TV season (stub implementation).
 
         Args:
@@ -180,7 +186,10 @@ class StubTMDBClient(MetadataClient):
             return load_fixture("tmdb", "tv_season")
 
     async def get_tv_episode(
-        self, show_id: str, season_number: int, episode_number: int
+        self,
+        show_id: str,
+        season_number: int,
+        episode_number: int,
     ) -> dict[str, Any]:
         """Get detailed information about a specific TV episode (stub implementation).
 
@@ -202,7 +211,9 @@ class StubTMDBClient(MetadataClient):
             # Fallback to generic episode details fixture
             return load_fixture("tmdb", "tv_episode")
 
-    def _create_image_url(self, path: str, size: str) -> HttpUrl:
+    def _create_image_url(
+        self, path: str, size: str
+    ) -> HttpUrl:
         """Create an HttpUrl for an image path.
 
         Args:
