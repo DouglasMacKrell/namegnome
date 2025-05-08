@@ -3,13 +3,13 @@
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Self
 
 
 class DateTimeEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles datetime and Path objects."""
 
-    def default(self, obj: object) -> Any:  # noqa: ANN401
+    def default(self: Self, obj: object) -> Any:  # noqa: ANN401
         """Convert objects to JSON-serializable format.
 
         Args:

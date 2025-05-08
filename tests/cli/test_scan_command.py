@@ -254,12 +254,12 @@ def test_scan_command_json_output(
     # We'll verify the basic functionality instead
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
-        
+
         # Set up mocked plan
         mock_plan = MagicMock()
         mock_plan.model_dump.return_value = {"id": "test"}
         mock_create_rename_plan.return_value = mock_plan
-        
+
         # Run command with --json flag
         runner = CliRunner()
         # We don't need to check the result, just that the core functions were called
@@ -268,7 +268,7 @@ def test_scan_command_json_output(
             ["scan", str(temp_path), "--media-type", "tv", "--json"],
             catch_exceptions=False,
         )
-        
+
         # Verify that the core functions were called
         assert mock_scan_directory.called
         assert mock_create_rename_plan.called

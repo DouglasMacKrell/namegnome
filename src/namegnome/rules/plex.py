@@ -2,7 +2,7 @@
 
 import re
 from pathlib import Path
-from typing import ClassVar, Optional
+from typing import ClassVar, Optional, Self
 
 from namegnome.models.core import MediaFile, MediaType
 from namegnome.rules.base import RuleSet, RuleSetConfig
@@ -31,7 +31,7 @@ class PlexRuleSet(RuleSet):
         r"(.*?)\.(\d{4})(?:\.(.+))?$", re.IGNORECASE
     )
 
-    def __init__(self) -> None:
+    def __init__(self: Self) -> None:
         """Initialize the PlexRuleSet."""
         super().__init__("plex")
 
@@ -49,7 +49,7 @@ class PlexRuleSet(RuleSet):
             ".webm",
         }
 
-    def supports_media_type(self, media_type: MediaType) -> bool:
+    def supports_media_type(self: Self, media_type: MediaType) -> bool:
         """Check if this rule set supports the given media type.
 
         Args:
@@ -61,7 +61,7 @@ class PlexRuleSet(RuleSet):
         return media_type in self.supported_media_types
 
     @property
-    def supported_media_types(self) -> list[MediaType]:
+    def supported_media_types(self: Self) -> list[MediaType]:
         """Get a list of media types supported by this rule set.
 
         Returns:
@@ -70,7 +70,7 @@ class PlexRuleSet(RuleSet):
         return [MediaType.TV, MediaType.MOVIE]
 
     def target_path(
-        self,
+        self: Self,
         media_file: MediaFile,
         base_dir: Optional[Path] = None,
         config: Optional[RuleSetConfig] = None,
@@ -123,7 +123,7 @@ class PlexRuleSet(RuleSet):
             raise ValueError(f"Unsupported media type: {media_file.media_type}")
 
     def _tv_show_path(
-        self,
+        self: Self,
         media_file: MediaFile,
         root_dir: Path,
         ext: str,
@@ -190,7 +190,7 @@ class PlexRuleSet(RuleSet):
         return season_dir / target_filename
 
     def _movie_path(
-        self,
+        self: Self,
         media_file: MediaFile,
         root_dir: Path,
         ext: str,

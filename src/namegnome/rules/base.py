@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Self
 
 from namegnome.models.core import MediaFile, MediaType
 
@@ -28,7 +28,7 @@ class RuleSet(ABC):
     based on their metadata and the target platform's naming conventions.
     """
 
-    def __init__(self, platform_name: str) -> None:
+    def __init__(self: Self, platform_name: str) -> None:
         """Initialize a rule set.
 
         Args:
@@ -38,7 +38,7 @@ class RuleSet(ABC):
 
     @abstractmethod
     def target_path(
-        self,
+        self: Self,
         media_file: MediaFile,
         base_dir: Optional[Path] = None,
         config: Optional[RuleSetConfig] = None,
@@ -62,7 +62,7 @@ class RuleSet(ABC):
         pass
 
     @abstractmethod
-    def supports_media_type(self, media_type: MediaType) -> bool:
+    def supports_media_type(self: Self, media_type: MediaType) -> bool:
         """Check if this rule set supports the given media type.
 
         Args:
@@ -75,7 +75,7 @@ class RuleSet(ABC):
 
     @property
     @abstractmethod
-    def supported_media_types(self) -> list[MediaType]:
+    def supported_media_types(self: Self) -> list[MediaType]:
         """Get a list of media types supported by this rule set.
 
         Returns:

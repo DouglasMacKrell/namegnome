@@ -8,6 +8,7 @@ import json
 import logging
 import os
 import shutil
+import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -65,6 +66,8 @@ def _update_latest_link(plan_dir: Path, plan_id: str, plan_file: Path) -> None:
         plan_file: Path to the plan file
     """
     latest_link = plan_dir / "latest.json"
+
+    # Remove the existing link or file if it exists
     if latest_link.exists() or os.path.islink(str(latest_link)):
         try:
             if os.path.islink(str(latest_link)):
@@ -75,25 +78,33 @@ def _update_latest_link(plan_dir: Path, plan_id: str, plan_file: Path) -> None:
             # Log the error but continue - not critical
             logger.warning(f"Warning: Could not remove old latest.json reference: {e}")
 
-    # Use symlinks on Unix-like systems, copy on Windows or when symlinks fail
-    if os.name != 'nt':  # Not Windows
+    # Determine if we're in a CI environment
+    is_ci = os.environ.get("CI", "false").lower() in ("true", "1", "yes")
+
+    # Check if we can use symlinks (non-Windows or Windows with symlink capability)
+    can_use_symlinks = (
+        sys.platform != "win32" or  # Not Windows
+        not is_ci  # Not in CI environment on Windows
+    )
+
+    if can_use_symlinks:
         try:
             # Use relative path for symlink to work across different mounts
             relative_path = plan_id + "/plan.json"
             os.symlink(relative_path, str(latest_link))
+            return
         except (OSError, PermissionError) as e:
-            # Fall back to copying if symlink fails
+            # Log the error but fall back to copying
             logger.warning(
                 f"Warning: Could not create symlink, falling back to copy: {e}"
             )
-            shutil.copy2(plan_file, latest_link)
-    else:
-        # On Windows, always use copy
-        try:
-            shutil.copy2(plan_file, latest_link)
-        except (OSError, PermissionError) as e:
-            # Log the error but continue - not critical
-            logger.warning(f"Warning: Could not create latest.json reference: {e}")
+
+    # Fall back to copying the file
+    try:
+        shutil.copy2(plan_file, latest_link)
+    except (OSError, PermissionError) as e:
+        # Log the error but continue - not critical
+        logger.warning(f"Warning: Could not create latest.json reference: {e}")
 
 
 def save_plan(plan: RenamePlan, scan_options: ScanOptions, verify: bool = False) -> str:

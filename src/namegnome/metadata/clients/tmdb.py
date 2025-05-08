@@ -1,7 +1,7 @@
 """TMDB (The Movie Database) API client implementation."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Self
 
 from pydantic import HttpUrl
 
@@ -23,7 +23,7 @@ class StubTMDBClient(MetadataClient):
     allowing for testing without making real API calls.
     """
 
-    def __init__(self) -> None:
+    def __init__(self: Self) -> None:
         """Initialize the stub TMDB client."""
         # Default base URLs for constructing image URLs
         self.base_image_url = "https://image.tmdb.org/t/p/"
@@ -31,7 +31,7 @@ class StubTMDBClient(MetadataClient):
         self.backdrop_size = "w1280"
 
     @property
-    def provider_name(self) -> str:
+    def provider_name(self: Self) -> str:
         """Get the name of this metadata provider.
 
         Returns:
@@ -40,7 +40,7 @@ class StubTMDBClient(MetadataClient):
         return "tmdb"
 
     async def search_movie(
-        self, title: str, year: int | None = None
+        self: Self, title: str, year: int | None = None
     ) -> list[dict[str, Any]]:
         """Search for movies by title and optional year (stub implementation).
 
@@ -81,7 +81,7 @@ class StubTMDBClient(MetadataClient):
         return filtered_results
 
     async def search_tv(
-        self, title: str, year: int | None = None
+        self: Self, title: str, year: int | None = None
     ) -> list[dict[str, Any]]:
         """Search for TV shows by title and optional year (stub implementation).
 
@@ -122,7 +122,7 @@ class StubTMDBClient(MetadataClient):
         return filtered_results
 
     async def get_movie_details(
-        self, movie_id: str
+        self: Self, movie_id: str
     ) -> dict[str, Any]:
         """Get detailed information about a specific movie (stub implementation).
 
@@ -143,7 +143,7 @@ class StubTMDBClient(MetadataClient):
             return load_fixture("tmdb", "movie_details")
 
     async def get_tv_details(
-        self, show_id: str
+        self: Self, show_id: str
     ) -> dict[str, Any]:
         """Get detailed information about a specific TV show (stub implementation).
 
@@ -164,7 +164,7 @@ class StubTMDBClient(MetadataClient):
             return load_fixture("tmdb", "tv_details")
 
     async def get_tv_season(
-        self, show_id: str, season_number: int
+        self: Self, show_id: str, season_number: int
     ) -> dict[str, Any]:
         """Get detailed information about a specific TV season (stub implementation).
 
@@ -186,7 +186,7 @@ class StubTMDBClient(MetadataClient):
             return load_fixture("tmdb", "tv_season")
 
     async def get_tv_episode(
-        self,
+        self: Self,
         show_id: str,
         season_number: int,
         episode_number: int,
@@ -212,7 +212,7 @@ class StubTMDBClient(MetadataClient):
             return load_fixture("tmdb", "tv_episode")
 
     def _create_image_url(
-        self, path: str, size: str
+        self: Self, path: str, size: str
     ) -> HttpUrl:
         """Create an HttpUrl for an image path.
 
@@ -227,7 +227,7 @@ class StubTMDBClient(MetadataClient):
         return HttpUrl(url_str)
 
     def map_to_media_metadata(
-        self, data: dict[str, Any], media_type: MediaMetadataType
+        self: Self, data: dict[str, Any], media_type: MediaMetadataType
     ) -> MediaMetadata:
         """Map TMDB API response to a standardized MediaMetadata object.
 

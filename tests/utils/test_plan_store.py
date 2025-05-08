@@ -3,6 +3,7 @@
 import json
 import os
 import shutil
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -110,8 +111,9 @@ def test_save_and_load_plan(
 
     # Check that the latest reference exists (symlink on Unix, copy on Windows)
     latest_file = _ensure_plan_dir() / "latest.json"
-    # Skip this assertion if we're on Windows in CI environment
-    if not (os.name == 'nt' and os.environ.get('CI')):
+    # Skip this assertion if we're in an environment where symlinks might not work
+    is_ci = os.environ.get("CI", "false").lower() in ("true", "1", "yes")
+    if not (sys.platform == "win32" and is_ci):
         assert latest_file.exists()
 
     # Load the plan with specific ID
@@ -224,8 +226,9 @@ def test_load_latest_plan(
     sample_plan: RenamePlan, sample_scan_options: ScanOptions, temp_home_dir: Path
 ) -> None:
     """Test loading the latest plan."""
-    # Skip on Windows in CI environment since symlinks might not work
-    if os.name == 'nt' and os.environ.get('CI'):
+    # Skip test when symlinks might not work (Windows in CI)
+    is_ci = os.environ.get("CI", "false").lower() in ("true", "1", "yes")
+    if sys.platform == "win32" and is_ci:
         pytest.skip("Skipping test on Windows in CI environment")
 
     # Save the plan, which gives us a UUID-based plan ID

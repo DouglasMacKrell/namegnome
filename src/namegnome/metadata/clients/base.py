@@ -1,7 +1,7 @@
 """Base classes for metadata API clients."""
 
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, Self
 
 
 class MetadataClient(ABC):
@@ -23,7 +23,7 @@ class MetadataClient(ABC):
 
     @abstractmethod
     async def search_movie(
-        self, title: str, year: int | None = None
+        self: Self, title: str, year: int | None = None
     ) -> list[dict[str, Any]]:
         """Search for movies by title and optional year.
 
@@ -38,7 +38,7 @@ class MetadataClient(ABC):
 
     @abstractmethod
     async def search_tv(
-        self, title: str, year: int | None = None
+        self: Self, title: str, year: int | None = None
     ) -> list[dict[str, Any]]:
         """Search for TV shows by title and optional year.
 
@@ -53,7 +53,7 @@ class MetadataClient(ABC):
 
     @abstractmethod
     async def get_movie_details(
-        self, movie_id: str
+        self: Self, movie_id: str
     ) -> dict[str, Any]:
         """Get detailed information about a specific movie.
 
@@ -67,7 +67,7 @@ class MetadataClient(ABC):
 
     @abstractmethod
     async def get_tv_details(
-        self, show_id: str
+        self: Self, show_id: str
     ) -> dict[str, Any]:
         """Get detailed information about a specific TV show.
 
@@ -81,7 +81,7 @@ class MetadataClient(ABC):
 
     @abstractmethod
     async def get_tv_season(
-        self, show_id: str, season_number: int
+        self: Self, show_id: str, season_number: int
     ) -> dict[str, Any]:
         """Get detailed information about a specific TV season.
 
@@ -96,7 +96,7 @@ class MetadataClient(ABC):
 
     @abstractmethod
     async def get_tv_episode(
-        self, show_id: str, season_number: int, episode_number: int
+        self: Self, show_id: str, season_number: int, episode_number: int
     ) -> dict[str, Any]:
         """Get detailed information about a specific TV episode.
 

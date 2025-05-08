@@ -162,7 +162,8 @@ def save_plan(plan: RenamePlan, output_dir: Path) -> Path:
         Path to the saved plan file.
 
     Raises:
-        OSError: If the output directory cannot be created or the file cannot be written.
+        OSError: If the output directory cannot be created or the file cannot be
+            written.
     """
     # Create output directory if it doesn't exist
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -182,10 +183,10 @@ def save_plan(plan: RenamePlan, output_dir: Path) -> Path:
     # Write to file using custom encoder for datetime objects
     with output_file.open("w", encoding="utf-8") as f:
         json.dump(
-            plan_dict, 
-            f, 
-            indent=2, 
-            ensure_ascii=False, 
+            plan_dict,
+            f,
+            indent=2,
+            ensure_ascii=False,
             cls=DateTimeEncoder
         )
 
