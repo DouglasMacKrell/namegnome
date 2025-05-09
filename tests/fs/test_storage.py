@@ -13,7 +13,6 @@ from unittest.mock import patch
 
 import pytest
 import yaml
-
 from namegnome.fs import (
     get_latest_plan,
     get_namegnome_dir,
