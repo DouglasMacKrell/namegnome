@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
-
 from namegnome.core.scanner import ScanOptions, guess_media_type, scan_directory
 from namegnome.models.core import MediaType
 

@@ -8,11 +8,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import typer
-from typer.testing import CliRunner
-
 from namegnome.cli.commands import ExitCode, app
 from namegnome.models.core import MediaFile, MediaType, ScanResult
 from namegnome.models.plan import RenamePlan
+from typer.testing import CliRunner
 
 
 @pytest.fixture

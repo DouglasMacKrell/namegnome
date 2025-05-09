@@ -9,8 +9,6 @@ from typing import Generator
 from unittest.mock import patch
 
 import pytest
-from pytest_mock import MockerFixture
-
 from namegnome.models.core import MediaFile, MediaType
 from namegnome.models.plan import RenamePlan, RenamePlanItem
 from namegnome.models.scan import ScanOptions
@@ -23,6 +21,7 @@ from namegnome.utils.plan_store import (
     load_plan,
     save_plan,
 )
+from pytest_mock import MockerFixture
 
 
 @pytest.fixture
