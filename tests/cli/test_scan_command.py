@@ -64,7 +64,9 @@ def mock_scan_result() -> ScanResult:
 
 
 @pytest.fixture(autouse=True)
-def mock_scan_directory(mock_scan_result: ScanResult) -> Generator[MagicMock, None, None]:
+def mock_scan_directory(
+    mock_scan_result: ScanResult,
+) -> Generator[MagicMock, None, None]:
     """Mock the scan_directory function.
 
     This fixture uses the autouse=True parameter to ensure it's automatically applied

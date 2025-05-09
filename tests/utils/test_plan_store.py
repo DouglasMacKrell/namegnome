@@ -70,7 +70,7 @@ def test_plan() -> RenamePlan:
         root_dir=base_dir,
         platform="plex",
         media_types=[MediaType.MOVIE],
-        items=[plan_item]
+        items=[plan_item],
     )
 
 

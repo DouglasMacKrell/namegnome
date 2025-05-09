@@ -86,9 +86,9 @@ def create_rename_plan(
                 )
                 destinations[target_path].status = PlanStatus.CONFLICT
                 conflict_src = item.source
-                destinations[target_path].reason = (
-                    f"Destination already used by {conflict_src}"
-                )
+                destinations[
+                    target_path
+                ].reason = f"Destination already used by {conflict_src}"
                 logger.warning(
                     f"Conflict detected: {item.source} and "
                     f"{destinations[target_path].source} both target {target_path}"
@@ -182,13 +182,7 @@ def save_plan(plan: RenamePlan, output_dir: Path) -> Path:
 
     # Write to file using custom encoder for datetime objects
     with output_file.open("w", encoding="utf-8") as f:
-        json.dump(
-            plan_dict,
-            f,
-            indent=2,
-            ensure_ascii=False,
-            cls=DateTimeEncoder
-        )
+        json.dump(plan_dict, f, indent=2, ensure_ascii=False, cls=DateTimeEncoder)
 
     logger.info(f"Saved rename plan to {output_file}")
     return output_file

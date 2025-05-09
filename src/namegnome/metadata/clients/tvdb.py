@@ -113,9 +113,7 @@ class StubTVDBClient(MetadataClient):
             # Fallback to generic movie details fixture
             return load_fixture("tvdb", "movie_details")
 
-    async def get_tv_details(
-        self: "StubTVDBClient", show_id: str
-    ) -> dict[str, Any]:
+    async def get_tv_details(self: "StubTVDBClient", show_id: str) -> dict[str, Any]:
         """Get detailed information about a specific TV show (stub implementation).
 
         Args:

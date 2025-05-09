@@ -52,9 +52,7 @@ class MetadataClient(ABC):
         pass
 
     @abstractmethod
-    async def get_movie_details(
-        self: Self, movie_id: str
-    ) -> dict[str, Any]:
+    async def get_movie_details(self: Self, movie_id: str) -> dict[str, Any]:
         """Get detailed information about a specific movie.
 
         Args:
@@ -66,9 +64,7 @@ class MetadataClient(ABC):
         pass
 
     @abstractmethod
-    async def get_tv_details(
-        self: Self, show_id: str
-    ) -> dict[str, Any]:
+    async def get_tv_details(self: Self, show_id: str) -> dict[str, Any]:
         """Get detailed information about a specific TV show.
 
         Args:

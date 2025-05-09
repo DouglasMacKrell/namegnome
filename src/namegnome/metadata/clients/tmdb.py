@@ -121,9 +121,7 @@ class StubTMDBClient(MetadataClient):
 
         return filtered_results
 
-    async def get_movie_details(
-        self: Self, movie_id: str
-    ) -> dict[str, Any]:
+    async def get_movie_details(self: Self, movie_id: str) -> dict[str, Any]:
         """Get detailed information about a specific movie (stub implementation).
 
         Args:
@@ -142,9 +140,7 @@ class StubTMDBClient(MetadataClient):
             # Fallback to generic movie details fixture
             return load_fixture("tmdb", "movie_details")
 
-    async def get_tv_details(
-        self: Self, show_id: str
-    ) -> dict[str, Any]:
+    async def get_tv_details(self: Self, show_id: str) -> dict[str, Any]:
         """Get detailed information about a specific TV show (stub implementation).
 
         Args:
@@ -211,9 +207,7 @@ class StubTMDBClient(MetadataClient):
             # Fallback to generic episode details fixture
             return load_fixture("tmdb", "tv_episode")
 
-    def _create_image_url(
-        self: Self, path: str, size: str
-    ) -> HttpUrl:
+    def _create_image_url(self: Self, path: str, size: str) -> HttpUrl:
         """Create an HttpUrl for an image path.
 
         Args:

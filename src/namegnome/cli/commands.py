@@ -313,7 +313,11 @@ def _scan_impl(options: ScanCommandOptions) -> int:
                 model_scan_options = _convert_to_model_options(
                     options, media_types, scan_options
                 )
-                plan_id = save_plan(plan, model_scan_options, verify=options.verify)
+                # Create and save the plan
+                console.log("Saving plan...")
+                plan_id = save_plan(
+                    plan, model_scan_options, extra_args={"verify": options.verify}
+                )
 
                 console.log(f"Plan stored with ID: {plan_id}")
 
@@ -356,9 +360,7 @@ def main() -> None:
 
 
 def _convert_to_model_options(
-    options: ScanCommandOptions,
-    media_types: List[MediaType],
-    scan_options: ScanOptions
+    options: ScanCommandOptions, media_types: List[MediaType], scan_options: ScanOptions
 ) -> ModelScanOptions:
     """Convert our ScanOptions to the model version for saving.
 
