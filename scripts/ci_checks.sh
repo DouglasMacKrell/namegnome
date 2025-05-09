@@ -71,8 +71,10 @@ if [[ "$FORMAT_ONLY" == "true" ]]; then
     if [[ "$IS_WINDOWS" == "true" ]]; then
         # On Windows, use python to run pre-commit directly
         python -m pre_commit run ruff --all-files || true
+        python -m pre_commit run ruff-format --all-files || true
     else
         pre-commit run ruff --all-files || true
+        pre-commit run ruff-format --all-files || true
     fi
     print_message "$GREEN" "Formatting fixed successfully!"
     exit 0
@@ -81,8 +83,10 @@ else
     FORMAT_STATUS=0
     if [[ "$IS_WINDOWS" == "true" ]]; then
         python -m pre_commit run ruff --all-files --hook-stage push || FORMAT_STATUS=$?
+        python -m pre_commit run ruff-format --all-files --hook-stage push || FORMAT_STATUS=$?
     else
         pre-commit run ruff --all-files --hook-stage push || FORMAT_STATUS=$?
+        pre-commit run ruff-format --all-files --hook-stage push || FORMAT_STATUS=$?
     fi
     
     if [[ $FORMAT_STATUS -ne 0 ]]; then
