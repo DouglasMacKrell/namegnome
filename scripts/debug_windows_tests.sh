@@ -70,13 +70,19 @@ print_message "$BLUE" "Testing plan_store module path handling directly..."
 python -c "
 import os
 import sys
+import platform
 from pathlib import Path
 sys.path.insert(0, '.')
 try:
     from src.namegnome.utils.plan_store import _ensure_plan_dir
-    print(f'Plan directory path: {_ensure_plan_dir()}')
-    print(f'Plan directory exists: {_ensure_plan_dir().exists()}')
-    print(f'Plan directory is absolute: {_ensure_plan_dir().is_absolute()}')
+    plan_dir = _ensure_plan_dir()
+    print(f'Plan directory path: {plan_dir}')
+    print(f'Plan directory exists: {plan_dir.exists()}')
+    print(f'Plan directory is absolute: {plan_dir.is_absolute()}')
+    print(f'Platform: {platform.system()}')
+    print(f'Path separator: {os.path.sep}')
+    print(f'Normalized path: {os.path.normpath(str(plan_dir))}')
+    print(f'Resolved path: {plan_dir.resolve()}')
 except Exception as e:
     print(f'Error importing or calling plan_store module: {e}')
 "

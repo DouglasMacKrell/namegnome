@@ -13,6 +13,7 @@ from unittest.mock import patch
 
 import pytest
 import yaml
+
 from namegnome.fs import (
     get_latest_plan,
     get_namegnome_dir,
@@ -111,7 +112,8 @@ def test_get_plans_dir(temp_home_dir: Path) -> None:
     assert plans_dir.is_dir()
 
     # Check that it's a subdirectory of the namegnome directory
-    assert plans_dir.parent == get_namegnome_dir()
+    # Resolve paths to handle Windows path comparison issues
+    assert plans_dir.resolve().parent == get_namegnome_dir().resolve()
 
 
 def test_store_plan(temp_home_dir: Path, test_plan: RenamePlan) -> None:
