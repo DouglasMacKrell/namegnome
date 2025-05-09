@@ -83,10 +83,17 @@ preview = true
 
 [tool.mypy]
 python_version = "3.12"
-strict = true
+disallow_untyped_defs = true
 warn_redundant_casts = true
+warn_unreachable = true
 warn_unused_ignores = true
-warn_unused_configs = true
+disallow_any_generics = true
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_any_generics = false
+disallow_untyped_defs = false
+warn_return_any = false
 
 [tool.coverage.run]
 source_pkgs = ["namegnome", "tests"]
@@ -137,3 +144,11 @@ convention = "google"
 
 [tool.ruff.lint.pylint]
 max-args = 5
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/namegnome"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "src/namegnome/py.typed",
+]

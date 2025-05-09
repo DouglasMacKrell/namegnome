@@ -4,10 +4,11 @@ import json
 import os
 import platform
 import re
+import shutil
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Iterator
+from typing import Generator
 from unittest.mock import patch
 
 import pytest
@@ -27,17 +28,23 @@ from namegnome.models.scan import ScanOptions
 
 
 @pytest.fixture
-def temp_home_dir() -> Iterator[Path]:
+def temp_home_dir() -> Generator[Path, None, None]:
     """Create a temporary home directory for testing."""
-    with tempfile.TemporaryDirectory() as temp_dir:
+    temp_dir = tempfile.mkdtemp()
+    try:
         # Get the appropriate environment variable for the platform
         env_var = "USERPROFILE" if platform.system() == "Windows" else "HOME"
 
-        with patch.dict(os.environ, {env_var: temp_dir}):
-            # Create the plans directory structure
-            plans_dir = Path(temp_dir) / ".namegnome" / "plans"
-            plans_dir.mkdir(parents=True, exist_ok=True)
-            yield Path(temp_dir)
+        home_path = Path(temp_dir)
+        # Create the plans directory structure
+        plans_dir = home_path / ".namegnome" / "plans"
+        plans_dir.mkdir(parents=True, exist_ok=True)
+
+        with patch.dict(os.environ, {env_var: str(home_path)}):
+            yield home_path
+    finally:
+        # Clean up the temporary directory
+        shutil.rmtree(temp_dir, ignore_errors=True)
 
 
 @pytest.fixture
@@ -162,7 +169,9 @@ def test_list_plans(temp_home_dir: Path, test_plan: RenamePlan) -> None:
     plan_path = store_plan(test_plan)
 
     # Extract the generated UUID from the plan path - now in the filename
-    uuid_pattern = r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.json"
+    uuid_pattern = (
+        r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.json"
+    )
     plan_filename = plan_path.name
     plan_id_match = re.match(uuid_pattern, plan_filename)
     assert plan_id_match is not None
@@ -190,7 +199,9 @@ def test_get_latest_plan(test_plan: RenamePlan, plan_store_dir: Path) -> None:
     plan_path = store_plan(test_plan)
 
     # Extract the actual plan ID from the file name
-    uuid_pattern = r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.json"
+    uuid_pattern = (
+        r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.json"
+    )
     plan_filename = plan_path.name
     plan_id_match = re.match(uuid_pattern, plan_filename)
     assert plan_id_match is not None
@@ -215,7 +226,9 @@ def test_get_plan(temp_home_dir: Path, test_plan: RenamePlan) -> None:
     plan_path = store_plan(test_plan)
 
     # Extract the generated UUID from the plan path
-    uuid_pattern = r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.json"
+    uuid_pattern = (
+        r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.json"
+    )
     plan_filename = plan_path.name
     plan_id_match = re.match(uuid_pattern, plan_filename)
     assert plan_id_match is not None
