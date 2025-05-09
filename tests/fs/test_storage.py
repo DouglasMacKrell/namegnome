@@ -2,6 +2,7 @@
 
 import json
 import os
+import platform
 import re
 import tempfile
 from datetime import datetime
@@ -11,7 +12,6 @@ from unittest.mock import patch
 
 import pytest
 import yaml
-
 from namegnome.fs import (
     get_latest_plan,
     get_namegnome_dir,
@@ -30,7 +30,10 @@ from namegnome.models.scan import ScanOptions
 def temp_home_dir() -> Iterator[Path]:
     """Create a temporary home directory for testing."""
     with tempfile.TemporaryDirectory() as temp_dir:
-        with patch.dict(os.environ, {"HOME": temp_dir}):
+        # Get the appropriate environment variable for the platform
+        env_var = "USERPROFILE" if platform.system() == "Windows" else "HOME"
+
+        with patch.dict(os.environ, {env_var: temp_dir}):
             # Create the plans directory structure
             plans_dir = Path(temp_dir) / ".namegnome" / "plans"
             plans_dir.mkdir(parents=True, exist_ok=True)
@@ -113,10 +116,10 @@ def test_store_plan(temp_home_dir: Path, test_plan: RenamePlan) -> None:
     assert plan_path.exists()
     assert plan_path.is_file()
 
-    # UUID format is used now, so check the parent directory follows the pattern
-    uuid_pattern = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
-    plan_dir = plan_path.parent.name
-    assert re.match(uuid_pattern, plan_dir)
+    # UUID format is now used in the filename, not as directory
+    uuid_pattern = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}\.json"
+    plan_filename = plan_path.name
+    assert re.match(uuid_pattern, plan_filename)
 
     # Read the plan file and verify its contents
     with open(plan_path, "r", encoding="utf-8") as f:
@@ -134,10 +137,6 @@ def test_store_run_metadata(
     # Generate a UUID-style plan ID
     plan_id = "12345678-1234-1234-1234-123456789012"
 
-    # Create the plan directory
-    plan_dir = get_plans_dir() / plan_id
-    plan_dir.mkdir(parents=True, exist_ok=True)
-
     # Convert the scan options to args dict
     args = test_scan_options.model_dump()
 
@@ -148,12 +147,12 @@ def test_store_run_metadata(
     assert metadata_path.exists()
     assert metadata_path.is_file()
 
-    # Read the metadata file and verify its contents - now using YAML format
+    # Read the metadata file and verify its contents
     with open(metadata_path, "r", encoding="utf-8") as f:
         metadata = yaml.safe_load(f)
 
-    assert metadata["plan_id"] == plan_id
-    assert metadata["args"] is not None
+    assert metadata["id"] == plan_id
+    assert "args" in metadata
     assert "timestamp" in metadata
 
 
@@ -162,10 +161,12 @@ def test_list_plans(temp_home_dir: Path, test_plan: RenamePlan) -> None:
     # Store a plan
     plan_path = store_plan(test_plan)
 
-    # Extract the generated UUID from the plan path
-    uuid_pattern = r"[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
-    plan_dir = plan_path.parent.name
-    assert re.match(uuid_pattern, plan_dir)
+    # Extract the generated UUID from the plan path - now in the filename
+    uuid_pattern = r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.json"
+    plan_filename = plan_path.name
+    plan_id_match = re.match(uuid_pattern, plan_filename)
+    assert plan_id_match is not None
+    actual_plan_id = plan_id_match.group(1)
 
     # List plans
     plans = list_plans()
@@ -177,7 +178,7 @@ def test_list_plans(temp_home_dir: Path, test_plan: RenamePlan) -> None:
     plan_info = plans[0]
 
     # The first element is the plan ID (UUID)
-    assert re.match(uuid_pattern, plan_info[0])
+    assert plan_info[0] == actual_plan_id
 
     # The third element is the path
     assert plan_info[2].exists()
@@ -188,8 +189,12 @@ def test_get_latest_plan(test_plan: RenamePlan, plan_store_dir: Path) -> None:
     # Store a plan
     plan_path = store_plan(test_plan)
 
-    # Extract the actual plan ID from the path (UUID directory name)
-    actual_plan_id = plan_path.parent.name
+    # Extract the actual plan ID from the file name
+    uuid_pattern = r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.json"
+    plan_filename = plan_path.name
+    plan_id_match = re.match(uuid_pattern, plan_filename)
+    assert plan_id_match is not None
+    actual_plan_id = plan_id_match.group(1)
 
     # Get the latest plan
     latest_plan = get_latest_plan()
@@ -210,10 +215,14 @@ def test_get_plan(temp_home_dir: Path, test_plan: RenamePlan) -> None:
     plan_path = store_plan(test_plan)
 
     # Extract the generated UUID from the plan path
-    plan_id = plan_path.parent.name
+    uuid_pattern = r"([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})\.json"
+    plan_filename = plan_path.name
+    plan_id_match = re.match(uuid_pattern, plan_filename)
+    assert plan_id_match is not None
+    actual_plan_id = plan_id_match.group(1)
 
     # Get the plan using the UUID
-    plan_data = get_plan(plan_id)
+    plan_data = get_plan(actual_plan_id)
 
     # Check that we got a plan
     assert plan_data is not None

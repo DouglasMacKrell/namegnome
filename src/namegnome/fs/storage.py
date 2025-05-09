@@ -16,11 +16,29 @@ from namegnome.models.plan import RenamePlan
 from namegnome.models.scan import ScanOptions
 from namegnome.utils.plan_store import (
     _ensure_plan_dir,
+    get_latest_plan_id,
+    load_plan,
     save_plan,
 )
 from namegnome.utils.plan_store import (
-    list_plans as _list_plans,
+    list_plans as plan_store_list_plans,
 )
+
+
+# Register custom YAML representers for Path and Enum objects
+def _path_representer(dumper: yaml.SafeDumper, data: Path) -> yaml.ScalarNode:
+    """Custom YAML representer for Path objects."""
+    return dumper.represent_scalar("tag:yaml.org,2002:str", str(data))
+
+
+def _enum_representer(dumper: yaml.SafeDumper, data: enum.Enum) -> yaml.ScalarNode:
+    """Custom YAML representer for Enum objects."""
+    return dumper.represent_scalar("tag:yaml.org,2002:str", str(data.value))
+
+
+# Add the representers to the dumper
+yaml.SafeDumper.add_representer(Path, _path_representer)
+yaml.SafeDumper.add_multi_representer(enum.Enum, _enum_representer)
 
 
 def get_namegnome_dir() -> Path:
@@ -72,7 +90,7 @@ def store_plan(plan: RenamePlan) -> Path:
     plan_id = save_plan(plan, scan_options)
 
     # Return the path for backward compatibility
-    return get_plans_dir() / plan_id / "plan.json"
+    return get_plans_dir() / f"{plan_id}.json"
 
 
 def _convert_value_for_yaml(value: object) -> object:
@@ -109,25 +127,24 @@ def store_run_metadata(plan_id: str, args: Dict[str, Any]) -> Path:
         Path to the metadata file.
     """
     # Ensure the plan directory exists
-    plan_dir = get_plans_dir() / plan_id
-    plan_dir.mkdir(parents=True, exist_ok=True)
+    plans_dir = get_plans_dir()
 
     # Create metadata file path
-    metadata_path = plan_dir / "run.yaml"
+    metadata_path = plans_dir / f"{plan_id}.meta.yaml"
 
     # Convert complex types to simple types that can be serialized to YAML
     serializable_args = _convert_value_for_yaml(args)
 
     # Create metadata dictionary
     metadata = {
-        "plan_id": plan_id,
+        "id": plan_id,
         "args": serializable_args,
         "timestamp": datetime.now().isoformat(),
     }
 
     # Write metadata to file
     with open(metadata_path, "w", encoding="utf-8") as f:
-        yaml.dump(metadata, f, default_flow_style=False)
+        yaml.safe_dump(metadata, f, default_flow_style=False)
 
     return metadata_path
 
@@ -138,15 +155,16 @@ def list_plans() -> List[Tuple[str, Any, Path]]:
     Returns:
         List of tuples containing (plan_id, creation_date, file_path).
     """
-    plans_dict = _list_plans()
+    plans_list = plan_store_list_plans()
     result = []
 
-    for plan_id, timestamp in plans_dict.items():
-        plan_path = get_plans_dir() / plan_id / "plan.json"
+    for plan_id, timestamp in plans_list:
+        # Handle both string timestamps and datetime objects
+        plan_path = get_plans_dir() / f"{plan_id}.json"
         result.append((plan_id, timestamp, plan_path))
 
-    # Sort by creation date, newest first
-    return sorted(result, key=lambda x: x[1], reverse=True)
+    # Already sorted by creation date, newest first
+    return result
 
 
 def get_latest_plan() -> Optional[Tuple[str, Path]]:
@@ -155,12 +173,12 @@ def get_latest_plan() -> Optional[Tuple[str, Path]]:
     Returns:
         Tuple containing (plan_id, file_path) or None if no plans exist.
     """
-    plans = list_plans()
-    if not plans:
+    plan_id = get_latest_plan_id()
+    if not plan_id:
         return None
 
-    # Return the most recent plan
-    return (plans[0][0], plans[0][2])
+    plan_path = get_plans_dir() / f"{plan_id}.json"
+    return (plan_id, plan_path)
 
 
 def get_plan(plan_id: str) -> Optional[Dict[str, Any]]:
@@ -174,14 +192,19 @@ def get_plan(plan_id: str) -> Optional[Dict[str, Any]]:
     """
     plans_dir = get_plans_dir()
 
-    # Check for a UUID directory first
-    plan_dir = plans_dir / plan_id
-    if plan_dir.exists() and plan_dir.is_dir():
-        plan_file = plan_dir / "plan.json"
-        if plan_file.exists():
-            with open(plan_file, "r", encoding="utf-8") as f:
-                plan_data: Dict[str, Any] = json.load(f)
-                return plan_data
+    # Try to load using the new format
+    try:
+        plan, _ = load_plan(plan_id)
+        return plan.model_dump()
+    except FileNotFoundError:
+        pass
+
+    # Check for the new file format directly
+    plan_file = plans_dir / f"{plan_id}.json"
+    if plan_file.exists():
+        with open(plan_file, "r", encoding="utf-8") as f:
+            plan_data: Dict[str, Any] = json.load(f)
+            return plan_data
 
     # Fall back to the old-style timestamp-based plan files
     plan_file = plans_dir / f"plan_{plan_id}.json"
@@ -189,5 +212,14 @@ def get_plan(plan_id: str) -> Optional[Dict[str, Any]]:
         with open(plan_file, "r", encoding="utf-8") as f:
             old_data: Dict[str, Any] = json.load(f)
             return old_data
+
+    # Check for old-style UUID directory structure
+    old_plan_dir = plans_dir / plan_id
+    if old_plan_dir.exists() and old_plan_dir.is_dir():
+        old_plan_file = old_plan_dir / "plan.json"
+        if old_plan_file.exists():
+            with open(old_plan_file, "r", encoding="utf-8") as f:
+                old_plan_data: Dict[str, Any] = json.load(f)
+                return old_plan_data
 
     return None

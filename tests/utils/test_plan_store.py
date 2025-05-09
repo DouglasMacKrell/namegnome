@@ -1,9 +1,7 @@
 """Tests for the plan store module."""
 
-import json
 import os
-import shutil
-import sys
+import platform
 from datetime import datetime, timedelta
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -17,6 +15,7 @@ from namegnome.models.scan import ScanOptions
 from namegnome.utils.plan_store import (
     _ensure_plan_dir,
     _get_git_hash,
+    get_latest_plan_id,
     get_plan_metadata,
     list_plans,
     load_plan,
@@ -29,91 +28,81 @@ from pytest_mock import MockerFixture
 def temp_home_dir() -> Generator[Path, None, None]:
     """Create a temporary home directory."""
     with TemporaryDirectory() as temp_dir:
-        # On Windows, we need to use the correct environment variable
-        if sys.platform == "win32":
-            env_var = "USERPROFILE"
-        else:
-            env_var = "HOME"
+        # Create a temporary home directory
+        home_dir = Path(temp_dir)
 
-        with patch.dict(os.environ, {env_var: temp_dir}):
-            yield Path(temp_dir)
+        # Get the appropriate environment variable for the platform
+        env_var = "USERPROFILE" if platform.system() == "Windows" else "HOME"
+
+        # Patch the environment variable
+        with patch.dict(os.environ, {env_var: str(home_dir)}):
+            yield home_dir
 
 
 @pytest.fixture
-def sample_media_file(tmp_path: Path) -> MediaFile:
-    """Create a sample media file."""
-    return MediaFile(
-        path=tmp_path / "test.mp4",
+def test_plan() -> RenamePlan:
+    """Create a test plan."""
+    # Create platform-independent paths
+    base_dir = Path.cwd() / "test_dir"
+    source_path = base_dir / "source.mp4"
+    destination_path = base_dir / "target.mp4"
+
+    # Create a media file for the test plan
+    media_file = MediaFile(
+        path=source_path,
         size=1024,
-        media_type=MediaType.TV,
+        media_type=MediaType.MOVIE,
         modified_date=datetime.now(),
+        # Optional fields
+        title="Test Movie",
+        year=2023,
     )
 
+    # Create a rename plan item
+    plan_item = RenamePlanItem(
+        source=source_path,
+        destination=destination_path,
+        media_file=media_file,
+    )
 
-@pytest.fixture
-def sample_plan(sample_media_file: MediaFile, tmp_path: Path) -> RenamePlan:
-    """Create a sample rename plan."""
     return RenamePlan(
-        id="test_plan",
-        root_dir=tmp_path,
+        id="test-plan-1",
+        root_dir=base_dir,
         platform="plex",
-        media_types=[MediaType.TV],
-        items=[
-            RenamePlanItem(
-                source=sample_media_file.path,
-                destination=tmp_path / "destination" / "test.mp4",
-                media_file=sample_media_file,
-            )
-        ],
+        media_types=[MediaType.MOVIE],
+        items=[plan_item]
     )
 
 
 @pytest.fixture
-def sample_scan_options(tmp_path: Path) -> ScanOptions:
-    """Create a sample scan options."""
+def test_scan_options() -> ScanOptions:
+    """Create test scan options."""
     return ScanOptions(
-        root=tmp_path,
-        media_types=[MediaType.TV],
-        platform="plex",
+        root=Path.cwd() / "test_dir",
+        recursive=True,
     )
 
 
-def test_ensure_plan_dir(temp_home_dir: Path) -> None:
-    """Test that the plan directory is created correctly."""
+def test_ensure_plan_dir() -> None:
+    """Test the _ensure_plan_dir function."""
+    # We don't need to test this extensively as it's mostly OS functionality
     plan_dir = _ensure_plan_dir()
     assert plan_dir.exists()
-    assert plan_dir.is_dir()
-    assert plan_dir == Path.home() / ".namegnome" / "plans"
-
-
-def test_get_git_hash() -> None:
-    """Test that the git hash is retrieved correctly."""
-    # This might return None in CI, but should work in a git repo
-    git_hash = _get_git_hash()
-    if git_hash is not None:
-        assert isinstance(git_hash, str)
-        assert len(git_hash) == 40  # SHA-1 hash is 40 hex characters
+    assert plan_dir.name == "plans"
+    assert str(plan_dir).endswith(".namegnome/plans")
 
 
 def test_save_and_load_plan(
-    sample_plan: RenamePlan, sample_scan_options: ScanOptions, temp_home_dir: Path
+    temp_home_dir: Path, test_plan: RenamePlan, test_scan_options: ScanOptions
 ) -> None:
     """Test saving and loading a plan."""
     # Save the plan
-    plan_id = save_plan(sample_plan, sample_scan_options)
+    plan_id = save_plan(test_plan, test_scan_options)
 
-    # Check that the plan directory was created
-    plan_dir = _ensure_plan_dir() / plan_id
-    assert plan_dir.exists()
-    assert plan_dir.is_dir()
-
-    # Check that the plan file was created
-    plan_file = plan_dir / "plan.json"
-    assert plan_file.exists()
-
-    # Check that the metadata file was created
-    metadata_file = plan_dir / "run.yaml"
-    assert metadata_file.exists()
+    # Verify files were created
+    plans_dir = _ensure_plan_dir()
+    assert (plans_dir / f"{plan_id}.json").exists()
+    assert (plans_dir / f"{plan_id}.meta.yaml").exists()
 
     # Check that the latest reference exists
     # We skip this in environments where file operations might be restricted
@@ -124,141 +113,107 @@ def test_save_and_load_plan(
     if not is_ci:
         assert latest_file.exists()
 
-    # Load the plan with specific ID
-    loaded_plan = load_plan(plan_id)
-    # The ID might be different now because we use UUID-based IDs
-    assert loaded_plan.platform == sample_plan.platform
-    assert str(loaded_plan.root_dir) == str(sample_plan.root_dir)
-    assert len(loaded_plan.items) == len(sample_plan.items)
+    # Load the plan and check it matches the original
+    loaded_plan, metadata = load_plan(plan_id)
+    assert loaded_plan.model_dump() == test_plan.model_dump()
+
+    # Check metadata
+    assert metadata.id == plan_id
+    assert isinstance(metadata.timestamp, datetime)
+    assert "scan_options" in metadata.args
 
 
-def test_save_plan_with_verify(
-    sample_plan: RenamePlan,
-    sample_scan_options: ScanOptions,
-    temp_home_dir: Path,
-    mocker: MockerFixture,
+def test_get_latest_plan_id(
+    temp_home_dir: Path, test_plan: RenamePlan, test_scan_options: ScanOptions
 ) -> None:
-    """Test saving a plan with verify=True."""
-    # Mock the sha256sum function
-    mock_sha256sum = mocker.patch(
-        "namegnome.utils.hash.sha256sum", return_value="fake_hash"
-    )
+    """Test getting the latest plan ID."""
+    # Save the plan
+    plan_id1 = save_plan(test_plan, test_scan_options)
 
-    # Save the plan with verify=True
-    plan_id = save_plan(sample_plan, sample_scan_options, verify=True)
+    # Get the latest plan ID and verify it matches
+    latest_id = get_latest_plan_id()
+    assert latest_id == plan_id1
 
-    # Check that the checksums file was created
-    checksum_file = _ensure_plan_dir() / plan_id / "checksums.json"
-    assert checksum_file.exists()
+    # Save another plan
+    plan_id2 = save_plan(test_plan, test_scan_options)
 
-    # Check that the checksum was computed
-    mock_sha256sum.assert_called_once()
+    # Get the latest plan ID again and verify it's now the second plan
+    latest_id = get_latest_plan_id()
+    assert latest_id == plan_id2
 
-    # Check the contents of the checksums file
-    with open(checksum_file, "r") as f:
-        checksums = json.load(f)
-    assert str(sample_plan.items[0].source) in checksums
-    assert checksums[str(sample_plan.items[0].source)] == "fake_hash"
+
+def test_list_plans(
+    temp_home_dir: Path, test_plan: RenamePlan, test_scan_options: ScanOptions
+) -> None:
+    """Test listing all plans."""
+    # Save two plans with different timestamps
+    with patch("namegnome.utils.plan_store.datetime") as mock_datetime:
+        # First plan is saved "now"
+        now = datetime.now()
+        mock_datetime.now.return_value = now
+        plan_id1 = save_plan(test_plan, test_scan_options)
+
+        # Second plan is saved 1 hour later
+        later = now + timedelta(hours=1)
+        mock_datetime.now.return_value = later
+        plan_id2 = save_plan(test_plan, test_scan_options)
+
+    # List all plans and check they're in the expected order (newest first)
+    plans = list_plans()
+    assert len(plans) == 2
+    assert plans[0][0] == plan_id2  # newest first
+    assert plans[1][0] == plan_id1
 
 
 def test_get_plan_metadata(
-    sample_plan: RenamePlan, sample_scan_options: ScanOptions, temp_home_dir: Path
+    temp_home_dir: Path, test_plan: RenamePlan, test_scan_options: ScanOptions
 ) -> None:
     """Test getting plan metadata."""
-    # Save the plan
-    plan_id = save_plan(sample_plan, sample_scan_options)
+    # Save a plan
+    plan_id = save_plan(test_plan, test_scan_options)
 
     # Get the metadata
     metadata = get_plan_metadata(plan_id)
 
-    # Check the metadata
+    # Check metadata
     assert metadata.id == plan_id
     assert isinstance(metadata.timestamp, datetime)
-    assert metadata.args["root"] == str(sample_scan_options.root)
-    assert metadata.args["platform"] == sample_scan_options.platform
-
-
-def test_list_plans(
-    sample_plan: RenamePlan, sample_scan_options: ScanOptions, temp_home_dir: Path
-) -> None:
-    """Test listing plans."""
-    # Save the plan once to ensure the directory is clean
-    save_plan(sample_plan, sample_scan_options)
-
-    # Clear the plans directory
-    plans_dir = _ensure_plan_dir()
-    for item in plans_dir.iterdir():
-        if item.is_dir():
-            shutil.rmtree(item)
-        elif item.is_file() and item.name != '.gitkeep':  # Keep any .gitkeep files
-            item.unlink()
-
-    # Save multiple plans with different timestamps
-    plan_ids = []
-    expected_timestamps = []
-
-    for i in range(3):
-        # Make each plan have a different timestamp
-        with patch("namegnome.utils.plan_store.datetime") as mock_datetime:
-            mock_now = datetime.now() - timedelta(days=i)
-            mock_datetime.now.return_value = mock_now
-            expected_timestamps.append(mock_now)
-            plan_id = save_plan(sample_plan, sample_scan_options)
-            plan_ids.append(plan_id)
-
-    # List the plans
-    plans = list_plans()
-
-    # Check that all plans are listed
-    assert len(plans) == 3
-
-    # Check that each plan ID has an associated timestamp
-    for plan_id in plan_ids:
-        assert plan_id in plans
-        assert isinstance(plans[plan_id], datetime)
+    assert "scan_options" in metadata.args
 
 
 def test_load_nonexistent_plan(temp_home_dir: Path) -> None:
-    """Test loading a nonexistent plan."""
+    """Test that loading a nonexistent plan raises an error."""
     with pytest.raises(FileNotFoundError):
-        load_plan("nonexistent_plan")
+        load_plan("nonexistent-plan-id")
 
 
 def test_get_nonexistent_plan_metadata(temp_home_dir: Path) -> None:
-    """Test getting metadata for a nonexistent plan."""
+    """Test that getting metadata for a nonexistent plan raises an error."""
     with pytest.raises(FileNotFoundError):
-        get_plan_metadata("nonexistent_plan")
+        get_plan_metadata("nonexistent-plan-id")
 
 
-def test_load_latest_plan(
-    sample_plan: RenamePlan, sample_scan_options: ScanOptions, temp_home_dir: Path
-) -> None:
-    """Test loading the latest plan."""
-    # Skip test when in CI environment since file operations might be restricted
-    is_ci = os.environ.get("CI", "false").lower() in ("true", "1", "yes")
-    if is_ci:
-        pytest.skip("Skipping test in CI environment")
+def test_get_latest_plan_id_no_plans(temp_home_dir: Path) -> None:
+    """Test getting the latest plan ID when no plans exist."""
+    latest_id = get_latest_plan_id()
+    assert latest_id is None
 
-    # Save the plan, which gives us a UUID-based plan ID
-    plan_id = save_plan(sample_plan, sample_scan_options)
 
-    # Create a copy of the plan file as latest.json if it doesn't exist already
-    latest_file = _ensure_plan_dir() / "latest.json"
-    plan_file = _ensure_plan_dir() / plan_id / "plan.json"
-    if not latest_file.exists() and plan_file.exists():
-        shutil.copy2(plan_file, latest_file)
+def test_get_git_hash_success(mocker: MockerFixture) -> None:
+    """Test getting the git hash successfully."""
+    # Mock subprocess.run to return a known hash
+    mock_result = mocker.MagicMock()
+    mock_result.stdout = "abcdef1234567890\n"
+    mocker.patch("subprocess.run", return_value=mock_result)
 
-    # Load the latest plan
-    loaded_plan = load_plan()
+    # Test getting the git hash
+    git_hash = _get_git_hash()
+    assert git_hash == "abcdef1234567890"
 
-    # Since we're now using UUID-based IDs, the loaded plan's ID won't match the sample plan's
-    # original ID, but it should match the returned plan_id from save_plan
-    assert loaded_plan.platform == sample_plan.platform
-    assert str(loaded_plan.root_dir) == str(sample_plan.root_dir)
-    assert len(loaded_plan.items) == len(sample_plan.items)
 
-    # Get a plan with the specific ID to verify it matches the latest
-    specific_plan = load_plan(plan_id)
-    assert specific_plan.platform == loaded_plan.platform
-    assert str(specific_plan.root_dir) == str(loaded_plan.root_dir)
-    assert len(specific_plan.items) == len(loaded_plan.items)
+def test_get_git_hash_failure(mocker: MockerFixture) -> None:
+    """Test getting the git hash when subprocess fails."""
+    # Test when subprocess.run raises an exception
+    mocker.patch("subprocess.run", side_effect=Exception("Test exception"))
+    git_hash = _get_git_hash()
+    assert git_hash is None

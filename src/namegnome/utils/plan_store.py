@@ -7,21 +7,46 @@ including creating symlinks to the latest plan and storing checksums.
 import json
 import logging
 import os
+import platform
 import shutil
-import sys
 import uuid
 from datetime import datetime
+from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, cast
 
 import yaml
 from pydantic import BaseModel
 
+from namegnome.models.core import MediaType
 from namegnome.models.plan import RenamePlan
 from namegnome.models.scan import ScanOptions
 
 # Logger for this module
 logger = logging.getLogger(__name__)
+
+# Constants
+MAX_FILENAME_CHECK_ATTEMPTS = 8
+WINDOWS_OS = "Windows"
+MIN_UUID_LENGTH = 8  # Minimum length to consider a string a UUID
+
+
+# Register a custom representer for Path objects
+def path_representer(dumper: yaml.SafeDumper, data: Path) -> yaml.ScalarNode:
+    """Custom YAML representer for Path objects."""
+    return dumper.represent_scalar("tag:yaml.org,2002:str", str(data))
+
+
+# Register a custom representer for Enum objects
+def enum_representer(dumper: yaml.SafeDumper, data: Enum) -> yaml.ScalarNode:
+    """Custom YAML representer for Enum objects."""
+    return dumper.represent_scalar("tag:yaml.org,2002:str", str(data.value))
+
+
+# Add representers to the SafeDumper
+yaml.SafeDumper.add_representer(Path, path_representer)
+yaml.SafeDumper.add_representer(MediaType, enum_representer)
+yaml.SafeDumper.add_multi_representer(Enum, enum_representer)
 
 
 class RunMetadata(BaseModel):
@@ -32,17 +57,69 @@ class RunMetadata(BaseModel):
     args: Dict[str, Any]
     git_hash: Optional[str] = None
 
+    def model_dump_for_yaml(self) -> Dict[str, Any]:
+        """Convert to a YAML-serializable dictionary.
+
+        This converts Path objects and Enums to strings for proper YAML serialization.
+
+        Returns:
+            Dict with all values converted to YAML-compatible types.
+        """
+        data = self.model_dump()
+
+        # Use a recursive function to convert Path objects to strings
+        def convert_paths(obj: object) -> object:
+            if isinstance(obj, dict):
+                return {k: convert_paths(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_paths(item) for item in obj]
+            elif isinstance(obj, Path):
+                return str(obj)
+            elif isinstance(obj, Enum):
+                return str(obj.value)
+            else:
+                return obj
+
+        # Cast to the expected return type
+        return cast(Dict[str, Any], convert_paths(data))
+
 
 def _ensure_plan_dir() -> Path:
-    """Ensure the plan directory exists and return its path."""
-    home = Path.home()
-    plan_dir = home / ".namegnome" / "plans"
-    plan_dir.mkdir(parents=True, exist_ok=True)
-    return plan_dir
+    """Ensure the plans directory exists and return its path.
+
+    Returns:
+        Path: The plans directory path.
+    """
+    # Use a proper cross-platform way to get the user's home directory
+    # In CI environments HOME may not be set on Windows
+    home_dir = os.environ.get("HOME")
+    is_windows_ci = platform.system() == WINDOWS_OS and os.environ.get("CI") == "true"
+
+    if not home_dir or is_windows_ci:
+        # On Windows, use USERPROFILE as fallback
+        home_dir = os.environ.get("USERPROFILE", str(Path.home()))
+
+    # Convert to Path object for proper handling
+    home_path = Path(home_dir)
+
+    # Create .namegnome/plans directory
+    plans_dir = home_path / ".namegnome" / "plans"
+
+    # Ensure directory exists
+    if not plans_dir.exists():
+        plans_dir.parent.mkdir(exist_ok=True)
+        plans_dir.mkdir(exist_ok=True)
+        logger.info(f"Created plans directory at {plans_dir}")
+
+    return plans_dir
 
 
 def _get_git_hash() -> Optional[str]:
-    """Get the current git hash if available."""
+    """Get the current git hash, if in a git repository.
+
+    Returns:
+        Optional[str]: The git hash, or None if not in a git repository.
+    """
     try:
         import subprocess
 
@@ -53,209 +130,323 @@ def _get_git_hash() -> Optional[str]:
             check=True,
         )
         return result.stdout.strip()
-    except (subprocess.SubprocessError, FileNotFoundError):
+    except Exception:
         return None
 
 
-def _update_latest_link(plan_dir: Path, plan_id: str, plan_file: Path) -> None:
-    """Update the latest.json symlink or copy to point to the new plan.
+def save_plan(
+    plan: RenamePlan,
+    scan_options: ScanOptions,
+    extra_args: Optional[Dict[str, Any]] = None,
+) -> str:
+    """Save a rename plan to disk.
 
     Args:
-        plan_dir: Directory where plans are stored
-        plan_id: ID of the plan to link to
-        plan_file: Path to the plan file
-    """
-    latest_link = plan_dir / "latest.json"
-
-    # Remove the existing link or file if it exists
-    if latest_link.exists() or os.path.islink(str(latest_link)):
-        try:
-            if os.path.islink(str(latest_link)):
-                os.unlink(str(latest_link))
-            else:
-                latest_link.unlink(missing_ok=True)
-        except (OSError, PermissionError) as e:
-            # Log the error but continue - not critical
-            logger.warning(f"Warning: Could not remove old latest.json reference: {e}")
-
-    # Always use file copy on Windows or in CI environment for reliability
-    is_windows = sys.platform == "win32"
-    is_ci = os.environ.get("CI", "false").lower() in ("true", "1", "yes")
-
-    # Only try symlinks on non-Windows platforms
-    if not is_windows and not is_ci:
-        try:
-            # Use relative path for symlink to work across different mounts
-            relative_path = os.path.join(plan_id, "plan.json")
-            # Create the symlink
-            os.symlink(relative_path, str(latest_link))
-            return
-        except (OSError, PermissionError) as e:
-            # Log the error but fall back to copying
-            logger.warning(
-                f"Warning: Could not create symlink, falling back to copy: {e}"
-            )
-
-    # Fall back to copying the file
-    try:
-        shutil.copy2(plan_file, latest_link)
-    except (OSError, PermissionError) as e:
-        # Log the error but continue - not critical
-        logger.warning(f"Warning: Could not create latest.json reference: {e}")
-
-
-def save_plan(plan: RenamePlan, scan_options: ScanOptions, verify: bool = False) -> str:
-    """Save a rename plan to disk and return the ID.
-
-    Args:
-        plan: The rename plan to save
-        scan_options: The options used to generate the plan
-        verify: Whether checksums should be stored for verification
+        plan: The rename plan to save.
+        scan_options: The scan options used to generate the plan.
+        extra_args: Extra arguments to store with the plan.
 
     Returns:
-        The ID of the saved plan
+        str: The ID of the saved plan.
     """
-    # Generate a unique ID for the plan
-    plan_id = str(uuid.uuid4())
-    plan_dir = _ensure_plan_dir()
+    plans_dir = _ensure_plan_dir()
 
-    # Create a directory for this plan
-    plan_path = plan_dir / plan_id
-    plan_path.mkdir(exist_ok=True)
+    run_id = str(uuid.uuid4())
+    timestamp = datetime.now()
 
-    # Save the plan as JSON
-    plan_file = plan_path / "plan.json"
-    with open(plan_file, "w", encoding="utf-8") as f:
-        f.write(plan.model_dump_json(indent=2))
+    # Create metadata
+    args = {"scan_options": scan_options.model_dump()}
+    if extra_args:
+        args.update(extra_args)
 
-    # Convert ScanOptions to a serializable dict by converting paths to strings
-    args_dict = scan_options.model_dump()
-    args_dict["root"] = str(args_dict["root"])
-
-    # Convert other complex types
-    if "media_types" in args_dict:
-        args_dict["media_types"] = [str(mt) for mt in args_dict["media_types"]]
-    if "target_extensions" in args_dict:
-        args_dict["target_extensions"] = list(args_dict["target_extensions"])
-
-    # Create run metadata
     metadata = RunMetadata(
-        id=plan_id,
-        timestamp=datetime.now(),
-        args=args_dict,
+        id=run_id,
+        timestamp=timestamp,
+        args=args,
         git_hash=_get_git_hash(),
     )
 
-    # Save run metadata
-    metadata_file = plan_path / "run.yaml"
-    with open(metadata_file, "w", encoding="utf-8") as f:
-        yaml.dump(metadata.model_dump(), f)
+    # Save plan with timestamp and id
+    filename = f"{run_id}.json"
+    plan_path = plans_dir / filename
 
-    # If verify is enabled, store checksums for each file
-    if verify:
-        from namegnome.utils.hash import sha256sum
+    with open(plan_path, "w", encoding="utf-8") as f:
+        f.write(plan.model_dump_json(indent=2))
 
-        checksums = {}
-        for item in plan.items:
+    # Save metadata using the YAML-serializable method
+    meta_path = plans_dir / f"{run_id}.meta.yaml"
+    with open(meta_path, "w", encoding="utf-8") as f:
+        yaml.safe_dump(metadata.model_dump_for_yaml(), f)
+
+    # Create or update the latest.json symlink or copy
+    latest_path = plans_dir / "latest.json"
+
+    # In CI environments or on Windows where symlinks may not be allowed,
+    # fall back to copying the file instead of creating a symlink
+    is_ci = os.environ.get("CI", "false").lower() in ("true", "1", "yes")
+
+    try:
+        # Try to use symlink first (preferred method)
+        if latest_path.exists():
+            latest_path.unlink()
+
+        # On Windows in CI, or if symlinks fail, copy the file instead
+        if platform.system() == WINDOWS_OS or is_ci:
+            # Try symlink first but fallback to copy
             try:
-                checksums[str(item.source)] = sha256sum(item.source)
-            except (FileNotFoundError, PermissionError):
-                # Skip files that can't be accessed
-                pass
+                # Force creation of a symlink even on Windows
+                latest_path.symlink_to(plan_path)
+            except (OSError, PermissionError):
+                # Fallback to copy if symlink fails
+                shutil.copy2(plan_path, latest_path)
+                logger.warning("Using file copy instead of symlink for latest.json")
+        else:
+            # On Unix systems, always use symlinks
+            latest_path.symlink_to(plan_path)
+    except Exception as e:
+        # Last resort fallback - if all fails, just write a file with the ID
+        logger.warning(f"Failed to create symlink or copy: {e}")
+        with open(latest_path, "w", encoding="utf-8") as f:
+            f.write(f"{run_id}\n")
 
-        # Save checksums
-        checksum_file = plan_path / "checksums.json"
-        with open(checksum_file, "w", encoding="utf-8") as f:
-            json.dump(checksums, f, indent=2)
-
-    # Create or update latest plan reference
-    _update_latest_link(plan_dir, plan_id, plan_file)
-
-    return plan_id
+    return run_id
 
 
-def load_plan(plan_id: Optional[str] = None) -> RenamePlan:
-    """Load a rename plan from disk.
+def load_plan(plan_id: str) -> Tuple[RenamePlan, RunMetadata]:
+    """Load a rename plan and its metadata from disk.
 
     Args:
-        plan_id: The ID of the plan to load, or None to load the latest
+        plan_id: The ID of the plan to load.
 
     Returns:
-        The loaded rename plan
+        tuple[RenamePlan, RunMetadata]: The loaded plan and its metadata.
 
     Raises:
-        FileNotFoundError: If the plan does not exist
+        FileNotFoundError: If the plan or metadata file does not exist.
     """
-    plan_dir = _ensure_plan_dir()
+    plans_dir = _ensure_plan_dir()
+    plan_path = plans_dir / f"{plan_id}.json"
+    meta_path = plans_dir / f"{plan_id}.meta.yaml"
 
-    if plan_id is None:
-        # Load the latest plan
-        plan_file = plan_dir / "latest.json"
-    else:
-        # Load a specific plan
-        plan_file = plan_dir / plan_id / "plan.json"
+    if not plan_path.exists():
+        raise FileNotFoundError(f"Plan file not found: {plan_path}")
 
-    if not plan_file.exists():
-        raise FileNotFoundError(f"Plan file not found: {plan_file}")
+    if not meta_path.exists():
+        raise FileNotFoundError(f"Metadata file not found: {meta_path}")
 
-    with open(plan_file, "r", encoding="utf-8") as f:
+    # Load plan
+    with open(plan_path, "r", encoding="utf-8") as f:
         plan_data = json.load(f)
 
-    return RenamePlan.model_validate(plan_data)
+    # Load metadata
+    with open(meta_path, "r", encoding="utf-8") as f:
+        meta_data = yaml.safe_load(f)
+
+    plan = RenamePlan.model_validate(plan_data)
+    metadata = RunMetadata.model_validate(meta_data)
+
+    return plan, metadata
+
+
+def get_latest_plan_id() -> Optional[str]:
+    """Get the ID of the latest rename plan.
+
+    Returns:
+        Optional[str]: The ID of the latest plan, or None if no plans exist.
+    """
+    plans_dir = _ensure_plan_dir()
+    latest_path = plans_dir / "latest.json"
+
+    if not latest_path.exists():
+        return None
+
+    # Try different methods to get the latest plan ID
+    return _extract_plan_id_from_latest(latest_path, plans_dir)
+
+
+def _check_symlink_target(latest_path: Path) -> Optional[str]:
+    """Check if the latest file is a symlink and get the target's stem.
+
+    Args:
+        latest_path: Path to the latest.json file
+
+    Returns:
+        str: Plan ID from symlink target, or None if not a symlink
+    """
+    if latest_path.is_symlink():
+        # Extract ID from the target path
+        target = latest_path.resolve()
+        return target.stem
+    return None
+
+
+def _check_json_plan(latest_path: Path) -> Optional[str]:
+    """Try to read the file as a JSON plan file.
+
+    Args:
+        latest_path: Path to the file to read
+
+    Returns:
+        str: Plan ID if found in JSON, None otherwise
+    """
+    try:
+        with open(latest_path, "r", encoding="utf-8") as f:
+            try:
+                data = json.load(f)
+                if isinstance(data, dict) and "id" in data:
+                    return cast(str, data["id"])
+            except json.JSONDecodeError:
+                # Not a JSON file
+                pass
+    except Exception:
+        pass
+    return None
+
+
+def _check_plain_text_id(latest_path: Path, plans_dir: Path) -> Optional[str]:
+    """Try to read the file as a plain text file containing just the plan ID.
+
+    Args:
+        latest_path: Path to the file to read
+        plans_dir: Plans directory to check if the ID exists
+
+    Returns:
+        str: Plan ID if found and valid, None otherwise
+    """
+    try:
+        with open(latest_path, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+            # Check if it looks like a UUID
+            if len(content) > MIN_UUID_LENGTH and "-" in content:
+                # Verify this plan exists to avoid returning a stale reference
+                if (plans_dir / f"{content}.json").exists():
+                    return content
+    except Exception:
+        pass
+    return None
+
+
+def _find_latest_plan_file(plans_dir: Path) -> Optional[str]:
+    """Find the most recent plan file by modification time.
+
+    Args:
+        plans_dir: Directory to search for plan files
+
+    Returns:
+        str: Plan ID from the most recent file, or None if no plans exist
+    """
+    try:
+        plan_files = list(plans_dir.glob("*.json"))
+        if not plan_files:
+            return None
+
+        # Filter out the latest.json file itself
+        plan_files = [f for f in plan_files if f.name != "latest.json"]
+
+        # Sort by modification time, newest first
+        plan_files.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+
+        # Get the first file and extract the UUID part
+        if plan_files:
+            return plan_files[0].stem
+    except Exception:
+        pass
+    return None
+
+
+def _extract_plan_id_from_latest(latest_path: Path, plans_dir: Path) -> Optional[str]:
+    """Extract the plan ID from the latest.json file or symlink.
+
+    Args:
+        latest_path: Path to the latest.json file
+        plans_dir: Path to the plans directory
+
+    Returns:
+        Optional[str]: The plan ID or None if it can't be determined
+    """
+    # Try each method in turn until one succeeds
+    methods: List[Callable[[], Optional[str]]] = [
+        lambda: _check_symlink_target(latest_path),
+        lambda: _check_json_plan(latest_path),
+        lambda: _check_plain_text_id(latest_path, plans_dir),
+        lambda: _find_latest_plan_file(plans_dir),
+    ]
+
+    for method in methods:
+        result = method()
+        if result:
+            return result
+
+    # If all methods fail
+    return None
+
+
+def list_plans() -> List[Tuple[str, datetime]]:
+    """List all available rename plans.
+
+    Returns:
+        list[tuple[str, datetime]]: List of tuples containing (plan_id, creation_date).
+    """
+    plans_dir = _ensure_plan_dir()
+    result = []
+
+    # Get all JSON files (exclude metadata files)
+    plan_files = [
+        f
+        for f in plans_dir.glob("*.json")
+        if f.name != "latest.json" and not f.name.endswith(".meta.json")
+    ]
+
+    for plan_file in plan_files:
+        plan_id = plan_file.stem
+
+        # Try to get timestamp from metadata
+        meta_file = plans_dir / f"{plan_id}.meta.yaml"
+        if meta_file.exists():
+            try:
+                with open(meta_file, "r", encoding="utf-8") as f:
+                    meta_data = yaml.safe_load(f)
+                    if isinstance(meta_data, dict) and "timestamp" in meta_data:
+                        ts = meta_data["timestamp"]
+                        # Handle both datetime objects and ISO-format strings
+                        if isinstance(ts, str):
+                            timestamp = datetime.fromisoformat(ts)
+                        else:
+                            timestamp = ts
+                        result.append((plan_id, timestamp))
+                        continue
+            except Exception:
+                pass
+
+        # Fallback to file modification time
+        timestamp = datetime.fromtimestamp(plan_file.stat().st_mtime)
+        result.append((plan_id, timestamp))
+
+    # Sort by timestamp, newest first
+    result.sort(key=lambda x: x[1], reverse=True)
+    return result
 
 
 def get_plan_metadata(plan_id: str) -> RunMetadata:
-    """Get metadata for a specific plan.
+    """Get the metadata for a rename plan.
 
     Args:
-        plan_id: The ID of the plan
+        plan_id: The ID of the plan to get metadata for.
 
     Returns:
-        The plan metadata
+        RunMetadata: The metadata for the plan.
 
     Raises:
-        FileNotFoundError: If the metadata does not exist
+        FileNotFoundError: If the metadata file does not exist.
     """
-    plan_dir = _ensure_plan_dir()
-    metadata_file = plan_dir / plan_id / "run.yaml"
+    plans_dir = _ensure_plan_dir()
+    meta_path = plans_dir / f"{plan_id}.meta.yaml"
 
-    if not metadata_file.exists():
-        raise FileNotFoundError(f"Metadata file not found: {metadata_file}")
+    if not meta_path.exists():
+        raise FileNotFoundError(f"Metadata file not found: {meta_path}")
 
-    with open(metadata_file, "r", encoding="utf-8") as f:
-        metadata = yaml.safe_load(f)
+    # Load metadata
+    with open(meta_path, "r", encoding="utf-8") as f:
+        meta_data = yaml.safe_load(f)
 
-    return RunMetadata.model_validate(metadata)
-
-
-def list_plans() -> Dict[str, datetime]:
-    """List all available plans with their timestamps.
-
-    Returns:
-        A dictionary mapping plan IDs to their timestamps
-    """
-    plan_dir = _ensure_plan_dir()
-    plans = {}
-
-    for path in plan_dir.iterdir():
-        if path.is_dir():
-            metadata_file = path / "run.yaml"
-            if metadata_file.exists():
-                try:
-                    with open(metadata_file, "r", encoding="utf-8") as f:
-                        metadata = yaml.safe_load(f)
-
-                    # Handle timestamp which might be a string or a datetime object
-                    timestamp = metadata["timestamp"]
-                    if isinstance(timestamp, str):
-                        timestamp = datetime.fromisoformat(timestamp)
-                    elif not isinstance(timestamp, datetime):
-                        # If it's neither string nor datetime, skip this plan
-                        continue
-
-                    plans[path.name] = timestamp
-                except (KeyError, ValueError, yaml.YAMLError):
-                    # Skip invalid metadata files
-                    pass
-
-    return plans
+    return RunMetadata.model_validate(meta_data)
