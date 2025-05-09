@@ -454,20 +454,16 @@ def _process_directory(
 def scan_directory(
     root_dir: Path,
     media_types: List[MediaType] | None = None,
-    recursive: bool = True,
-    include_hidden: bool = False,
-    verify: bool = False,
-    platform: str = "plex",
+    *,  # Force the rest of the parameters to be keyword-only
+    options: Optional[ScanOptions] = None,
 ) -> ScanResult:
     """Scan a directory for media files.
 
     Args:
         root_dir: The directory to scan
         media_types: Types of media to include. If None, includes all types.
-        recursive: Whether to scan subdirectories recursively
-        include_hidden: Whether to include hidden files and directories
-        verify: Whether to verify file checksums
-        platform: Target platform for the scan
+        options: Scan options including recursive, include_hidden, verify,
+            and platform settings. If None, default options will be used.
 
     Returns:
         ScanResult object containing the found media files and statistics
@@ -485,18 +481,14 @@ def scan_directory(
     # Use absolute path to avoid relative path issues
     root_dir = root_dir.absolute()
 
-    # Set up options
-    options = ScanOptions(
-        recursive=recursive,
-        include_hidden=include_hidden,
-        verify_hash=verify,
-        platform=platform,
-    )
+    # Set up options with defaults if none provided
+    if options is None:
+        options = ScanOptions()
 
     # Set up media types
     if media_types:
         options.media_types = media_types
-    else:
+    elif not options.media_types:
         # If no media types specified, include all
         options.media_types = [
             MediaType.TV,

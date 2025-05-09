@@ -78,19 +78,16 @@ def _update_latest_link(plan_dir: Path, plan_id: str, plan_file: Path) -> None:
             # Log the error but continue - not critical
             logger.warning(f"Warning: Could not remove old latest.json reference: {e}")
 
-    # Determine if we're in a CI environment
+    # Always use file copy on Windows or in CI environment for reliability
+    is_windows = sys.platform == "win32"
     is_ci = os.environ.get("CI", "false").lower() in ("true", "1", "yes")
 
-    # Check if we can use symlinks (non-Windows or Windows with symlink capability)
-    can_use_symlinks = (
-        sys.platform != "win32" or  # Not Windows
-        not is_ci  # Not in CI environment on Windows
-    )
-
-    if can_use_symlinks:
+    # Only try symlinks on non-Windows platforms
+    if not is_windows and not is_ci:
         try:
             # Use relative path for symlink to work across different mounts
-            relative_path = plan_id + "/plan.json"
+            relative_path = os.path.join(plan_id, "plan.json")
+            # Create the symlink
             os.symlink(relative_path, str(latest_link))
             return
         except (OSError, PermissionError) as e:

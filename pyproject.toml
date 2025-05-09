@@ -126,6 +126,7 @@ select = [
     "T20",  # flake8-todos
     "C90",  # mccabe
 ]
+ignore = ["D203", "D213"]  # Disable potentially conflicting rules that can cause infinite autofix loops
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"

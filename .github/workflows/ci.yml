@@ -22,19 +22,39 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
         
+    - name: Set shell to bash on Windows
+      if: matrix.os == 'windows-latest'
+      run: |
+        echo "SHELL=bash" >> $GITHUB_ENV
+        
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         python -m pip install -e ".[dev]"
         
-    - name: Fix formatting issues
+    - name: Debug Windows environment
+      if: matrix.os == 'windows-latest'
+      shell: bash
       run: |
-        bash scripts/ci_checks.sh --format-only || true
+        echo "OSTYPE: $OSTYPE"
+        echo "Python version: $(python --version)"
+        echo "Python executable: $(which python)"
+        python -c "import os; print(f'Path separator: {os.path.sep}')"
+        bash ./scripts/debug_windows_tests.sh || true
+        
+    - name: Fix formatting issues
+      shell: bash
+      run: |
+        bash scripts/ci_checks.sh --format-only
         
     - name: Run full CI checks
+      shell: bash
       run: |
         bash scripts/ci_checks.sh
+      env:
+        CI: "true"
+        PYTHONPATH: ${{ github.workspace }}
         
     - name: Upload coverage report
       uses: codecov/codecov-action@v3
-      if: matrix.os == 'ubuntu-latest' 
+      if: matrix.os == 'ubuntu-latest'

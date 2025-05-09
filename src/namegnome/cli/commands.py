@@ -16,9 +16,9 @@ from rich.traceback import install as install_traceback
 
 from namegnome.cli.renderer import render_diff
 from namegnome.core.planner import create_rename_plan
-from namegnome.core.scanner import scan_directory
+from namegnome.core.scanner import ScanOptions, scan_directory
 from namegnome.models.core import MediaType
-from namegnome.models.scan import ScanOptions
+from namegnome.models.scan import ScanOptions as ModelScanOptions
 from namegnome.rules.base import RuleSetConfig
 from namegnome.rules.plex import PlexRuleSet
 from namegnome.utils.json import DateTimeEncoder
@@ -247,22 +247,6 @@ def _scan_impl(options: ScanCommandOptions) -> int:
     # Generate plan ID based on current timestamp
     plan_id = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    # Create scan options model for plan store
-    scan_options_model = ScanOptions(
-        root=options.root,
-        media_types=media_types,
-        platform=options.platform,
-        verify_hash=options.verify,
-        show_name=options.show_name,
-        movie_year=options.movie_year,
-        anthology=options.anthology,
-        adjust_episodes=options.adjust_episodes,
-        json_output=options.json_output,
-        llm_model=options.llm_model,
-        no_color=options.no_color,
-        strict_directory_structure=options.strict_directory_structure,
-    )
-
     try:
         # Create a progress spinner
         with Progress(
@@ -273,8 +257,15 @@ def _scan_impl(options: ScanCommandOptions) -> int:
             # Scan directory
             progress.add_task("Scanning directory...", total=None)
             try:
+                # Create ScanOptions for scan_directory
+                scan_options = ScanOptions(
+                    recursive=True,
+                    include_hidden=False,
+                    verify_hash=options.verify,
+                    platform=options.platform,
+                )
                 scan_result = scan_directory(
-                    options.root, media_types, verify=options.verify
+                    options.root, media_types, options=scan_options
                 )
             except (FileNotFoundError, PermissionError, ValueError) as e:
                 console.print(f"[red]Error: {str(e)}[/red]")
@@ -319,7 +310,10 @@ def _scan_impl(options: ScanCommandOptions) -> int:
                 )
 
                 # Save the plan to the plan store
-                plan_id = save_plan(plan, scan_options_model, verify=options.verify)
+                model_scan_options = _convert_to_model_options(
+                    options, media_types, scan_options
+                )
+                plan_id = save_plan(plan, model_scan_options, verify=options.verify)
 
                 console.log(f"Plan stored with ID: {plan_id}")
 
@@ -359,3 +353,37 @@ def version() -> None:
 def main() -> None:
     """Main entry point for the CLI."""
     app()
+
+
+def _convert_to_model_options(
+    options: ScanCommandOptions,
+    media_types: List[MediaType],
+    scan_options: ScanOptions
+) -> ModelScanOptions:
+    """Convert our ScanOptions to the model version for saving.
+
+    Args:
+        options: CLI command options
+        media_types: List of media types detected
+        scan_options: Core scanner options
+
+    Returns:
+        Model version of scan options for storage
+    """
+    return ModelScanOptions(
+        root=options.root,
+        media_types=media_types,
+        platform=options.platform,
+        verify_hash=options.verify,
+        recursive=scan_options.recursive,
+        include_hidden=scan_options.include_hidden,
+        show_name=options.show_name,
+        movie_year=options.movie_year,
+        anthology=options.anthology,
+        adjust_episodes=options.adjust_episodes,
+        json_output=options.json_output,
+        llm_model=options.llm_model,
+        no_color=options.no_color,
+        strict_directory_structure=options.strict_directory_structure,
+        target_extensions=scan_options.target_extensions,
+    )
