@@ -89,7 +89,10 @@ def test_ensure_plan_dir() -> None:
     plan_dir = _ensure_plan_dir()
     assert plan_dir.exists()
     assert plan_dir.name == "plans"
-    assert str(plan_dir).endswith(".namegnome/plans")
+    # Cross-platform: check the last two parts
+    parts = plan_dir.parts
+    assert parts[-1] == "plans"
+    assert ".namegnome" in parts
 
 
 def test_save_and_load_plan(

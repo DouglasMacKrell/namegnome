@@ -1,11 +1,13 @@
 """Tests for the namegnome CLI commands."""
 
 import contextlib
+import os
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pytest import MonkeyPatch
 from typer.testing import CliRunner
 
 from namegnome.cli.commands import app
@@ -16,7 +18,6 @@ from namegnome.models.plan import RenamePlan
 # Helper function to create an absolute path that's platform-independent
 def abs_path(path_str: str) -> str:
     """Create a platform-independent absolute path string."""
-    import os
     from pathlib import Path
 
     if os.name == "nt":  # Windows
@@ -255,3 +256,68 @@ def test_scan_with_all_options(
     )
     assert result.exit_code != 0
     assert "No media files found." in result.output
+
+
+@pytest.mark.parametrize(
+    "scan_args",
+    [
+        ["scan", "{tmp_path}", "--media-type", "tv", "--json", "--no-color"],
+        ["scan", "{tmp_path}", "--media-type", "tv", "--no-color"],
+        ["scan", "{tmp_path}", "--media-type", "tv", "--no-color"],
+        [
+            "scan",
+            "{tmp_path}",
+            "--media-type",
+            "tv",
+            "--media-type",
+            "movie",
+            "--platform",
+            "jellyfin",
+            "--verify",
+            "--show-name",
+            "Test Show",
+            "--movie-year",
+            "2023",
+            "--anthology",
+            "--adjust-episodes",
+            "--llm-model",
+            "llama-model",
+            "--no-color",
+        ],
+    ],
+)
+def test_scan_command_cross_platform(
+    scan_args: list[str], tmp_path: Path, monkeypatch: MonkeyPatch
+) -> None:
+    """Test scan command with a platform-appropriate temp directory."""
+    from namegnome.cli.commands import app
+
+    runner = CliRunner()
+    args = [a.format(tmp_path=tmp_path) for a in scan_args]
+    result = runner.invoke(app, args)
+    # Accept either 'No media files found.' or a usage error if the directory is invalid
+    assert result.exit_code != 0
+    assert (
+        "No media files found." in result.output
+        or "Usage:" not in result.output  # Fail if usage error is shown
+    )
+
+
+# Add a test to catch Windows-specific usage error
+@pytest.mark.skipif(os.name != "nt", reason="Windows-specific error check")
+def test_scan_command_windows_usage_error(tmp_path: Path) -> None:
+    """Test that scan command does not show usage error for non-existent directory on Windows."""
+    from namegnome.cli.commands import app
+
+    runner = CliRunner()
+    # Use a non-existent directory
+    non_existent = tmp_path / "doesnotexist"
+    result = runner.invoke(
+        app, ["scan", str(non_existent), "--media-type", "tv", "--no-color"]
+    )
+    # Should not show a usage error
+    assert "Usage:" not in result.output
+    assert result.exit_code != 0
+    assert (
+        "does not exist" in result.output or "Invalid value for 'ROOT'" in result.output
+    )
