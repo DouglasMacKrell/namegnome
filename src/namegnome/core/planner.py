@@ -8,7 +8,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from namegnome.models.core import PlanStatus, ScanResult
 from namegnome.models.plan import RenamePlan, RenamePlanItem
@@ -16,6 +16,11 @@ from namegnome.rules.base import RuleSet, RuleSetConfig
 
 # Logger for this module
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from namegnome.models.core import ScanResult
+    from namegnome.models.plan import RenamePlan
+    from namegnome.rules.base import RuleSet
 
 
 def create_rename_plan(

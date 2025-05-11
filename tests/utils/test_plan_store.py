@@ -9,6 +9,8 @@ from typing import Generator
 from unittest.mock import patch
 
 import pytest
+from pytest_mock import MockerFixture
+
 from namegnome.models.core import MediaFile, MediaType
 from namegnome.models.plan import RenamePlan, RenamePlanItem
 from namegnome.models.scan import ScanOptions
@@ -21,7 +23,6 @@ from namegnome.utils.plan_store import (
     load_plan,
     save_plan,
 )
-from pytest_mock import MockerFixture
 
 
 @pytest.fixture
@@ -40,13 +41,14 @@ def temp_home_dir() -> Generator[Path, None, None]:
 
 
 @pytest.fixture
-def test_plan() -> RenamePlan:
-    """Create a test plan."""
-    # Create platform-independent paths
-    base_dir = Path.cwd() / "test_dir"
+def test_plan(tmp_path: Path) -> RenamePlan:
+    """Create a test plan with platform-appropriate absolute paths."""
+    base_dir = tmp_path / "test_dir"
+    base_dir.mkdir(parents=True, exist_ok=True)
     source_path = base_dir / "source.mp4"
     destination_path = base_dir / "target.mp4"
-
+    source_path.touch()
+    destination_path.touch()
     # Create a media file for the test plan
     media_file = MediaFile(
         path=source_path,
@@ -57,14 +59,12 @@ def test_plan() -> RenamePlan:
         title="Test Movie",
         year=2023,
     )
-
     # Create a rename plan item
     plan_item = RenamePlanItem(
         source=source_path,
         destination=destination_path,
         media_file=media_file,
     )
-
     return RenamePlan(
         id="test-plan-1",
         root_dir=base_dir,

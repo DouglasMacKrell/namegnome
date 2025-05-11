@@ -190,7 +190,6 @@ class ScanCommandOptions:
 
 @app.command()
 def scan(  # noqa: PLR0913
-    # Use Typer's parameters but delegate implementation to ScanCommandOptions
     root: ROOT_PATH,
     media_type: MEDIA_TYPE = [],
     platform: PLATFORM = "plex",
@@ -203,34 +202,108 @@ def scan(  # noqa: PLR0913
     llm_model: LLM_MODEL = None,
     no_color: NO_COLOR = False,
     strict_directory_structure: STRICT_DIRECTORY_STRUCTURE = True,
-) -> int:
+) -> None:
     """Scan a directory for media files and generate a rename plan."""
-    # Convert media_type to list to fix type issue
     media_type_list = list(media_type)
-
-    # Use CLI parameters to create options object
-    return _scan_impl(
-        ScanCommandOptions(
-            root=root,
-            media_type=media_type_list,
-            platform=platform,
-            show_name=show_name,
-            movie_year=movie_year,
-            anthology=anthology,
-            adjust_episodes=adjust_episodes,
-            verify=verify,
-            json_output=json_output,
-            llm_model=llm_model,
-            no_color=no_color,
-            strict_directory_structure=strict_directory_structure,
-        )
-    )
+    if not media_type_list:
+        console.print("[red]At least one media type must be specified.[/red]")
+        raise typer.Exit(ExitCode.ERROR)
+    if not root.exists():
+        console.print(f"[red]Error: Directory does not exist: {root}[/red]")
+        raise typer.Exit(ExitCode.ERROR)
+    try:
+        # Convert string media types to MediaType enum values
+        try:
+            validated_media_types = [validate_media_type(mt) for mt in media_type_list]
+        except typer.BadParameter as e:
+            console.print(f"[red]Error: {str(e)}[/red]")
+            raise typer.Exit(ExitCode.ERROR)
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            console=console,
+        ) as progress:
+            progress.add_task("Scanning directory...", total=None)
+            scan_options = ScanOptions(
+                recursive=True,
+                include_hidden=False,
+                verify_hash=verify,
+                platform=platform,
+            )
+            scan_result = scan_directory(
+                root, validated_media_types, options=scan_options
+            )
+            if len(scan_result.files) == 0:
+                console.print("[yellow]No media files found.[/yellow]")
+                raise typer.Exit(ExitCode.SUCCESS)
+            progress.update(
+                progress.task_ids[0], description="Generating rename plan..."
+            )
+            rule_set = PlexRuleSet()  # TODO: Make this configurable based on platform
+            with console.status("[cyan]Creating rename plan...", spinner="dots"):
+                config = RuleSetConfig(
+                    show_name=show_name,
+                    movie_year=movie_year,
+                    anthology=anthology,
+                    adjust_episodes=adjust_episodes,
+                    verify=verify,
+                    llm_model=llm_model,
+                    strict_directory_structure=strict_directory_structure,
+                )
+                plan = create_rename_plan(
+                    scan_result=scan_result,
+                    rule_set=rule_set,
+                    plan_id=str(uuid.uuid4()),
+                    platform=platform,
+                    config=config,
+                )
+            progress.update(progress.task_ids[0], description="Storing rename plan...")
+            model_scan_options = _convert_to_model_options(
+                ScanCommandOptions(
+                    root=root,
+                    media_type=media_type_list,
+                    platform=platform,
+                    show_name=show_name,
+                    movie_year=movie_year,
+                    anthology=anthology,
+                    adjust_episodes=adjust_episodes,
+                    verify=verify,
+                    json_output=json_output,
+                    llm_model=llm_model,
+                    no_color=no_color,
+                    strict_directory_structure=strict_directory_structure,
+                ),
+                validated_media_types,
+                scan_options,
+            )
+            console.log("Saving plan...")
+            plan_id = save_plan(plan, model_scan_options, extra_args={"verify": verify})
+            console.log(f"Plan stored with ID: {plan_id}")
+        if json_output:
+            json_str = json.dumps(plan.model_dump(), cls=DateTimeEncoder, indent=2)
+            sys.stdout.write(json_str + "\n")
+        else:
+            render_diff(plan, console=console)
+            manual_items = [item for item in plan.items if item.manual]
+            if manual_items:
+                console.print(
+                    f"\n[bold yellow]Warning:[/bold yellow] {len(manual_items)} "
+                    f"item(s) require manual confirmation. "
+                    f"Use --force to override or fix these issues manually."
+                )
+                raise typer.Exit(ExitCode.MANUAL_NEEDED)
+    except Exception as e:
+        console.print(f"[red]Error: An unexpected error occurred: {str(e)}[/red]")
+        console.print_exception()
+        raise typer.Exit(ExitCode.ERROR)
 
 
 def _scan_impl(options: ScanCommandOptions) -> int:
     """Implementation of the scan command."""
     # Create console with appropriate color settings
     console = Console(no_color=options.no_color)
+
+    result: int = ExitCode.SUCCESS
 
     # Check if at least one media type is specified
     if not options.media_type:
@@ -267,83 +340,77 @@ def _scan_impl(options: ScanCommandOptions) -> int:
                 scan_result = scan_directory(
                     options.root, media_types, options=scan_options
                 )
+                # Early exit if no files found
+                if len(scan_result.files) == 0:
+                    console.print("[yellow]No media files found.[/yellow]")
+                    result = ExitCode.SUCCESS
+                    plan = None
+                else:
+                    # Generate rename plan
+                    progress.update(
+                        progress.task_ids[0],
+                        description="Generating rename plan...",
+                    )
+                    rule_set = (
+                        PlexRuleSet()
+                    )  # TODO: Make this configurable based on platform
+                    with console.status(
+                        "[cyan]Creating rename plan...", spinner="dots"
+                    ):
+                        config = RuleSetConfig(
+                            show_name=options.show_name,
+                            movie_year=options.movie_year,
+                            anthology=options.anthology,
+                            adjust_episodes=options.adjust_episodes,
+                            verify=options.verify,
+                            llm_model=options.llm_model,
+                            strict_directory_structure=options.strict_directory_structure,
+                        )
+                        plan = create_rename_plan(
+                            scan_result=scan_result,
+                            rule_set=rule_set,
+                            plan_id=str(uuid.uuid4()),
+                            platform=options.platform,
+                            config=config,
+                        )
+                    # Store the plan and metadata
+                    progress.update(
+                        progress.task_ids[0], description="Storing rename plan..."
+                    )
+                    model_scan_options = _convert_to_model_options(
+                        options, media_types, scan_options
+                    )
+                    console.log("Saving plan...")
+                    plan_id = save_plan(
+                        plan, model_scan_options, extra_args={"verify": options.verify}
+                    )
+                    console.log(f"Plan stored with ID: {plan_id}")
             except (FileNotFoundError, PermissionError, ValueError) as e:
                 console.print(f"[red]Error: {str(e)}[/red]")
-                return ExitCode.ERROR
+                result = ExitCode.ERROR
+                plan = None
 
-            # Generate rename plan
-            progress.update(
-                progress.task_ids[0], description="Generating rename plan..."
-            )
-
-            # Determine which rule set to use based on platform
-            # For now, we only have PlexRuleSet, but this can be extended
-            # to support other platforms in the future
-            rule_set = PlexRuleSet()  # TODO: Make this configurable based on platform
-
-            # Create rename plan with the rule set
-            with console.status("[cyan]Creating rename plan...", spinner="dots"):
-                # Create config for rule set
-                config = RuleSetConfig(
-                    show_name=options.show_name,
-                    movie_year=options.movie_year,
-                    anthology=options.anthology,
-                    adjust_episodes=options.adjust_episodes,
-                    verify=options.verify,
-                    llm_model=options.llm_model,
-                    strict_directory_structure=options.strict_directory_structure,
-                )
-
-                # Create plan
-                plan = create_rename_plan(
-                    scan_result=scan_result,
-                    rule_set=rule_set,
-                    plan_id=str(uuid.uuid4()),
-                    platform=options.platform,
-                    config=config,
-                )
-
-            # Store the plan and metadata
-            if len(scan_result.files) > 0:
-                progress.update(
-                    progress.task_ids[0], description="Storing rename plan..."
-                )
-
-                # Save the plan to the plan store
-                model_scan_options = _convert_to_model_options(
-                    options, media_types, scan_options
-                )
-                # Create and save the plan
-                console.log("Saving plan...")
-                plan_id = save_plan(
-                    plan, model_scan_options, extra_args={"verify": options.verify}
-                )
-
-                console.log(f"Plan stored with ID: {plan_id}")
-
-        # Output results
-        if options.json_output:
-            json_str = json.dumps(plan.model_dump(), cls=DateTimeEncoder, indent=2)
-            sys.stdout.write(json_str + "\n")
-        else:
-            render_diff(plan, console=console)
-
-            # Check if any items require manual confirmation
-            manual_items = [item for item in plan.items if item.manual]
-            if manual_items:
-                console.print(
-                    f"\n[bold yellow]Warning:[/bold yellow] {len(manual_items)} "
-                    f"item(s) require manual confirmation. "
-                    f"Use --force to override or fix these issues manually."
-                )
-                return ExitCode.MANUAL_NEEDED
-
+        # Output results if plan exists
+        if result == ExitCode.SUCCESS and plan is not None:
+            if options.json_output:
+                json_str = json.dumps(plan.model_dump(), cls=DateTimeEncoder, indent=2)
+                sys.stdout.write(json_str + "\n")
+            else:
+                render_diff(plan, console=console)
+                manual_items = [item for item in plan.items if item.manual]
+                if manual_items:
+                    console.print(
+                        f"\n[bold yellow]Warning:[/bold yellow] {len(manual_items)} "
+                        f"item(s) require manual confirmation. "
+                        f"Use --force to override or fix these issues manually."
+                    )
+                    result = ExitCode.MANUAL_NEEDED
     except Exception as e:
         console.print(f"[red]Error: An unexpected error occurred: {str(e)}[/red]")
         console.print_exception()
-        return ExitCode.ERROR
+        result = ExitCode.ERROR
 
-    return ExitCode.SUCCESS
+    return result
 
 
 @app.command()

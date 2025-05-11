@@ -13,6 +13,7 @@ from unittest.mock import patch
 
 import pytest
 import yaml
+
 from namegnome.fs import (
     get_latest_plan,
     get_namegnome_dir,
@@ -56,12 +57,12 @@ def plan_store_dir(temp_home_dir: Path) -> Path:
 
 
 @pytest.fixture
-def test_plan() -> RenamePlan:
-    """Create a test rename plan."""
+def test_plan(tmp_path: Path) -> RenamePlan:
+    """Create a test rename plan with platform-appropriate absolute paths."""
     # Used for creating a test plan, even though not directly referenced in the plan
     # (to demonstrate we're creating a valid plan)
     _ = MediaFile(
-        path=Path("/test/file.mp4").absolute(),
+        path=tmp_path / "file.mp4",
         size=1024,
         media_type=MediaType.TV,
         modified_date=datetime.now(),
@@ -70,7 +71,7 @@ def test_plan() -> RenamePlan:
     return RenamePlan(
         id="20250101_010101",
         created_at=datetime.now(),
-        root_dir=Path("/test").absolute(),
+        root_dir=tmp_path,
         platform="plex",
         media_types=[MediaType.TV],
         items=[],

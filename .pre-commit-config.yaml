@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: 'v0.3.4'
+    rev: 'v0.11.9'
     hooks:
       - id: ruff
         args: [--fix, --respect-gitignore]
@@ -8,7 +8,7 @@ repos:
         args: [--respect-gitignore]
   
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.7.1'
+    rev: 'v1.15.0'
     hooks:
       - id: mypy
         additional_dependencies:
@@ -25,3 +25,9 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']

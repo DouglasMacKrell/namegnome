@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Generator
 
 import pytest
+
 from namegnome.core.scanner import ScanOptions, guess_media_type, scan_directory
 from namegnome.models.core import MediaType
 
@@ -17,36 +18,36 @@ logger = logging.getLogger(__name__)
 class TestGuessMediaType:
     """Tests for the guess_media_type function."""
 
-    def test_tv_show_pattern(self) -> None:
+    def test_tv_show_pattern(self, tmp_path: Path) -> None:
         """Test that TV show patterns are detected correctly."""
         # S01E01 pattern
-        assert guess_media_type(Path("/tmp/Breaking Bad S01E01.mp4")) == MediaType.TV
+        assert guess_media_type(tmp_path / "Breaking Bad S01E01.mp4") == MediaType.TV
         # 1x01 pattern
-        assert guess_media_type(Path("/tmp/Breaking Bad 1x01.mkv")) == MediaType.TV
+        assert guess_media_type(tmp_path / "Breaking Bad 1x01.mkv") == MediaType.TV
         # season/episode pattern
         assert (
-            guess_media_type(Path("/tmp/Breaking Bad Season 1 Episode 1.avi"))
+            guess_media_type(tmp_path / "Breaking Bad Season 1 Episode 1.avi")
             == MediaType.TV
         )
 
-    def test_directory_hints(self) -> None:
+    def test_directory_hints(self, tmp_path: Path) -> None:
         """Test that directory hints are used to guess media type."""
         # TV show in TV directory
         assert (
-            guess_media_type(Path("/media/TV Shows/Breaking Bad/episode.mp4"))
+            guess_media_type(tmp_path / "TV Shows/Breaking Bad/episode.mp4")
             == MediaType.TV
         )
         # Movie in Movies directory
-        assert guess_media_type(Path("/media/Movies/Inception.mp4")) == MediaType.MOVIE
+        assert guess_media_type(tmp_path / "Movies/Inception.mp4") == MediaType.MOVIE
         # Music in Music directory
-        assert guess_media_type(Path("/media/Music/song.mp3")) == MediaType.MUSIC
+        assert guess_media_type(tmp_path / "Music/song.mp3") == MediaType.MUSIC
 
-    def test_unknown_type(self) -> None:
+    def test_unknown_type(self, tmp_path: Path) -> None:
         """Test that unknown media types are classified as UNKNOWN."""
         # Unknown extension
-        assert guess_media_type(Path("/tmp/somefile.txt")) == MediaType.UNKNOWN
+        assert guess_media_type(tmp_path / "somefile.txt") == MediaType.UNKNOWN
         # No clear hints in the path
-        assert guess_media_type(Path("/tmp/random_video.mp4")) == MediaType.UNKNOWN
+        assert guess_media_type(tmp_path / "random_video.mp4") == MediaType.UNKNOWN
 
 
 class TestScanDirectory:

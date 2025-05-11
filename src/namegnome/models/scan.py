@@ -3,7 +3,7 @@
 from pathlib import Path
 from typing import List, Optional, Set
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from namegnome.models.core import MediaType
 
@@ -55,7 +55,4 @@ class ScanOptions(BaseModel):
 
     target_extensions: Set[str] = Field(default_factory=set)
 
-    class Config:
-        """Pydantic config for ScanOptions."""
-
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)

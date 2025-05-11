@@ -31,26 +31,26 @@ class TestPlexRuleSet:
         assert rule_set.supports_media_type(MediaType.MUSIC) is False
         assert rule_set.supports_media_type(MediaType.UNKNOWN) is False
 
-    def test_tv_show_path_standard_format(self, rule_set: PlexRuleSet) -> None:
+    def test_tv_show_path_standard_format(
+        self, rule_set: PlexRuleSet, tmp_path: Path
+    ) -> None:
         """Test target path generation for a standard TV show file format."""
         # Create a test media file
         media_file = MediaFile(
-            path=Path("/test/Breaking Bad S01E05 Gray Matter.mp4").absolute(),
+            path=tmp_path / "Breaking Bad S01E05 Gray Matter.mp4",
             size=1024,
             media_type=MediaType.TV,
             modified_date=datetime.now(),
         )
-
         # Set a base directory for consistent testing
-        base_dir = Path("/media").absolute()
-
+        base_dir = tmp_path
         # Generate the target path
         target = rule_set.target_path(media_file, base_dir)
-
         # Check that the path follows Plex conventions
-        expected = Path(
-            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray Matter.mp4"
-        ).absolute()
+        expected = (
+            base_dir
+            / "TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray Matter.mp4"
+        )
         assert target == expected
 
     def test_tv_show_path_with_dots(self, rule_set: PlexRuleSet) -> None:

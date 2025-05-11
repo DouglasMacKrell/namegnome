@@ -21,14 +21,14 @@ def temp_dir() -> Generator[Path, None, None]:
 
 
 @pytest.fixture
-def scan_result(temp_dir: Path) -> ScanResult:
-    """Create a sample scan result with test files."""
+def scan_result(tmp_path: Path) -> ScanResult:
+    """Create a sample scan result with test files using platform-appropriate absolute paths."""
     # Create some test files
-    tv_file = temp_dir / "Breaking Bad S01E01.mp4"
+    tv_file = tmp_path / "Breaking Bad S01E01.mp4"
     tv_file.write_bytes(b"dummy content")
-    movie_file = temp_dir / "Inception (2010).mp4"
+    movie_file = tmp_path / "Inception (2010).mp4"
     movie_file.write_bytes(b"dummy content")
-    music_file = temp_dir / "song.mp3"
+    music_file = tmp_path / "song.mp3"
     music_file.write_bytes(b"dummy content")
 
     # Create media files
@@ -55,7 +55,7 @@ def scan_result(temp_dir: Path) -> ScanResult:
 
     return ScanResult(
         files=media_files,
-        root_dir=temp_dir.absolute(),
+        root_dir=tmp_path.absolute(),
         media_types=[MediaType.TV, MediaType.MOVIE, MediaType.MUSIC],
         platform="plex",
         # Backward compatibility fields

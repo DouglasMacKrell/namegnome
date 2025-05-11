@@ -178,36 +178,16 @@ def save_plan(
     with open(meta_path, "w", encoding="utf-8") as f:
         yaml.safe_dump(metadata.model_dump_for_yaml(), f)
 
-    # Create or update the latest.json symlink or copy
-    latest_path = plans_dir / "latest.json"
-
-    # In CI environments or on Windows where symlinks may not be allowed,
-    # fall back to copying the file instead of creating a symlink
-    is_ci = os.environ.get("CI", "false").lower() in ("true", "1", "yes")
-
+    # Create or update the latest symlink or file
+    latest_link = plans_dir / "latest.json"
     try:
-        # Try to use symlink first (preferred method)
-        if latest_path.exists():
-            latest_path.unlink()
-
-        # On Windows in CI, or if symlinks fail, copy the file instead
-        if platform.system() == WINDOWS_OS or is_ci:
-            # Try symlink first but fallback to copy
-            try:
-                # Force creation of a symlink even on Windows
-                latest_path.symlink_to(plan_path)
-            except (OSError, PermissionError):
-                # Fallback to copy if symlink fails
-                shutil.copy2(plan_path, latest_path)
-                logger.warning("Using file copy instead of symlink for latest.json")
-        else:
-            # On Unix systems, always use symlinks
-            latest_path.symlink_to(plan_path)
-    except Exception as e:
-        # Last resort fallback - if all fails, just write a file with the ID
-        logger.warning(f"Failed to create symlink or copy: {e}")
-        with open(latest_path, "w", encoding="utf-8") as f:
-            f.write(f"{run_id}\n")
+        if latest_link.exists() or latest_link.is_symlink():
+            latest_link.unlink()
+        # Try to create a symlink
+        os.symlink(str(plan_path), str(latest_link))
+    except (OSError, NotImplementedError):
+        # Fallback: copy the file instead
+        shutil.copyfile(str(plan_path), str(latest_link))
 
     return run_id
 

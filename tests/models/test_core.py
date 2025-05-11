@@ -26,10 +26,10 @@ class TestMediaType:
         assert MediaType.MUSIC.value == "music"
         assert MediaType.UNKNOWN.value == "unknown"
 
-    def test_serialization(self) -> None:
+    def test_serialization(self, tmp_path: Path) -> None:
         """Test MediaType serializes to string in JSON."""
         media_file = MediaFile(
-            path=Path("/tmp/test.mp4").absolute(),
+            path=tmp_path / "test.mp4",
             size=1024,
             media_type=MediaType.TV,
             modified_date=datetime.now(),
@@ -55,10 +55,10 @@ class TestPlanStatus:
 class TestMediaFile:
     """Tests for the MediaFile model."""
 
-    def test_create_valid(self) -> None:
+    def test_create_valid(self, tmp_path: Path) -> None:
         """Test creating a valid MediaFile instance."""
         media_file = MediaFile(
-            path=Path("/tmp/test.mp4").absolute(),
+            path=tmp_path / "test.mp4",
             size=1024,
             media_type=MediaType.TV,
             modified_date=datetime.now(),
@@ -79,32 +79,29 @@ class TestMediaFile:
                 modified_date=datetime.now(),
             )
 
-    def test_serialization_roundtrip(self) -> None:
+    def test_serialization_roundtrip(self, tmp_path: Path) -> None:
         """Test serialization and deserialization."""
         now = datetime.now()
+        test_path = tmp_path / "test.mp4"
         original = MediaFile(
-            path=Path("/tmp/test.mp4").absolute(),
+            path=test_path,
             size=1024,
             media_type=MediaType.TV,
             modified_date=now,
             hash="abc123",
             metadata_ids={"tmdb": "12345"},
         )
-
         json_data = original.model_dump_json()
-
         # Manual check of JSON structure
         parsed = json.loads(json_data)
-        assert parsed["path"] == str(Path("/tmp/test.mp4").absolute())
+        assert parsed["path"] == str(test_path)
         assert parsed["size"] == 1024
         assert parsed["media_type"] == "tv"
         assert parsed["hash"] == "abc123"
         assert parsed["metadata_ids"] == {"tmdb": "12345"}
-
         # Convert back to model and verify
         model_dict = original.model_dump()
         reconstructed = MediaFile.model_validate(model_dict)
-
         assert reconstructed.path == original.path
         assert reconstructed.size == original.size
         assert reconstructed.media_type == original.media_type
@@ -116,10 +113,10 @@ class TestRenamePlanItem:
     """Tests for the RenamePlanItem model."""
 
     @pytest.fixture
-    def media_file(self) -> MediaFile:
+    def media_file(self, tmp_path: Path) -> MediaFile:
         """Create a sample MediaFile for tests."""
         return MediaFile(
-            path=Path("/tmp/source.mp4").absolute(),
+            path=tmp_path / "source.mp4",
             size=1024,
             media_type=MediaType.TV,
             modified_date=datetime.now(),
@@ -184,10 +181,10 @@ class TestRenamePlan:
     """Tests for the RenamePlan model."""
 
     @pytest.fixture
-    def media_file(self) -> MediaFile:
+    def media_file(self, tmp_path: Path) -> MediaFile:
         """Create a sample MediaFile for tests."""
         return MediaFile(
-            path=Path("/tmp/source.mp4").absolute(),
+            path=tmp_path / "source.mp4",
             size=1024,
             media_type=MediaType.TV,
             modified_date=datetime.now(),
@@ -202,17 +199,17 @@ class TestRenamePlan:
             media_file=media_file,
         )
 
-    def test_create_valid(self, plan_item: RenamePlanItem) -> None:
+    def test_create_valid(self, plan_item: RenamePlanItem, tmp_path: Path) -> None:
         """Test creating a valid RenamePlan."""
         plan = RenamePlan(
             id="plan-123",
-            root_dir=Path("/tmp").absolute(),
+            root_dir=tmp_path,
             platform="plex",
             items=[plan_item],
             media_types=[MediaType.TV],
         )
         assert plan.id == "plan-123"
-        assert plan.root_dir == Path("/tmp").absolute()
+        assert plan.root_dir == tmp_path
         assert plan.platform == "plex"
         assert len(plan.items) == 1
         assert plan.items[0] == plan_item
@@ -254,32 +251,34 @@ class TestScanResult:
     """Tests for the ScanResult model."""
 
     @pytest.fixture
-    def media_file(self) -> MediaFile:
+    def media_file(self, tmp_path: Path) -> MediaFile:
         """Create a sample MediaFile for tests."""
         return MediaFile(
-            path=Path("/tmp/show.mp4").absolute(),
+            path=tmp_path / "show.mp4",
             size=1024,
             media_type=MediaType.TV,
             modified_date=datetime.now(),
         )
 
     @pytest.fixture
-    def movie_file(self) -> MediaFile:
+    def movie_file(self, tmp_path: Path) -> MediaFile:
         """Create a sample MediaFile for tests."""
         return MediaFile(
-            path=Path("/tmp/movie.mp4").absolute(),
+            path=tmp_path / "movie.mp4",
             size=1024,
             media_type=MediaType.MOVIE,
             modified_date=datetime.now(),
         )
 
-    def test_create_valid(self, media_file: MediaFile, movie_file: MediaFile) -> None:
+    def test_create_valid(
+        self, media_file: MediaFile, movie_file: MediaFile, tmp_path: Path
+    ) -> None:
         """Test creating a valid ScanResult."""
         result = ScanResult(
             files=[media_file, movie_file],
             media_types=[MediaType.TV, MediaType.MOVIE],
             platform="plex",
-            root_dir=Path("/tmp").absolute(),
+            root_dir=tmp_path,
             # Backward compatibility fields
             total_files=10,
             skipped_files=8,
@@ -292,7 +291,7 @@ class TestScanResult:
         )
 
         assert len(result.files) == 2
-        assert result.root_dir == Path("/tmp").absolute()
+        assert result.root_dir == tmp_path
         assert len(result.media_types) == 2
         assert result.platform == "plex"
         assert result.total_files == 10

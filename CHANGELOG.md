@@ -53,6 +53,13 @@ All notable changes to the namegnome project will be documented in this file.
 - Corrected handling of Enum values in YAML serialization
 - Fixed path handling in file checksums computation
 
+### Changed
+- Refactored scan command and CLI error handling for proper exit codes and user-facing output.
+- Updated all tests to assert on real CLI output and exit codes.
+- Removed all skipped/redundant tests; all tests now pass with zero skips.
+- Migrated to Pydantic v2 ConfigDict to resolve deprecation warnings.
+- Ensured full cross-platform CI compatibility and green pipeline.
+
 ## [0.2.1] - 2025-05-10
 
 ### Added

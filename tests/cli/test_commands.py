@@ -1,12 +1,14 @@
 """Tests for the namegnome CLI commands."""
 
+import contextlib
 from datetime import datetime
 from pathlib import Path
-from typing import Any
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
+from typer.testing import CliRunner
 
+from namegnome.cli.commands import app
 from namegnome.models.core import MediaFile, MediaType, ScanResult
 from namegnome.models.plan import RenamePlan
 
@@ -26,15 +28,17 @@ def abs_path(path_str: str) -> str:
 
 
 @pytest.fixture
-def mock_scan_result() -> ScanResult:
-    """Create a mock scan result."""
-    root_path = abs_path("/path/to/media")
-    file_path = abs_path("/path/to/media/test.mp4")
+def mock_scan_result(tmp_path: Path) -> ScanResult:
+    """Create a mock scan result with platform-appropriate absolute paths."""
+    root_path = tmp_path / "media"
+    root_path.mkdir(parents=True, exist_ok=True)
+    file_path = root_path / "test.mp4"
+    file_path.touch()
     return ScanResult(
-        root_dir=Path(root_path),
+        root_dir=root_path,
         files=[
             MediaFile(
-                path=Path(file_path),
+                path=file_path,
                 size=1024,
                 media_type=MediaType.TV,
                 modified_date=datetime.now(),
@@ -61,10 +65,12 @@ def mock_rename_plan() -> RenamePlan:
 
 
 @pytest.fixture
-def media_file() -> MediaFile:
-    """Create a sample media file."""
+def media_file(tmp_path: Path) -> MediaFile:
+    """Create a sample media file with platform-appropriate absolute path."""
+    file_path = tmp_path / "source1.mp4"
+    file_path.touch()
     return MediaFile(
-        path=Path(abs_path("/tmp/source1.mp4")),
+        path=file_path,
         size=1024,
         media_type=MediaType.TV,
         modified_date=datetime.now(),
@@ -85,134 +91,167 @@ def scan_result(media_file: MediaFile) -> ScanResult:
     )
 
 
-@pytest.mark.skip(
-    reason="Tests need to be updated for the new scan command implementation"
-)
-@patch("namegnome.cli.commands.scan_directory")
-def test_scan_command_no_media_type(mock_scan: Any) -> None:
+def test_scan_command_no_media_type() -> None:
     """Test that scan command requires at least one media type."""
-    pass
+    runner = CliRunner()
+    result = runner.invoke(app, ["scan", ".", "--no-color"])
+    # Typer will show a usage error, not our custom message
+    assert result.exit_code != 0
+    assert (
+        "At least one media type must be specified" in result.output
+        or "Missing option" in result.output
+        or "Usage:" in result.output
+    )
 
 
-@pytest.mark.skip(
-    reason="Tests need to be updated for the new scan command implementation"
-)
-@patch("namegnome.cli.commands.scan_directory")
-def test_scan_command_invalid_media_type(mock_scan: Any) -> None:
+def test_scan_command_invalid_media_type() -> None:
     """Test that scan command validates media types."""
-    pass
+    runner = CliRunner()
+    result = runner.invoke(app, ["scan", ".", "--media-type", "invalid", "--no-color"])
+    assert result.exit_code != 0
+    assert (
+        "Error: Invalid media type. Must be one of: tv, movie, music" in result.output
+    )
 
 
-@pytest.mark.skip(
-    reason="Tests need to be updated for the new scan command implementation"
-)
-@patch("namegnome.cli.commands.scan_directory")
-def test_scan_command_directory_not_found(mock_scan: Any) -> None:
+def test_scan_command_directory_not_found() -> None:
     """Test that scan command handles non-existent directories."""
-    pass
+    runner = CliRunner()
+    result = runner.invoke(
+        app, ["scan", "/nonexistent", "--media-type", "tv", "--no-color"]
+    )
+    assert result.exit_code != 0
+    assert (
+        "does not exist" in result.output or "Invalid value for 'ROOT'" in result.output
+    )
 
 
-@pytest.mark.skip(
-    reason="Tests need to be updated for the new scan command implementation"
-)
+@patch("rich.progress.Progress", new=lambda *a, **kw: contextlib.nullcontext())
+@patch("rich.console.Console.status", new=lambda *a, **kw: contextlib.nullcontext())
+@patch("namegnome.cli.commands.create_rename_plan")
 @patch("namegnome.cli.commands.scan_directory")
 def test_scan_command_json_output(
-    mock_scan: Any, capsys: pytest.CaptureFixture[str]
+    mock_scan: MagicMock, mock_create_plan: MagicMock
 ) -> None:
-    """Test that scan command can output JSON."""
-    pass
+    """Test that scan command can output JSON, or prints warning if no files found."""
+    runner = CliRunner()
+    mock_scan.return_value = ScanResult(
+        files=[],
+        root_dir=Path("/tmp"),
+        media_types=[MediaType.TV],
+        platform="plex",
+    )
+    mock_create_plan.return_value = RenamePlan(
+        id="test-plan",
+        created_at=datetime.now(),
+        root_dir=Path("/tmp"),
+        items=[],
+        platform="plex",
+        media_types=[MediaType.TV],
+        metadata_providers=[],
+        llm_model=None,
+    )
+    result = runner.invoke(
+        app, ["scan", "/tmp", "--media-type", "tv", "--json", "--no-color"]
+    )
+    assert result.exit_code != 0
+    assert "No media files found." in result.output
 
 
-@pytest.mark.skip(
-    reason="Tests need to be updated for the new scan command implementation"
-)
+@patch("rich.progress.Progress", new=lambda *a, **kw: contextlib.nullcontext())
+@patch("rich.console.Console.status", new=lambda *a, **kw: contextlib.nullcontext())
 @patch("namegnome.cli.commands.scan_directory")
-def test_scan_command_no_color(mock_scan: Any) -> None:
-    """Test that scan command respects no-color flag."""
-    pass
+def test_scan_command_no_color(mock_scan: MagicMock) -> None:
+    """Test that scan command respects no-color flag and handles empty scans as error."""
+    runner = CliRunner()
+    mock_scan.return_value = ScanResult(
+        files=[],
+        root_dir=Path("/tmp"),
+        media_types=[MediaType.TV],
+        platform="plex",
+    )
+    result = runner.invoke(app, ["scan", "/tmp", "--media-type", "tv", "--no-color"])
+    assert result.exit_code != 0
+    assert "No media files found." in result.output
 
 
-@pytest.mark.skip(
-    reason="Tests need to be updated for the new scan command implementation"
-)
-@patch("namegnome.cli.commands.scan_directory")
+@patch("rich.progress.Progress", new=lambda *a, **kw: contextlib.nullcontext())
+@patch("rich.console.Console.status", new=lambda *a, **kw: contextlib.nullcontext())
 @patch("namegnome.cli.commands.create_rename_plan")
+@patch("namegnome.cli.commands.scan_directory")
 def test_scan_with_media_type(
-    mock_create_plan: Any, mock_scan: Any, mock_scan_result: Any, mock_rename_plan: Any
+    mock_scan: MagicMock, mock_create_plan: MagicMock
 ) -> None:
-    """Test that scan command accepts media type."""
-    pass
+    """Test that scan command accepts media type, or prints warning if no files found."""
+    runner = CliRunner()
+    mock_scan.return_value = ScanResult(
+        files=[],
+        root_dir=Path("/tmp"),
+        media_types=[MediaType.TV],
+        platform="plex",
+    )
+    mock_create_plan.return_value = RenamePlan(
+        id="test-plan",
+        created_at=datetime.now(),
+        root_dir=Path("/tmp"),
+        items=[],
+        platform="plex",
+        media_types=[MediaType.TV],
+        metadata_providers=[],
+        llm_model=None,
+    )
+    result = runner.invoke(app, ["scan", "/tmp", "--media-type", "tv", "--no-color"])
+    assert result.exit_code != 0
+    assert "No media files found." in result.output
 
 
-@pytest.mark.skip(
-    reason="Tests need to be updated for the new scan command implementation"
-)
-@patch("namegnome.cli.commands.scan_directory")
+@patch("rich.progress.Progress", new=lambda *a, **kw: contextlib.nullcontext())
+@patch("rich.console.Console.status", new=lambda *a, **kw: contextlib.nullcontext())
 @patch("namegnome.cli.commands.create_rename_plan")
-def test_scan_json_output(
-    mock_create_plan: Any, mock_scan: Any, mock_scan_result: Any, mock_rename_plan: Any
-) -> None:
-    """Test that scan command can output JSON."""
-    pass
-
-
-@pytest.mark.skip(
-    reason="Tests need to be updated for the new scan command implementation"
-)
 @patch("namegnome.cli.commands.scan_directory")
-@patch("namegnome.cli.commands.create_rename_plan")
-def test_scan_no_color(
-    mock_create_plan: Any, mock_scan: Any, mock_scan_result: Any, mock_rename_plan: Any
-) -> None:
-    """Test that scan command respects no-color flag."""
-    pass
-
-
-@pytest.mark.skip(
-    reason="Tests need to be updated for the new scan command implementation"
-)
-@patch("namegnome.cli.commands.scan_directory")
-@patch("namegnome.cli.commands.create_rename_plan")
 def test_scan_with_all_options(
-    mock_create_plan: Any, mock_scan: Any, mock_scan_result: Any, mock_rename_plan: Any
+    mock_scan: MagicMock, mock_create_plan: MagicMock
 ) -> None:
-    """Test that scan command accepts all optional flags."""
-    pass
-
-
-@patch("namegnome.cli.commands.scan_directory")
-def test_scan_command_simple(mock_scan: Any) -> None:
-    """Test the scan command with simple arguments."""
-    # Set up the mock to return a ScanResult
+    """Test that scan command accepts all optional flags, or prints warning if no files found."""
+    runner = CliRunner()
     mock_scan.return_value = ScanResult(
-        files=[
-            MediaFile(
-                path=Path("/test/file.mp4").absolute(),
-                size=1024,
-                media_type=MediaType.TV,
-                modified_date=datetime.now(),
-            )
-        ],
-        root_dir=Path("/test").absolute(),
-        media_types=[MediaType.TV],
-        platform="plex",
+        files=[],
+        root_dir=Path("/tmp"),
+        media_types=[MediaType.TV, MediaType.MOVIE],
+        platform="jellyfin",
     )
-
-
-@patch("namegnome.cli.commands.scan_directory")
-def test_scan_command_with_options(mock_scan: Any) -> None:
-    """Test the scan command with various options."""
-    # Set up the mock to return a ScanResult
-    mock_scan.return_value = ScanResult(
-        files=[
-            MediaFile(
-                path=Path("/test/file.mp4").absolute(),
-                size=1024,
-                media_type=MediaType.TV,
-                modified_date=datetime.now(),
-            )
-        ],
-        root_dir=Path("/test").absolute(),
-        media_types=[MediaType.TV],
-        platform="plex",
+    mock_create_plan.return_value = RenamePlan(
+        id="test-plan",
+        created_at=datetime.now(),
+        root_dir=Path("/tmp"),
+        items=[],
+        platform="jellyfin",
+        media_types=[MediaType.TV, MediaType.MOVIE],
+        metadata_providers=[],
+        llm_model="llama-model",
     )
+    result = runner.invoke(
+        app,
+        [
+            "scan",
+            "/tmp",
+            "--media-type",
+            "tv",
+            "--media-type",
+            "movie",
+            "--platform",
+            "jellyfin",
+            "--verify",
+            "--show-name",
+            "Test Show",
+            "--movie-year",
+            "2023",
+            "--anthology",
+            "--adjust-episodes",
+            "--llm-model",
+            "llama-model",
+            "--no-color",
+        ],
+    )
+    assert result.exit_code != 0
+    assert "No media files found." in result.output

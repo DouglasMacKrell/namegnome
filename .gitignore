@@ -166,6 +166,15 @@ temp/
 # MCP CONFIG
 github_mcp_wrapper.sh
 memory.json
+local-memory/
+mcp.json
+.env.mcp
+
+# MCP Memory server files
+memory.json
+memory.jsonl  # (if any JSONL log or backup files are used)
+node_modules/  # (node dependencies, if you installed the package locally)
+dist/          # (build output, if you compiled any MCP server code locally)
 
 # IDE specific files
 .idea/
