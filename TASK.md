@@ -614,6 +614,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **0.9 CLI `scan` Command** (2023-11-08) - Implemented CLI scan command with plan storage.
 * **0.10 Rollback Plan Store** (2024-07-25) - Implemented UUID-based plan storage with SHA-256 checksums and run metadata. Added plan_store module to handle storing, retrieving, and verifying rename plans. Created a comprehensive test suite for plan storage operations. Fixed backward compatibility issues with the ScanResult model structure.
 * **Test Suite & CI Green** (2024-07-25) - Refactored scan command and CLI error handling for proper exit codes and user-facing output. Updated all tests to assert on real CLI output and exit codes. Removed all skipped/redundant tests; all tests now pass with zero skips. Migrated to Pydantic v2 ConfigDict to resolve deprecation warnings. Ensured full cross-platform CI compatibility and green pipeline.
+* **Windows Compatibility Pre-commit Hook** (2024-07-25) - Added a custom pre-commit hook (windows-compat-check) and supporting script to detect and block Windows-incompatible patterns (e.g., /tmp, os.path, backslashes, Windows drive letters) in Python files before commit. This helps prevent CI failures on Windows runners by catching issues early in the developer workflow.
 
 ---
 

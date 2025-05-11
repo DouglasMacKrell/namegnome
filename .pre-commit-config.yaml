@@ -25,6 +25,15 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+      - id: windows-compat-check
+        name: Windows Compatibility Pattern Check
+        entry: bash scripts/check_windows_patterns.sh
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+        description: |
+          Fails if forbidden patterns (hardcoded /tmp, os.path, etc.) are found in Python files.
 
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0

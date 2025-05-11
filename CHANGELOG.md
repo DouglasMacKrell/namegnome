@@ -31,6 +31,7 @@ All notable changes to the namegnome project will be documented in this file.
 - Automatic creation of .namegnome/plans directory structure
 - Backward compatibility with timestamp-based plan IDs
 - README header image for improved project presentation
+- Custom pre-commit hook (windows-compat-check) and supporting script to detect and block Windows-incompatible patterns (e.g., /tmp, os.path, backslashes, Windows drive letters) in Python files before commit. Helps prevent CI failures on Windows runners by catching issues early.
 
 ### Fixed
 - Fixed test failures related to console output capture
