@@ -119,6 +119,49 @@ namegnome scan /path/to/media/files --media-type tv --media-type movie
 - `namegnome apply <plan-id>`: Apply a saved rename plan
 - `namegnome undo <plan-id>`: Roll back a previous operation
 
+## Undo Command
+
+The `undo` command reverts a previously executed rename plan, restoring all files to their original locations. It supports multi-file undo, robust error handling, and a confirmation prompt for safety.
+
+### Usage
+
+```sh
+namegnome undo <plan-id> [--yes]
+```
+
+- `<plan-id>`: The ID of the plan to undo (autocompletes from available plans).
+- `--yes`: Skip confirmation prompt and undo immediately.
+
+### Example
+
+```sh
+namegnome undo 123e4567-e89b-12d3-a456-426614174000
+```
+
+You will be prompted for confirmation unless you pass `--yes`:
+
+```sh
+Are you sure you want to undo the plan 123e4567-e89b-12d3-a456-426614174000? [y/N]: y
+Restoring /path/to/moved1.txt -> /path/to/original1.txt
+Restoring /path/to/moved2.txt -> /path/to/original2.txt
+[green]Undo completed for plan: 123e4567-e89b-12d3-a456-426614174000[/green]
+```
+
+### Error Handling
+
+- If the original source file already exists, undo will fail and not overwrite:
+  ```sh
+  [red]Cannot restore: source file already exists: /path/to/original1.txt[/red]
+  ```
+- If the destination file is missing (already undone), undo will fail:
+  ```sh
+  [red]Cannot restore: destination file does not exist: /path/to/moved1.txt[/red]
+  ```
+
+### Multi-file Undo
+
+The undo command restores all files in the plan. Each file is logged as it is restored. Progress is shown with a spinner.
+
 ## Technology Stack
 
 - **Python 3.12+**: Modern language features and performance
