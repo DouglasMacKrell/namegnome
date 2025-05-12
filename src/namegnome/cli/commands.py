@@ -36,12 +36,13 @@ from rich.traceback import install as install_traceback
 from namegnome.cli.renderer import render_diff
 from namegnome.core.planner import create_rename_plan
 from namegnome.core.scanner import ScanOptions, scan_directory
+from namegnome.core.undo import undo_plan
 from namegnome.models.core import MediaType
 from namegnome.models.scan import ScanOptions as ModelScanOptions
 from namegnome.rules.base import RuleSetConfig
 from namegnome.rules.plex import PlexRuleSet
 from namegnome.utils.json import DateTimeEncoder
-from namegnome.utils.plan_store import save_plan
+from namegnome.utils.plan_store import list_plans, save_plan
 
 # Install rich traceback handler
 install_traceback(show_locals=True)
@@ -189,6 +190,26 @@ STRICT_DIRECTORY_STRUCTURE = Annotated[
     typer.Option(
         "--strict-directory-structure",
         help="Enforce platform directory structure",
+    ),
+]
+
+UNDO_PLAN_PATH = Annotated[
+    Path,
+    typer.Argument(
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        resolve_path=True,
+        help="Path to the plan JSON file to undo",
+    ),
+]
+
+YES = Annotated[
+    bool,
+    typer.Option(
+        "--yes",
+        help="Skip confirmation prompt and undo immediately.",
     ),
 ]
 
@@ -442,6 +463,47 @@ def version() -> None:
     from namegnome.__about__ import __version__
 
     console.print(f"NameGnome version: [bold]{__version__}[/bold]")
+
+
+def plan_id_autocomplete(
+    ctx: typer.Context, args: List[str], incomplete: str
+) -> List[str]:
+    """Autocomplete callback for plan IDs."""
+    return [plan_id for plan_id, _ in list_plans() if plan_id.startswith(incomplete)]
+
+
+@app.command()
+def undo(
+    plan_id: str = typer.Argument(
+        ..., autocompletion=plan_id_autocomplete, help="ID of the plan to undo"
+    ),
+    yes: YES = False,
+) -> None:
+    """Undo a rename plan transactionally by plan ID."""
+    from namegnome.utils.plan_store import _ensure_plan_dir
+
+    plans_dir = _ensure_plan_dir()
+    plan_path = plans_dir / f"{plan_id}.json"
+    if not plan_path.exists():
+        console.print(f"[red]Plan file not found for ID: {plan_id}[/red]")
+        raise typer.Exit(1)
+    if not yes:
+        confirmed = typer.confirm(
+            f"Are you sure you want to undo the plan {plan_id}?", default=False
+        )
+        if not confirmed:
+            console.print("[yellow]Undo cancelled by user.[/yellow]")
+            raise typer.Exit(1)
+    # Progress bar for undo
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        console=console,
+    ) as progress:
+        progress.add_task("Undoing plan...", total=None)
+        # Log each file being restored (handled in undo_plan)
+        undo_plan(plan_path, log_callback=lambda msg: console.log(msg))
+    console.print(f"[green]Undo completed for plan: {plan_id}[/green]")
 
 
 def main() -> None:

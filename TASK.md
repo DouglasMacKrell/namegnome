@@ -621,6 +621,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **Windows Compatibility Pre-commit Hook** (2024-07-25) - Added a custom pre-commit hook (windows-compat-check) and supporting script to detect and block Windows-incompatible patterns (e.g., /tmp, os.path, backslashes, Windows drive letters) in Python files before commit. This helps prevent CI failures on Windows runners by catching issues early in the developer workflow.
 * **0.12 Docs Update** (2024-07-25) - Expanded README with install, usage, and roadmap; added architecture diagram under docs/; created CONTRIBUTING.md with commit style guidelines; added CI and coverage badges; performed a full documentation and comment sweep for all modules, ensuring Google-style docstrings, inline reasoning comments, and E501 compliance. All docs pass markdown-lint and render correctly on GitHub.
 * **1.1 Filesystem Abstraction Layer** (2024-07-25) - Implemented and fully tested atomic_move with cross-platform, cross-device, dry-run, and overwrite logic. Added comprehensive documentation, usage examples, and advanced usage doc. Updated README and CONTRIBUTING.md. All tests pass and docs are E501-compliant.
+* **1.2 SHA-256 Hash Utility** (2024-05-12) - Implemented sha256sum utility for file integrity, integrated with scan and apply workflows, and added comprehensive tests for all hash scenarios.
 
 ---
 

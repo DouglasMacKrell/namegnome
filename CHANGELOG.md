@@ -115,3 +115,25 @@ All notable changes to the namegnome project will be documented in this file.
 - Set up GitHub repository with branch protection
 - Implemented Git branching strategy (develop for work, main for stable releases)
 - Configured editor settings for consistent development 
+
+## [0.2.2] - 2024-05-12
+
+### Added
+- SHA-256 hash utility for file integrity, integrated with scan and apply workflows; comprehensive tests for all hash scenarios.
+- Transactional apply engine with hash verification, rollback on failure, skip-identical logic, and robust error handling. Fully tested with unit and CLI tests.
+- Undo engine and Typer CLI command with confirmation prompt, plan ID autocompletion, error handling for source/destination conflicts, and multi-file support. Fully tested with unit, CLI, and integration tests.
+- Rich progress bars and per-file logging to undo CLI, matching scan/apply UX. All operations are logged and user-visible.
+- End-to-end integration tests for multi-file undo, error cases, and CLI flows. Ensured all practical user scenarios are covered.
+- Updated README.md with undo command usage, error handling, and multi-file examples. Performed a full documentation and comment sweep for all modules, ensuring Google-style docstrings, inline reasoning comments, and E501 compliance. All docs pass markdown-lint and render correctly on GitHub.
+
+### Fixed
+- Corrected fixture file path resolution in metadata utils
+- Added proper type annotation for kwargs in metadata client factory function
+- Removed unnecessary type ignore comment
+
+### Changed
+- Refactored scan command and CLI error handling for proper exit codes and user-facing output.
+- Updated all tests to assert on real CLI output and exit codes.
+- Removed all skipped/redundant tests; all tests now pass with zero skips.
+- Migrated to Pydantic v2 ConfigDict to resolve deprecation warnings.
+- Ensured full cross-platform CI compatibility and green pipeline. 
