@@ -134,7 +134,8 @@ Each ticket is self‑contained so Cursor can tackle them sequentially.
   2. Add architecture diagram under `docs/`.
   3. Create `CONTRIBUTING.md` describing commit style `NGN-###`.
   4. Add CI and coverage badges.
-* **Done when:** Docs pass markdown‑lint and render on GitHub.
+  5. Perform a full documentation and comment sweep for all modules, ensuring Google-style docstrings, inline reasoning comments, and E501 compliance.
+* **Done when:** Docs pass markdown-lint and render on GitHub.
 
 ---
 
@@ -615,6 +616,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **0.10 Rollback Plan Store** (2024-07-25) - Implemented UUID-based plan storage with SHA-256 checksums and run metadata. Added plan_store module to handle storing, retrieving, and verifying rename plans. Created a comprehensive test suite for plan storage operations. Fixed backward compatibility issues with the ScanResult model structure.
 * **Test Suite & CI Green** (2024-07-25) - Refactored scan command and CLI error handling for proper exit codes and user-facing output. Updated all tests to assert on real CLI output and exit codes. Removed all skipped/redundant tests; all tests now pass with zero skips. Migrated to Pydantic v2 ConfigDict to resolve deprecation warnings. Ensured full cross-platform CI compatibility and green pipeline.
 * **Windows Compatibility Pre-commit Hook** (2024-07-25) - Added a custom pre-commit hook (windows-compat-check) and supporting script to detect and block Windows-incompatible patterns (e.g., /tmp, os.path, backslashes, Windows drive letters) in Python files before commit. This helps prevent CI failures on Windows runners by catching issues early in the developer workflow.
+* **0.12 Docs Update** (2024-07-25) - Expanded README with install, usage, and roadmap; added architecture diagram under docs/; created CONTRIBUTING.md with commit style guidelines; added CI and coverage badges; performed a full documentation and comment sweep for all modules, ensuring Google-style docstrings, inline reasoning comments, and E501 compliance. All docs pass markdown-lint and render correctly on GitHub.
 
 ---
 

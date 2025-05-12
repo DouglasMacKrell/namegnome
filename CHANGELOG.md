@@ -32,6 +32,7 @@ All notable changes to the namegnome project will be documented in this file.
 - Backward compatibility with timestamp-based plan IDs
 - README header image for improved project presentation
 - Custom pre-commit hook (windows-compat-check) and supporting script to detect and block Windows-incompatible patterns (e.g., /tmp, os.path, backslashes, Windows drive letters) in Python files before commit. Helps prevent CI failures on Windows runners by catching issues early.
+- 0.12 Docs Update: Expanded README (install, usage, roadmap), added architecture diagram under docs/, created CONTRIBUTING.md with commit style guidelines, added CI and coverage badges, and performed a full documentation and comment sweep for all modules (Google-style docstrings, inline reasoning comments, E501 compliance). Confirmed all docs pass markdown-lint and render on GitHub.
 
 ### Fixed
 - Fixed test failures related to console output capture
