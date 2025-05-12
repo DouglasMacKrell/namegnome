@@ -33,6 +33,7 @@ All notable changes to the namegnome project will be documented in this file.
 - README header image for improved project presentation
 - Custom pre-commit hook (windows-compat-check) and supporting script to detect and block Windows-incompatible patterns (e.g., /tmp, os.path, backslashes, Windows drive letters) in Python files before commit. Helps prevent CI failures on Windows runners by catching issues early.
 - 0.12 Docs Update: Expanded README (install, usage, roadmap), added architecture diagram under docs/, created CONTRIBUTING.md with commit style guidelines, added CI and coverage badges, and performed a full documentation and comment sweep for all modules (Google-style docstrings, inline reasoning comments, E501 compliance). Confirmed all docs pass markdown-lint and render on GitHub.
+- Implemented and fully tested atomic_move with cross-platform, cross-device, dry-run, and overwrite logic. Added comprehensive documentation, usage examples, and advanced usage doc. Updated README and CONTRIBUTING.md. All tests pass and docs are E501-compliant.
 
 ### Fixed
 - Fixed test failures related to console output capture
