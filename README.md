@@ -173,6 +173,18 @@ namegnome scan /media/Library \
 - The `--anthology` flag is for shows with multiple segments per file
 - The `--adjust-episodes` flag helps correct episode numbering when files are in the right order but numbered incorrectly
 
+## Advanced: Atomic & Cross-Platform File Moves
+
+NameGnome uses a robust, cross-platform atomic move engine for all file
+renaming and reorganization. This ensures:
+
+- Safe, auditable, and reversible moves—even across devices or on Windows with
+  long paths.
+- Overwrite protection, dry-run support, and byte-for-byte duplicate detection.
+
+See the full API, advanced usage, and guarantees in  
+[`docs/fs-operations.md`](docs/fs-operations.md).
+
 ## Roadmap
 
 ### Sprint 0 (MVP 0.1 "Dry-Run Scanner")
