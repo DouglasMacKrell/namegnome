@@ -63,13 +63,34 @@ def test_cross_device(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_long_paths_windows(mocker: Any, tmp_path: Path) -> None:
-    """Test that atomic_move adds the Windows long path prefix for long paths on Windows."""
+    """Test that atomic_move adds the Windows long path prefix for long paths on Windows.
+
+    If the test environment does not support long paths, log a warning and skip.
+    """
     if sys.platform != "win32":
         pytest.skip("Windows-only test")
 
     src = tmp_path / ("a" * (WIN_MAX_PATH + 1))
     dst = tmp_path / ("b" * (WIN_MAX_PATH + 1))
-    src.write_text("long path")
+    try:
+        src.write_text("long path")
+    except OSError as e:
+        # Windows CI and some local setups do not support long paths by default
+        bslash = chr(92)
+        reg_path = f"HKLM{bslash}SYSTEM{bslash}CurrentControlSet{bslash}Control{bslash}FileSystem"
+        msg = (
+            f"[yellow]SKIPPED:[/yellow] Could not create long path file for test: {e}\n"
+            "Windows long path support is not enabled on this system.\n"
+            f"To enable, set the registry key 'LongPathsEnabled' to 1 under {reg_path} and reboot.\n"
+            "See: https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation"
+        )
+        try:
+            from namegnome.cli import console
+
+            console.print(msg)
+        except Exception:
+            sys.stderr.write(msg + "\n")
+        pytest.skip("Windows long path support is not enabled on this system.")
 
     # Patch Path.rename to check the path
     called = {}
