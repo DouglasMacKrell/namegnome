@@ -16,12 +16,16 @@ Thank you for your interest in contributing! Please follow these guidelines to e
 - **Docstrings:** Google style for all public functions/classes
 - **Imports:** Use absolute imports rooted at `namegnome`
 - **No file > 500 lines**; split into focused modules
+- **Filesystem operations:** All file moves/renames must use
+  `namegnome.fs.operations.atomic_move`. See [docs/fs-operations.md](docs/fs-operations.md)
+  for API, usage, and guarantees.
 
 ## Test Requirements
 - Every new function/class requires:
   - 1 expected-flow test
   - 1 edge case
   - 1 failure case
+  - If your code moves or renames files, you must use and test atomic_move.
 - Tests must pass on Windows, macOS, and Linux
 - Coverage threshold: 80% (enforced in CI)
 
