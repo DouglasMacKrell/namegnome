@@ -1,7 +1,23 @@
 """Filesystem storage operations for namegnome.
 
-This module is a wrapper around utils.plan_store to maintain backward compatibility.
-All new code should use utils.plan_store directly.
+This module provides plan and metadata storage for rename operations,
+maintaining backward compatibility with legacy plan formats.
+- All new code should use utils.plan_store directly; this module wraps it for
+  compatibility with older CLI/tests.
+- Handles plan storage, metadata, and listing, with custom YAML serialization for
+  Path and Enum types.
+
+Design:
+- Custom YAML representers ensure that Path and Enum objects are serialized in a
+  human-readable way for metadata files.
+- All plan storage is routed through utils.plan_store, but legacy CLI/tests may
+  still use this module's API.
+- Directory structure and file naming conventions are derived from PLANNING.md
+  and TASK.md.
+- This module is retained for legacy support; new features and bugfixes should
+  target utils.plan_store.
+
+See README.md, PLANNING.md, and TASK.md for rationale and usage examples.
 """
 
 import enum
@@ -25,7 +41,8 @@ from namegnome.utils.plan_store import (
 )
 
 
-# Register custom YAML representers for Path and Enum objects
+# Reason: Custom YAML representers ensure Path and Enum objects are serialized as
+# strings for human readability and compatibility.
 def _path_representer(dumper: yaml.SafeDumper, data: Path) -> yaml.ScalarNode:
     """Custom YAML representer for Path objects."""
     return dumper.represent_scalar("tag:yaml.org,2002:str", str(data))
@@ -41,11 +58,17 @@ yaml.SafeDumper.add_representer(Path, _path_representer)
 yaml.SafeDumper.add_multi_representer(enum.Enum, _enum_representer)
 
 
+# Reason: get_namegnome_dir and get_plans_dir maintain legacy directory structure for
+# backward compatibility with older CLI/tests.
 def get_namegnome_dir() -> Path:
     """Get the .namegnome directory, creating it if it doesn't exist.
 
     Returns:
         Path to the .namegnome directory.
+
+    Reason:
+        Maintains legacy directory structure for backward compatibility with older
+        CLI/tests.
     """
     namegnome_dir = Path.home() / ".namegnome"
     namegnome_dir.mkdir(exist_ok=True)
@@ -62,6 +85,10 @@ def get_plans_dir() -> Path:
 
     Returns:
         Path to the plans directory.
+
+    Reason:
+        Maintains legacy directory structure for backward compatibility with older
+        CLI/tests.
     """
     return _ensure_plan_dir()
 
@@ -74,6 +101,10 @@ def store_plan(plan: RenamePlan) -> Path:
 
     Returns:
         Path to the stored plan file.
+
+    Reason:
+        Provides a legacy-compatible API for storing plans; new code should use
+        utils.plan_store.save_plan directly.
     """
     # Create minimal ScanOptions for backward compatibility
     scan_options = ScanOptions(
@@ -101,6 +132,9 @@ def _convert_value_for_yaml(value: object) -> object:
 
     Returns:
         A YAML-serializable value.
+
+    Reason:
+        Ensures compatibility with legacy YAML metadata files and human readability.
     """
     if isinstance(value, Path):
         return str(value)
@@ -125,6 +159,10 @@ def store_run_metadata(plan_id: str, args: Dict[str, Any]) -> Path:
 
     Returns:
         Path to the metadata file.
+
+    Reason:
+        Maintains legacy metadata format for backward compatibility; new code should
+        use utils.plan_store.
     """
     # Ensure the plan directory exists
     plans_dir = get_plans_dir()
@@ -154,6 +192,10 @@ def list_plans() -> List[Tuple[str, Any, Path]]:
 
     Returns:
         List of tuples containing (plan_id, creation_date, file_path).
+
+    Reason:
+        Provides a legacy-compatible API for listing plans; new code should use
+        utils.plan_store.list_plans.
     """
     plans_list = plan_store_list_plans()
     result = []
@@ -172,6 +214,10 @@ def get_latest_plan() -> Optional[Tuple[str, Path]]:
 
     Returns:
         Tuple containing (plan_id, file_path) or None if no plans exist.
+
+    Reason:
+        Provides a legacy-compatible API for retrieving the latest plan; new code
+        should use utils.plan_store.get_latest_plan_id.
     """
     plan_id = get_latest_plan_id()
     if not plan_id:
@@ -189,6 +235,10 @@ def get_plan(plan_id: str) -> Optional[Dict[str, Any]]:
 
     Returns:
         The plan data as a dictionary, or None if not found.
+
+    Reason:
+        Provides a legacy-compatible API for retrieving plans; new code should use
+        utils.plan_store.load_plan.
     """
     plans_dir = get_plans_dir()
 
@@ -223,3 +273,7 @@ def get_plan(plan_id: str) -> Optional[Dict[str, Any]]:
                 return old_plan_data
 
     return None
+
+
+# TODO: NGN-207 - Remove this wrapper module once all CLI/tests are migrated to use
+# utils.plan_store directly.

@@ -1,7 +1,25 @@
 """Utilities for storing and retrieving rename plans.
 
-This module provides functions for saving, loading, and managing rename plans,
-including creating symlinks to the latest plan and storing checksums.
+This module provides functions for saving, loading, and managing rename plans and
+their metadata.
+- Ensures atomic, cross-platform storage of plans and metadata for safe undo/redo
+  operations.
+- Creates or updates a symlink (or fallback copy) to the latest plan for easy
+  access.
+- Stores run metadata (including CLI args and git hash) in YAML for
+  reproducibility and audit.
+
+Design:
+- All plan files are stored under ~/.namegnome/plans, with UUID-based filenames
+  for uniqueness.
+- Symlink is used for 'latest.json' when possible; falls back to file copy on
+  platforms/filesystems that do not support symlinks (see PLANNING.md for
+  rationale).
+- Metadata is stored in YAML for human readability and extensibility.
+- Custom YAML representers ensure Path and Enum objects are serialized as
+  strings.
+
+See README.md, PLANNING.md, and TASK.md for rationale and usage examples.
 """
 
 import json
@@ -186,7 +204,8 @@ def save_plan(
         # Try to create a symlink
         os.symlink(str(plan_path), str(latest_link))
     except (OSError, NotImplementedError):
-        # Fallback: copy the file instead
+        # Reason: On Windows or some filesystems, symlinks may not be supported;
+        # fallback to copying the file for compatibility.
         shutil.copyfile(str(plan_path), str(latest_link))
 
     return run_id
@@ -430,3 +449,7 @@ def get_plan_metadata(plan_id: str) -> RunMetadata:
         meta_data = yaml.safe_load(f)
 
     return RunMetadata.model_validate(meta_data)
+
+
+# TODO: NGN-208 - Add support for plan versioning and migration for future schema
+# changes.

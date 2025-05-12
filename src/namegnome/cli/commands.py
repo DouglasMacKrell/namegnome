@@ -1,4 +1,23 @@
-"""CLI commands for namegnome."""
+"""CLI commands for namegnome.
+
+This module implements all user-facing CLI commands for NameGnome, including scan,
+version, and future apply/undo commands.
+- Uses Typer for declarative CLI structure and option parsing.
+- All output is routed through Rich Console for consistent, styled UX.
+- Follows CLI UX guidelines from PLANNING.md: clear help, colorized output,
+  progress bars, and robust error handling.
+
+Design:
+- Typer app and Console are instantiated at module level for reuse across
+  commands.
+- Annotated is used for CLI argument/option definitions to provide type safety
+  and rich help text.
+- ScanCommandOptions dataclass is used to group and validate scan command
+  options.
+- Exit codes are defined as an Enum for clarity and maintainability.
+
+See README.md and PLANNING.md for CLI usage and design rationale.
+"""
 
 import json
 import sys
@@ -27,10 +46,14 @@ from namegnome.utils.plan_store import save_plan
 # Install rich traceback handler
 install_traceback(show_locals=True)
 
+# Reason: Typer app and Console are instantiated at module level for reuse and to
+# ensure global options (like --no-color) are respected across all commands.
 app = typer.Typer()
 console = Console()
 
 
+# Reason: ExitCode enum provides clear, maintainable exit codes for all CLI
+# commands, matching project conventions.
 class ExitCode(int, Enum):
     """Exit codes for CLI commands."""
 
@@ -456,3 +479,7 @@ def _convert_to_model_options(
         strict_directory_structure=options.strict_directory_structure,
         target_extensions=scan_options.target_extensions,
     )
+
+
+# TODO: NGN-203 - Add CLI commands for 'apply' and 'undo' once those engines are
+# implemented.

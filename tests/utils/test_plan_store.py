@@ -1,4 +1,16 @@
-"""Tests for the plan store module."""
+"""Tests for the plan store module.
+
+This test suite covers:
+- Saving and loading rename plans and their metadata
+- Listing plans and retrieving the latest plan ID
+- Error handling for nonexistent plans and metadata
+- Cross-platform and CI-specific quirks (HOME/USERPROFILE, symlink/copy fallback)
+- Ensures robust, reproducible plan storage and retrieval (see PLANNING.md)
+
+Rationale:
+- Guarantees that plan persistence, auditability, and undo/redo logic are reliable across OSes and CI environments
+- Validates error handling and edge cases for user safety and reliability
+"""
 
 import os
 import platform
@@ -27,7 +39,15 @@ from namegnome.utils.plan_store import (
 
 @pytest.fixture
 def temp_home_dir() -> Generator[Path, None, None]:
-    """Create a temporary home directory."""
+    """Create a temporary home directory.
+
+    Yields:
+        Path to the temporary home directory.
+
+    Scenario:
+    - Simulates different OS environments by patching HOME/USERPROFILE.
+    - Ensures plan storage logic is robust to platform differences.
+    """
     with TemporaryDirectory() as temp_dir:
         # Create a temporary home directory
         home_dir = Path(temp_dir)
@@ -42,7 +62,15 @@ def temp_home_dir() -> Generator[Path, None, None]:
 
 @pytest.fixture
 def test_plan(tmp_path: Path) -> RenamePlan:
-    """Create a test plan with platform-appropriate absolute paths."""
+    """Create a test plan with platform-appropriate absolute paths.
+
+    Returns:
+        RenamePlan: A test plan with one item and all required fields.
+
+    Scenario:
+    - Provides a reusable plan for save/load/list/metadata tests.
+    - Ensures all paths are absolute for cross-platform correctness.
+    """
     base_dir = tmp_path / "test_dir"
     base_dir.mkdir(parents=True, exist_ok=True)
     source_path = base_dir / "source.mp4"
@@ -76,7 +104,11 @@ def test_plan(tmp_path: Path) -> RenamePlan:
 
 @pytest.fixture
 def test_scan_options() -> ScanOptions:
-    """Create test scan options."""
+    """Create test scan options.
+
+    Returns:
+        ScanOptions: Minimal scan options for plan storage tests.
+    """
     return ScanOptions(
         root=Path.cwd() / "test_dir",
         recursive=True,
@@ -84,7 +116,12 @@ def test_scan_options() -> ScanOptions:
 
 
 def test_ensure_plan_dir() -> None:
-    """Test the _ensure_plan_dir function."""
+    """Test the _ensure_plan_dir function.
+
+    Scenario:
+    - Ensures the plans directory exists and is named correctly.
+    - Checks for cross-platform compatibility in directory structure.
+    """
     # We don't need to test this extensively as it's mostly OS functionality
     plan_dir = _ensure_plan_dir()
     assert plan_dir.exists()
@@ -98,7 +135,14 @@ def test_ensure_plan_dir() -> None:
 def test_save_and_load_plan(
     temp_home_dir: Path, test_plan: RenamePlan, test_scan_options: ScanOptions
 ) -> None:
-    """Test saving and loading a plan."""
+    """Test saving and loading a plan.
+
+    Scenario:
+    - Saves a plan and verifies that all expected files are created.
+    - Loads the plan and checks that it matches the original.
+    - Checks for latest.json existence (skipped in CI for reliability).
+    - Ensures metadata is present and correct.
+    """
     # Save the plan
     plan_id = save_plan(test_plan, test_scan_options)
 
@@ -129,7 +173,12 @@ def test_save_and_load_plan(
 def test_get_latest_plan_id(
     temp_home_dir: Path, test_plan: RenamePlan, test_scan_options: ScanOptions
 ) -> None:
-    """Test getting the latest plan ID."""
+    """Test getting the latest plan ID.
+
+    Scenario:
+    - Saves two plans and checks that the latest plan ID is updated correctly.
+    - Ensures correct ordering and retrieval logic.
+    """
     # Save the plan
     plan_id1 = save_plan(test_plan, test_scan_options)
 
@@ -148,7 +197,12 @@ def test_get_latest_plan_id(
 def test_list_plans(
     temp_home_dir: Path, test_plan: RenamePlan, test_scan_options: ScanOptions
 ) -> None:
-    """Test listing all plans."""
+    """Test listing all plans.
+
+    Scenario:
+    - Saves two plans with different timestamps and checks that list_plans returns them in the correct order (newest first).
+    - Ensures correct sorting and retrieval logic.
+    """
     # Save two plans with different timestamps
     with patch("namegnome.utils.plan_store.datetime") as mock_datetime:
         # First plan is saved "now"
@@ -171,7 +225,12 @@ def test_list_plans(
 def test_get_plan_metadata(
     temp_home_dir: Path, test_plan: RenamePlan, test_scan_options: ScanOptions
 ) -> None:
-    """Test getting plan metadata."""
+    """Test getting plan metadata.
+
+    Scenario:
+    - Saves a plan and retrieves its metadata.
+    - Ensures metadata fields are present and correct.
+    """
     # Save a plan
     plan_id = save_plan(test_plan, test_scan_options)
 
@@ -185,19 +244,34 @@ def test_get_plan_metadata(
 
 
 def test_load_nonexistent_plan(temp_home_dir: Path) -> None:
-    """Test that loading a nonexistent plan raises an error."""
+    """Test that loading a nonexistent plan raises an error.
+
+    Scenario:
+    - Attempts to load a plan with a nonexistent ID and expects FileNotFoundError.
+    - Ensures robust error handling for missing plans.
+    """
     with pytest.raises(FileNotFoundError):
         load_plan("nonexistent-plan-id")
 
 
 def test_get_nonexistent_plan_metadata(temp_home_dir: Path) -> None:
-    """Test that getting metadata for a nonexistent plan raises an error."""
+    """Test that getting metadata for a nonexistent plan raises an error.
+
+    Scenario:
+    - Attempts to get metadata for a nonexistent plan and expects FileNotFoundError.
+    - Ensures robust error handling for missing metadata.
+    """
     with pytest.raises(FileNotFoundError):
         get_plan_metadata("nonexistent-plan-id")
 
 
 def test_get_latest_plan_id_no_plans(temp_home_dir: Path) -> None:
-    """Test getting the latest plan ID when no plans exist."""
+    """Test getting the latest plan ID when no plans exist.
+
+    Scenario:
+    - Ensures get_latest_plan_id returns None when no plans are present.
+    - Validates correct behavior for empty state.
+    """
     latest_id = get_latest_plan_id()
     assert latest_id is None
 

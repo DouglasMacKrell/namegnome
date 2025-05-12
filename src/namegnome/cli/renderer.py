@@ -1,4 +1,15 @@
-"""Render diff tables for rename plans."""
+"""Renderer for CLI output.
+
+This module provides functions to render rename plans as rich tables in the CLI,
+using color and style conventions for clear, user-friendly output.
+- Uses Rich for all output, matching CLI UX guidelines from PLANNING.md.
+- Status colors/styles are chosen to match both user expectations and test
+  assertions (see tests/cli/test_renderer.py).
+- Designed for extensibility: can be adapted for other output formats or
+  additional summary info.
+
+See README.md and PLANNING.md for CLI UX rationale and color conventions.
+"""
 
 from rich.console import Console
 from rich.table import Table
@@ -13,6 +24,9 @@ def render_diff(plan: RenamePlan, console: Console | None = None) -> None:
     Args:
         plan: The rename plan to render.
         console: Optional Console instance to use for rendering.
+
+    Returns:
+        None. Prints the table and summary to the console.
     """
     console = console or Console()
 
@@ -22,14 +36,15 @@ def render_diff(plan: RenamePlan, console: Console | None = None) -> None:
     table.add_column("Destination", style="green")
     table.add_column("Reason", style="yellow")
 
-    # Map statuses to styles that match the expected ANSI color codes in tests
+    # Reason: Status styles are chosen to match both user-facing color conventions
+    # and test assertions (see test_renderer.py).
     status_styles = {
         PlanStatus.PENDING: "yellow bold",  # \033[1;33m
-        PlanStatus.MOVED: "green",
-        PlanStatus.SKIPPED: "yellow",
-        PlanStatus.CONFLICT: "red bold",  # \033[1;31m
-        PlanStatus.FAILED: "red bold",
-        PlanStatus.MANUAL: "bright_red bold",  # \033[1;91m
+        PlanStatus.MOVED: "green bold",  # \033[1;32m
+        PlanStatus.SKIPPED: "cyan",
+        PlanStatus.CONFLICT: "red bold",
+        PlanStatus.FAILED: "red",
+        PlanStatus.MANUAL: "magenta",
     }
 
     for item in plan.items:
@@ -58,3 +73,7 @@ def render_diff(plan: RenamePlan, console: Console | None = None) -> None:
 
     if failed > 0:
         console.print(f"Failed items: {failed}", style="red bold")
+
+
+# TODO: NGN-204 - Add support for exporting diff tables to Markdown or HTML for
+# reporting.

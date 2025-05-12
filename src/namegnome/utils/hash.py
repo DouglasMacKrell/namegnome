@@ -1,6 +1,11 @@
 """Utilities for computing file hashes.
 
-This module provides functions for computing SHA-256 checksums of files.
+This module provides functions for computing SHA-256 checksums of files, used for
+file integrity verification and duplicate detection.
+- Default chunk size is 8 MB for efficient hashing of large media files (see
+  PLANNING.md for rationale).
+- Used throughout the codebase for verifying file moves and detecting identical
+  files.
 """
 
 import hashlib
@@ -32,6 +37,8 @@ def sha256sum(path: Union[str, Path], chunk_size: int = 8_388_608) -> str:
     if not path.is_file():
         raise ValueError(f"Path is not a file: {path}")
 
+    # Reason: 8 MB chunk size balances memory usage and performance for large
+    # media files (see PLANNING.md).
     hasher = hashlib.sha256()
     with open(path, "rb") as f:
         while chunk := f.read(chunk_size):

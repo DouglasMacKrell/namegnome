@@ -1,4 +1,15 @@
-"""Tests for the directory scanner module."""
+"""Tests for the directory scanner module.
+
+This test suite covers:
+- Media type detection (TV, movie, music, unknown) via filename and directory hints
+- Directory scanning for all supported media types, including recursive, hidden, and non-ASCII files
+- Edge cases: nonexistent directories, files instead of directories, and platform-specific quirks
+- Backward compatibility and cross-platform correctness (see PLANNING.md)
+
+Rationale:
+- Ensures robust, cross-platform media detection and scanning for all supported platforms and file systems
+- Validates handling of edge cases and error conditions for user safety and reliability
+"""
 
 import logging
 import shutil
@@ -16,10 +27,19 @@ logger = logging.getLogger(__name__)
 
 
 class TestGuessMediaType:
-    """Tests for the guess_media_type function."""
+    """Tests for the guess_media_type function.
+
+    Covers detection of TV, movie, music, and unknown types using filename patterns and directory hints.
+    Ensures correct classification for downstream planning and renaming logic.
+    """
 
     def test_tv_show_pattern(self, tmp_path: Path) -> None:
-        """Test that TV show patterns are detected correctly."""
+        """Test that TV show patterns are detected correctly.
+
+        Scenarios:
+        - S01E01, 1x01, and 'Season X Episode Y' patterns should be classified as TV.
+        - Ensures regex and pattern logic is robust to common TV naming conventions.
+        """
         # S01E01 pattern
         assert guess_media_type(tmp_path / "Breaking Bad S01E01.mp4") == MediaType.TV
         # 1x01 pattern
@@ -31,7 +51,12 @@ class TestGuessMediaType:
         )
 
     def test_directory_hints(self, tmp_path: Path) -> None:
-        """Test that directory hints are used to guess media type."""
+        """Test that directory hints are used to guess media type.
+
+        Scenarios:
+        - Files in 'TV Shows', 'Movies', or 'Music' directories should be classified accordingly.
+        - Ensures directory-based heuristics supplement filename patterns.
+        """
         # TV show in TV directory
         assert (
             guess_media_type(tmp_path / "TV Shows/Breaking Bad/episode.mp4")
@@ -43,7 +68,12 @@ class TestGuessMediaType:
         assert guess_media_type(tmp_path / "Music/song.mp3") == MediaType.MUSIC
 
     def test_unknown_type(self, tmp_path: Path) -> None:
-        """Test that unknown media types are classified as UNKNOWN."""
+        """Test that unknown media types are classified as UNKNOWN.
+
+        Scenarios:
+        - Files with unknown extensions or lacking clear hints should be classified as UNKNOWN.
+        - Ensures fallback logic is robust to ambiguous or unsupported files.
+        """
         # Unknown extension
         assert guess_media_type(tmp_path / "somefile.txt") == MediaType.UNKNOWN
         # No clear hints in the path
@@ -51,11 +81,19 @@ class TestGuessMediaType:
 
 
 class TestScanDirectory:
-    """Test scanning directories for media files."""
+    """Test scanning directories for media files.
+
+    Covers recursive and non-recursive scans, hidden files, non-ASCII filenames, and error handling.
+    Ensures all supported media types and edge cases are detected and reported correctly.
+    """
 
     @pytest.fixture
     def file_path(self, tmp_path: Path) -> Path:
-        """Create a temporary file for testing."""
+        """Create a temporary file for testing.
+
+        Returns:
+            Path to the created file.
+        """
         file_path = tmp_path / "test_file.txt"
         with open(file_path, "w") as f:
             f.write("Test file content")
@@ -63,7 +101,15 @@ class TestScanDirectory:
 
     @pytest.fixture
     def temp_media_dir(self) -> Generator[Path, None, None]:
-        """Create a temporary directory with media files for testing."""
+        """Create a temporary directory with media files for testing.
+
+        Yields:
+            Path to the temporary media directory.
+
+        Rationale:
+        - Simulates a realistic media library structure with TV, movies, music, hidden, and non-ASCII files.
+        - Used for all directory scan tests to ensure coverage of edge cases and platform quirks.
+        """
         # Create a temporary directory
         temp_dir = Path(tempfile.mkdtemp())
 
@@ -114,7 +160,13 @@ class TestScanDirectory:
         shutil.rmtree(temp_dir)
 
     def test_scan_all_media_types(self, temp_media_dir: Path) -> None:
-        """Test scanning for all media types."""
+        """Test scanning for all media types.
+
+        Scenario:
+        - Scans a directory containing TV, movie, and music files.
+        - Asserts that all media types are detected and counted correctly.
+        - Ensures by_media_type and file counts match expectations.
+        """
         # Scan all media types (default)
         result = scan_directory(temp_media_dir)
 
@@ -126,7 +178,12 @@ class TestScanDirectory:
         assert MediaType.MUSIC in result.by_media_type
 
     def test_scan_specific_media_type(self, temp_media_dir: Path) -> None:
-        """Test scanning for a specific media type."""
+        """Test scanning for a specific media type.
+
+        Scenario:
+        - Only TV shows are scanned for; movies and music should be ignored.
+        - Ensures filtering by media type works as intended.
+        """
         # Only scan for TV shows
         result = scan_directory(temp_media_dir, media_types=[MediaType.TV])
 
@@ -138,7 +195,12 @@ class TestScanDirectory:
         assert result.by_media_type[MediaType.TV] == 4  # Updated count
 
     def test_scan_no_recursive(self, temp_media_dir: Path) -> None:
-        """Test scanning without recursion."""
+        """Test scanning without recursion.
+
+        Scenario:
+        - Only the root directory is scanned; subdirectories are ignored.
+        - Ensures recursive option disables deep scanning.
+        """
         # Create a recursive option that's disabled
         options = ScanOptions(recursive=False)
         result = scan_directory(temp_media_dir, options=options)
@@ -147,7 +209,12 @@ class TestScanDirectory:
         assert len(result.files) == 0  # Updated - no media files at root level
 
     def test_scan_include_hidden(self, temp_media_dir: Path) -> None:
-        """Test scanning with hidden files included."""
+        """Test scanning with hidden files included.
+
+        Scenario:
+        - Hidden files and directories are included in the scan.
+        - Ensures include_hidden option works as intended.
+        """
         # Create options to include hidden files
         options = ScanOptions(include_hidden=True)
         result = scan_directory(temp_media_dir, options=options)
@@ -156,17 +223,32 @@ class TestScanDirectory:
         assert len(result.files) == 8  # Updated to match actual count found
 
     def test_scan_nonexistent_directory(self) -> None:
-        """Test scanning a nonexistent directory."""
+        """Test scanning a nonexistent directory.
+
+        Scenario:
+        - Scanning a path that does not exist should raise FileNotFoundError.
+        - Ensures robust error handling for user mistakes or missing paths.
+        """
         with pytest.raises(FileNotFoundError):
             scan_directory(Path("/nonexistent"))
 
     def test_scan_not_a_directory(self, file_path: Path) -> None:
-        """Test scanning a file (not a directory)."""
+        """Test scanning a file (not a directory).
+
+        Scenario:
+        - Scanning a file instead of a directory should raise ValueError.
+        - Ensures type checking and error handling for invalid input.
+        """
         with pytest.raises(ValueError):
             scan_directory(file_path)
 
     def test_non_ascii_filenames(self, tmp_path: Path) -> None:
-        """Test scanning files with non-ASCII characters."""
+        """Test scanning files with non-ASCII characters.
+
+        Scenario:
+        - Files with non-ASCII names and valid media patterns should be detected.
+        - Ensures Unicode support for international libraries and cross-platform compatibility.
+        """
         # Create a directory structure that signals it's for movies
         media_dir = tmp_path / "Movies"
         media_dir.mkdir(exist_ok=True)

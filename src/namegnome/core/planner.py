@@ -56,6 +56,9 @@ def create_rename_plan(
     # Track destinations to detect conflicts
     destinations: dict[Path, RenamePlanItem] = {}
     # Track paths on case-insensitive filesystems
+    # Reason: On Windows and macOS, file systems are often case-insensitive,
+    # so we must detect conflicts like 'Show.mkv' vs 'show.mkv'.
+    # See PLANNING.md for cross-platform requirements.
     case_insensitive_destinations: dict[str, RenamePlanItem] = {}
 
     # Process each media file
@@ -85,6 +88,8 @@ def create_rename_plan(
             # Check for conflicts
             if target_path in destinations:
                 # Mark both items as conflicting
+                # Reason: Two files targeting the same destination would
+                # overwrite each other; this is a critical safety check.
                 item.status = PlanStatus.CONFLICT
                 item.reason = (
                     f"Destination already used by {destinations[target_path].source}"
@@ -99,7 +104,11 @@ def create_rename_plan(
                     f"{destinations[target_path].source} both target {target_path}"
                 )
             # Also check for case-insensitive conflicts
+            # Reason: On case-insensitive filesystems, 'A.mkv' and 'a.mkv'
+            # would collide.
             elif str(target_path).lower() in case_insensitive_destinations:
+                # Reason: On case-insensitive filesystems, 'A.mkv' and 'a.mkv'
+                # would collide.
                 conflicting_item = case_insensitive_destinations[
                     str(target_path).lower()
                 ]
@@ -125,6 +134,8 @@ def create_rename_plan(
 
         except ValueError as e:
             # Handle errors in path generation
+            # Reason: If the rule set cannot generate a valid path, mark as
+            # failed but keep in plan for user review.
             logger.error(f"Error generating target path for {media_file.path}: {e}")
             item = RenamePlanItem(
                 source=media_file.path,
@@ -191,3 +202,7 @@ def save_plan(plan: RenamePlan, output_dir: Path) -> Path:
 
     logger.info(f"Saved rename plan to {output_file}")
     return output_file
+
+
+# TODO: NGN-202 - Add support for user-defined conflict resolution strategies
+# (e.g., auto-rename, skip, prompt).

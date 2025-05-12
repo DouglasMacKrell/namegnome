@@ -1,4 +1,26 @@
-"""Plex-specific naming rules for media files."""
+"""Plex-specific naming rules for media files.
+
+This module implements the RuleSet for Plex Media Server, following the official
+naming guide and conventions:
+https://support.plex.tv/articles/naming-and-organizing-your-tv-show-files/
+
+Design:
+- TV and Movie formats are derived from MEDIA-SERVER FILE-NAMING & METADATA
+  GUIDE.md and Plex documentation.
+- Regex patterns are used to extract show/movie names, season/episode numbers,
+  and years from filenames.
+- Handles edge cases where filenames are incomplete or do not match expected
+  patterns, falling back to config or defaults.
+- Directory structure is enforced to match Plex's expectations for library
+  scanning and metadata matching.
+
+Extensibility:
+- To support new edge cases or additional metadata, extend the regex patterns or
+  add new config options.
+- This class can be subclassed for Plex variants or customizations.
+
+See README.md and PLANNING.md for rationale and usage examples.
+"""
 
 import re
 from pathlib import Path
@@ -20,7 +42,8 @@ class PlexRuleSet(RuleSet):
         /Movies/Movie Name (Year)/Movie Name (Year).ext
     """
 
-    # Patterns for TV shows and movies
+    # Reason: Regex patterns are designed to match the most common Plex naming
+    # conventions, as well as common user mistakes.
     tv_pattern: ClassVar[re.Pattern[str]] = re.compile(
         r"(.*?)[\.|\s]S(\d{2})E(\d{2})(?:[\.|\s](.+))?$", re.IGNORECASE
     )
@@ -35,7 +58,7 @@ class PlexRuleSet(RuleSet):
         """Initialize the PlexRuleSet."""
         super().__init__("plex")
 
-        # Common media extensions
+        # Reason: Only include extensions supported by Plex for video files.
         self.video_extensions = {
             ".mp4",
             ".mkv",
@@ -152,8 +175,8 @@ class PlexRuleSet(RuleSet):
         match = self.tv_pattern.match(filename)
 
         if not match:
-            # If no match, try to extract what we can from the file path
-            # For now, just use the filename as is
+            # Reason: If no match, fall back to config or defaults to avoid losing
+            # files with non-standard names.
             show_name = config.show_name or "Unknown Show"
             season_num = 1
             episode_num = 1
@@ -177,7 +200,7 @@ class PlexRuleSet(RuleSet):
             else:
                 episode_title = episode_title_raw.replace(".", " ").strip()
 
-        # Create the target path components
+        # Reason: Directory structure matches Plex's expectations for TV libraries.
         tv_dir = root_dir / "TV Shows"
         show_dir = tv_dir / show_name
         season_dir = show_dir / f"Season {season_num:02d}"
@@ -197,6 +220,9 @@ class PlexRuleSet(RuleSet):
         config: Optional[RuleSetConfig] = None,
     ) -> Path:
         """Generate a target path for a movie file.
+
+        # TODO: NGN-206 - Add support for multi-edition movies and extras folders
+        # as per Plex advanced naming guide.
 
         Format: /Movies/Movie Name (Year)/Movie Name (Year).ext
 

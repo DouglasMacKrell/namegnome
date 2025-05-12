@@ -1,4 +1,17 @@
-"""Tests for the filesystem storage module."""
+"""Tests for the filesystem storage module.
+
+This test suite covers:
+- Directory creation and validation for .namegnome and plans
+- Storing and retrieving rename plans and run metadata
+- Listing plans, getting the latest plan, and retrieving plan details
+- Error handling for nonexistent plans and directories
+- Cross-platform and CI-specific quirks (HOME/USERPROFILE, symlink/copy fallback)
+- Ensures robust, reproducible plan storage and retrieval (see PLANNING.md)
+
+Rationale:
+- Guarantees that filesystem storage, auditability, and undo/redo logic are reliable across OSes and CI environments
+- Validates error handling and edge cases for user safety and reliability
+"""
 
 import json
 import os
@@ -30,7 +43,15 @@ from namegnome.models.scan import ScanOptions
 
 @pytest.fixture
 def temp_home_dir() -> Generator[Path, None, None]:
-    """Create a temporary home directory for testing."""
+    """Create a temporary home directory for testing.
+
+    Yields:
+        Path to the temporary home directory.
+
+    Scenario:
+    - Simulates different OS environments by patching HOME/USERPROFILE.
+    - Ensures plan storage logic is robust to platform differences.
+    """
     temp_dir = tempfile.mkdtemp()
     try:
         # Get the appropriate environment variable for the platform
@@ -50,7 +71,14 @@ def temp_home_dir() -> Generator[Path, None, None]:
 
 @pytest.fixture
 def plan_store_dir(temp_home_dir: Path) -> Path:
-    """Create and return the plan store directory."""
+    """Create and return the plan store directory.
+
+    Returns:
+        Path to the plan store directory.
+
+    Scenario:
+    - Ensures the plans directory exists and is accessible for all tests.
+    """
     plans_dir = get_plans_dir()
     assert plans_dir.exists()
     return plans_dir
@@ -58,7 +86,15 @@ def plan_store_dir(temp_home_dir: Path) -> Path:
 
 @pytest.fixture
 def test_plan(tmp_path: Path) -> RenamePlan:
-    """Create a test rename plan with platform-appropriate absolute paths."""
+    """Create a test rename plan with platform-appropriate absolute paths.
+
+    Returns:
+        RenamePlan: A test plan with all required fields.
+
+    Scenario:
+    - Provides a reusable plan for store/list/get tests.
+    - Ensures all paths are absolute for cross-platform correctness.
+    """
     # Used for creating a test plan, even though not directly referenced in the plan
     # (to demonstrate we're creating a valid plan)
     _ = MediaFile(
@@ -82,7 +118,11 @@ def test_plan(tmp_path: Path) -> RenamePlan:
 
 @pytest.fixture
 def test_scan_options() -> ScanOptions:
-    """Create test scan options."""
+    """Create test scan options.
+
+    Returns:
+        ScanOptions: Minimal scan options for plan storage tests.
+    """
     return ScanOptions(
         root=Path("/test").absolute(),
         media_types=[MediaType.TV],
@@ -91,7 +131,12 @@ def test_scan_options() -> ScanOptions:
 
 
 def test_get_namegnome_dir(temp_home_dir: Path) -> None:
-    """Test that get_namegnome_dir returns the correct path and creates directories."""
+    """Test that get_namegnome_dir returns the correct path and creates directories.
+
+    Scenario:
+    - Ensures the .namegnome directory and plans subdirectory are created and accessible.
+    - Validates cross-platform directory creation logic.
+    """
     namegnome_dir = get_namegnome_dir()
 
     # Check that the directory exists
@@ -104,7 +149,12 @@ def test_get_namegnome_dir(temp_home_dir: Path) -> None:
 
 
 def test_get_plans_dir(temp_home_dir: Path) -> None:
-    """Test that get_plans_dir returns the correct path."""
+    """Test that get_plans_dir returns the correct path.
+
+    Scenario:
+    - Ensures the plans directory exists and is a subdirectory of .namegnome.
+    - Validates cross-platform directory structure.
+    """
     plans_dir = get_plans_dir()
 
     # Check that the directory exists
@@ -117,7 +167,13 @@ def test_get_plans_dir(temp_home_dir: Path) -> None:
 
 
 def test_store_plan(temp_home_dir: Path, test_plan: RenamePlan) -> None:
-    """Test storing a rename plan."""
+    """Test storing a rename plan.
+
+    Scenario:
+    - Stores a plan and checks that the file exists and has a valid UUID filename.
+    - Reads the plan file and verifies its contents.
+    - Ensures plan storage is robust to UUID regeneration and platform quirks.
+    """
     # Store the plan using the new method which now internally creates ScanOptions
     plan_path = store_plan(test_plan)
 
@@ -142,7 +198,12 @@ def test_store_plan(temp_home_dir: Path, test_plan: RenamePlan) -> None:
 def test_store_run_metadata(
     temp_home_dir: Path, test_scan_options: ScanOptions
 ) -> None:
-    """Test storing run metadata."""
+    """Test storing run metadata.
+
+    Scenario:
+    - Stores run metadata for a plan and checks that the file exists and contains expected fields.
+    - Ensures YAML serialization and field presence.
+    """
     # Generate a UUID-style plan ID
     plan_id = "12345678-1234-1234-1234-123456789012"
 
@@ -166,7 +227,12 @@ def test_store_run_metadata(
 
 
 def test_list_plans(temp_home_dir: Path, test_plan: RenamePlan) -> None:
-    """Test listing plans."""
+    """Test listing plans.
+
+    Scenario:
+    - Stores a plan and checks that it appears in the list with a valid UUID and path.
+    - Ensures correct extraction and listing logic.
+    """
     # Store a plan
     plan_path = store_plan(test_plan)
 
@@ -196,7 +262,12 @@ def test_list_plans(temp_home_dir: Path, test_plan: RenamePlan) -> None:
 
 
 def test_get_latest_plan(test_plan: RenamePlan, plan_store_dir: Path) -> None:
-    """Test getting the latest plan."""
+    """Test getting the latest plan.
+
+    Scenario:
+    - Stores a plan and checks that get_latest_plan returns the correct ID and path.
+    - Ensures correct retrieval logic for latest plan.
+    """
     # Store a plan
     plan_path = store_plan(test_plan)
 

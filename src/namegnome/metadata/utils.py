@@ -1,4 +1,19 @@
-"""Utility functions for metadata processing."""
+"""Utility functions for metadata processing.
+
+This module provides helpers for loading test fixtures, normalizing titles, and
+stripping articles for metadata providers.
+
+- Used by metadata clients and tests to ensure consistent, provider-agnostic
+  processing of media titles and metadata.
+- Designed for testability, normalization, and cross-provider compatibility
+  (see PLANNING.md, README.md, and provider integration docs).
+
+Design:
+- load_fixture enables deterministic, offline testing of metadata clients using
+  static JSON files.
+- normalize_title and strip_articles provide consistent title processing for
+  fuzzy matching and deduplication.
+"""
 
 import json
 import logging
@@ -22,6 +37,10 @@ def load_fixture(provider: str, fixture_name: str) -> dict[str, Any]:
     Raises:
         FileNotFoundError: If the fixture file doesn't exist.
         json.JSONDecodeError: If the fixture contains invalid JSON.
+
+    Reason:
+        Enables deterministic, offline testing of metadata clients using static
+        JSON files (see tests/fixtures/stubs).
     """
     # Calculate the path relative to the current file
     # When running tests, this will be in the project's test fixtures directory
@@ -51,6 +70,10 @@ def normalize_title(title: str) -> str:
 
     Returns:
         The normalized title.
+
+    Reason:
+        Ensures consistent, provider-agnostic title matching for fuzzy search and
+        deduplication.
     """
     # Remove special characters, extra spaces, and convert to lowercase
     normalized = "".join(c.lower() for c in title if c.isalnum() or c.isspace())
@@ -66,6 +89,10 @@ def strip_articles(title: str) -> str:
 
     Returns:
         The title without leading articles.
+
+    Reason:
+        Improves sorting, matching, and display by ignoring common English
+        articles.
     """
     articles = ["the ", "a ", "an "]
     lower_title = title.lower()

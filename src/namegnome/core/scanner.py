@@ -18,7 +18,10 @@ from namegnome.utils.hash import sha256sum
 # Logger for this module
 logger = logging.getLogger(__name__)
 
-# Common media file extensions by type
+# MEDIA_EXTENSIONS is intentionally broad to support all major video/audio
+# formats used by Plex, Jellyfin, Emby, etc.
+# Reason: This ensures maximum compatibility with the naming rules outlined in
+# MEDIA-SERVER FILE-NAMING & METADATA GUIDE.md.
 MEDIA_EXTENSIONS = {
     MediaType.TV: {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".m4v", ".ts", ".webm"},
     MediaType.MOVIE: {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".m4v", ".ts", ".webm"},
@@ -44,7 +47,10 @@ MEDIA_EXTENSIONS = {
     },
 }
 
-# Extensions that should be ignored completely
+# IGNORED_EXTENSIONS covers common sidecar, subtitle, and metadata files that
+# should never be treated as media.
+# Reason: These files are not ingested by media servers as primary content and
+# would pollute scan results.
 IGNORED_EXTENSIONS = {
     ".nfo",
     ".txt",
@@ -68,7 +74,10 @@ IGNORED_EXTENSIONS = {
     ".url",
 }
 
-# Patterns that strongly indicate TV shows
+# TV_PATTERNS are derived from the most common episode naming conventions in the
+# media server ecosystem.
+# Reason: These patterns are recommended in the MEDIA-SERVER FILE-NAMING &
+# METADATA GUIDE.md and are recognized by Plex/Jellyfin scanners.
 TV_PATTERNS = [
     r"s\d{1,2}e\d{1,2}",  # S01E01
     r"\bs\d{1,2}\s*e\d{1,2}\b",  # s01 e01, s01e01 with word boundaries
@@ -78,7 +87,9 @@ TV_PATTERNS = [
     r"\b(?:s|season)\s*\d+\b.*\b(?:e|episode)\s*\d+\b",  # Season X Episode Y pattern
 ]
 
-# Directory names that suggest specific media types
+# Directory hints are used to infer media type from parent folder names.
+# Reason: Most media libraries are organized by top-level folders (e.g., Movies/,
+# TV/, Music/), so this provides a strong hint when file patterns are ambiguous.
 DIRECTORY_HINTS = {
     MediaType.TV: {"tv", "shows", "series", "tv shows", "television"},
     MediaType.MOVIE: {"movies", "film", "films", "cinema"},
@@ -198,12 +209,8 @@ def _is_valid_media_file(
 
     # Guess the media type
     media_type = guess_media_type(file_path)
-
-    # Skip if not in the target media types
-    if media_types and media_type not in media_types:
-        return False
-
-    return True
+    # Only include if the guessed type is in the allowed list
+    return media_type in media_types
 
 
 def _create_media_file(

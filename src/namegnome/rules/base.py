@@ -1,4 +1,28 @@
-"""Base abstract classes for media file naming rule sets."""
+"""Base abstract classes for media file naming rule sets.
+
+This module defines the abstract base class and configuration dataclass for all
+platform-specific naming rule sets.
+- RuleSetConfig: Groups all configuration options that may affect naming (show name,
+  year, anthology, etc.).
+- RuleSet: Abstract base class for all rule sets, enforcing a consistent interface
+  for target path generation and media type support.
+
+Design:
+- All platform-specific rulesets (e.g., Plex, Jellyfin) must inherit from RuleSet and
+  implement its abstract methods.
+- This abstraction allows new platforms to be added without changing the core planner
+  or CLI logic.
+- Naming conventions and configuration options are derived from MEDIA-SERVER
+  FILE-NAMING & METADATA GUIDE.md and PLANNING.md.
+
+Extensibility:
+- To add a new platform, subclass RuleSet and implement target_path,
+  supports_media_type, and supported_media_types.
+- RuleSetConfig can be extended with new options as needed for future platforms or
+  features.
+
+See README.md and PLANNING.md for rationale and usage examples.
+"""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -8,6 +32,8 @@ from typing import Optional, Self
 from namegnome.models.core import MediaFile, MediaType
 
 
+# Reason: RuleSetConfig groups all options that may affect naming, making it easy
+# to pass config between CLI, planner, and rules.
 @dataclass
 class RuleSetConfig:
     """Configuration for rule sets."""
@@ -21,6 +47,8 @@ class RuleSetConfig:
     strict_directory_structure: bool = True
 
 
+# Reason: RuleSet is an abstract base class (ABC) to enforce a consistent
+# interface for all platform-specific naming logic.
 class RuleSet(ABC):
     """Abstract base class for media naming rule sets.
 
@@ -82,3 +110,7 @@ class RuleSet(ABC):
             A list of supported MediaType values.
         """
         pass
+
+
+# TODO: NGN-205 - Consider adding a method for custom validation or post-processing
+# hooks for advanced platforms.

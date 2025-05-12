@@ -1,4 +1,17 @@
-"""Tests for the planner module."""
+"""Tests for the planner module.
+
+This test suite covers:
+- Creation of rename plans from scan results using rule sets (e.g., Plex)
+- Detection of conflicts (e.g., case-insensitive collisions)
+- Handling of unsupported media types (e.g., music in Plex)
+- Saving plans to JSON files and verifying output
+- Output directory creation and file existence checks
+- Backward compatibility and cross-platform correctness (see PLANNING.md)
+
+Rationale:
+- Ensures robust, cross-platform plan generation and output for all supported platforms and file systems
+- Validates handling of edge cases, error conditions, and output artifacts for user safety and reliability
+"""
 
 import json
 import tempfile
@@ -71,10 +84,20 @@ def scan_result(tmp_path: Path) -> ScanResult:
 
 
 class TestCreateRenamePlan:
-    """Tests for the create_rename_plan function."""
+    """Tests for the create_rename_plan function.
+
+    Covers plan creation from scan results, conflict detection, and handling of unsupported types.
+    Ensures correct plan structure for downstream apply/undo logic.
+    """
 
     def test_create_plan_with_plex_rules(self, scan_result: ScanResult) -> None:
-        """Test creating a plan with Plex rules."""
+        """Test creating a plan with Plex rules.
+
+        Scenario:
+        - Creates a plan from a scan result using the Plex rule set.
+        - Asserts that plan properties, item counts, and destination paths are correct.
+        - Ensures only supported media types are included in the plan.
+        """
         rule_set = PlexRuleSet()
         plan = create_rename_plan(
             scan_result=scan_result,
@@ -107,7 +130,13 @@ class TestCreateRenamePlan:
         assert "(2010)" in str(movie_item.destination)
 
     def test_detect_conflicts(self, temp_dir: Path) -> None:
-        """Test that conflicts are detected correctly."""
+        """Test that conflicts are detected correctly.
+
+        Scenario:
+        - Two files that would map to the same destination (case-insensitive) are included in the scan.
+        - Asserts that at least one plan item is marked as a conflict.
+        - Ensures conflict detection logic is robust to platform quirks.
+        """
         # Create two files that would map to the same destination (same name, just different case)
         file1 = temp_dir / "Show.S01E01.mp4"
         file2 = temp_dir / "show.s01e01.mp4"
@@ -157,7 +186,13 @@ class TestCreateRenamePlan:
         assert any(conflict_statuses)
 
     def test_handle_unsupported_media_type(self, scan_result: ScanResult) -> None:
-        """Test handling of unsupported media types."""
+        """Test handling of unsupported media types.
+
+        Scenario:
+        - Music files are present in the scan result but not supported by the Plex rule set.
+        - Asserts that music files are skipped in the plan.
+        - Ensures unsupported types do not cause errors or incorrect plan items.
+        """
         rule_set = PlexRuleSet()
         plan = create_rename_plan(
             scan_result=scan_result,
@@ -174,10 +209,20 @@ class TestCreateRenamePlan:
 
 
 class TestSavePlan:
-    """Tests for the save_plan function."""
+    """Tests for the save_plan function.
+
+    Covers saving plans to JSON files, output directory creation, and file existence checks.
+    Ensures output artifacts are correct and compatible with downstream tools.
+    """
 
     def test_save_plan_to_json(self, scan_result: ScanResult, temp_dir: Path) -> None:
-        """Test saving a plan to a JSON file."""
+        """Test saving a plan to a JSON file.
+
+        Scenario:
+        - Creates a plan and saves it to a JSON file in a specified output directory.
+        - Asserts that the file exists, has the correct name, and contains valid JSON.
+        - Ensures output is compatible with downstream tools and manual inspection.
+        """
         # Create a plan
         rule_set = PlexRuleSet()
         plan = create_rename_plan(

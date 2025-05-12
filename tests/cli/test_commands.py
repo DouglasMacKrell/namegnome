@@ -1,4 +1,16 @@
-"""Tests for the namegnome CLI commands."""
+"""Tests for the namegnome CLI commands.
+
+This test suite covers:
+- CLI command validation, argument parsing, and error handling
+- Scan command with various options, output modes (JSON, no-color), and platform-specific quirks
+- Mocking of scan and plan creation logic for isolated CLI testing
+- Cross-platform path handling and Windows/Unix-specific edge cases
+- Ensures robust, user-friendly CLI UX and error reporting (see PLANNING.md)
+
+Rationale:
+- Guarantees that CLI commands behave as expected for all supported scenarios and platforms
+- Validates error handling, output modes, and argument validation for user safety and onboarding
+"""
 
 import contextlib
 import os
@@ -15,22 +27,13 @@ from namegnome.models.core import MediaFile, MediaType, ScanResult
 from namegnome.models.plan import RenamePlan
 
 
-# Helper function to create an absolute path that's platform-independent
-def abs_path(path_str: str) -> str:
-    """Create a platform-independent absolute path string."""
-    from pathlib import Path
-
-    if os.name == "nt":  # Windows
-        # Convert Unix-style paths to Windows absolute paths
-        if path_str.startswith("/"):
-            return str(Path("C:" + path_str.replace("/", "\\")))
-    # For Unix systems, keep the path as is
-    return str(Path(path_str))
-
-
 @pytest.fixture
 def mock_scan_result(tmp_path: Path) -> ScanResult:
-    """Create a mock scan result with platform-appropriate absolute paths."""
+    """Create a mock scan result with platform-appropriate absolute paths.
+
+    Returns:
+        ScanResult: A mock scan result for CLI tests.
+    """
     root_path = tmp_path / "media"
     root_path.mkdir(parents=True, exist_ok=True)
     file_path = root_path / "test.mp4"
@@ -51,12 +54,18 @@ def mock_scan_result(tmp_path: Path) -> ScanResult:
 
 
 @pytest.fixture
-def mock_rename_plan() -> RenamePlan:
-    """Create a mock rename plan."""
+def mock_rename_plan(tmp_path: Path) -> RenamePlan:
+    """Create a mock rename plan.
+
+    Returns:
+        RenamePlan: A mock plan for CLI tests.
+    """
+    root_dir = tmp_path / "media"
+    root_dir.mkdir(parents=True, exist_ok=True)
     return RenamePlan(
         id="test-plan",
         created_at=datetime.now(),
-        root_dir=Path(abs_path("/path/to/media")),
+        root_dir=root_dir,
         items=[],
         platform="plex",
         media_types=[],
@@ -67,7 +76,11 @@ def mock_rename_plan() -> RenamePlan:
 
 @pytest.fixture
 def media_file(tmp_path: Path) -> MediaFile:
-    """Create a sample media file with platform-appropriate absolute path."""
+    """Create a sample media file with platform-appropriate absolute path.
+
+    Returns:
+        MediaFile: A sample media file for CLI tests.
+    """
     file_path = tmp_path / "source1.mp4"
     file_path.touch()
     return MediaFile(
@@ -79,12 +92,16 @@ def media_file(tmp_path: Path) -> MediaFile:
 
 
 @pytest.fixture
-def scan_result(media_file: MediaFile) -> ScanResult:
-    """Create a sample scan result."""
+def scan_result(media_file: MediaFile, tmp_path: Path) -> ScanResult:
+    """Create a sample scan result.
+
+    Returns:
+        ScanResult: A sample scan result for CLI tests.
+    """
     media_files = [media_file]
     by_media_type: dict[MediaType, int] = {MediaType.TV: 1}
     return ScanResult(
-        root_dir=Path(abs_path("/tmp")),
+        root_dir=tmp_path,
         files=media_files,
         by_media_type=by_media_type,
         media_types=[MediaType.TV],
@@ -93,7 +110,12 @@ def scan_result(media_file: MediaFile) -> ScanResult:
 
 
 def test_scan_command_no_media_type() -> None:
-    """Test that scan command requires at least one media type."""
+    """Test that scan command requires at least one media type.
+
+    Scenario:
+    - Invokes scan command without media type and expects a usage error.
+    - Ensures CLI argument validation and error reporting.
+    """
     runner = CliRunner()
     result = runner.invoke(app, ["scan", ".", "--no-color"])
     # Typer will show a usage error, not our custom message
@@ -106,7 +128,12 @@ def test_scan_command_no_media_type() -> None:
 
 
 def test_scan_command_invalid_media_type() -> None:
-    """Test that scan command validates media types."""
+    """Test that scan command validates media types.
+
+    Scenario:
+    - Invokes scan command with an invalid media type and expects an error message.
+    - Ensures CLI argument validation and error reporting.
+    """
     runner = CliRunner()
     result = runner.invoke(app, ["scan", ".", "--media-type", "invalid", "--no-color"])
     assert result.exit_code != 0
@@ -116,7 +143,12 @@ def test_scan_command_invalid_media_type() -> None:
 
 
 def test_scan_command_directory_not_found() -> None:
-    """Test that scan command handles non-existent directories."""
+    """Test that scan command handles non-existent directories.
+
+    Scenario:
+    - Invokes scan command with a nonexistent directory and expects an error message.
+    - Ensures robust error handling for missing paths.
+    """
     runner = CliRunner()
     result = runner.invoke(
         app, ["scan", "/nonexistent", "--media-type", "tv", "--no-color"]
@@ -132,20 +164,26 @@ def test_scan_command_directory_not_found() -> None:
 @patch("namegnome.cli.commands.create_rename_plan")
 @patch("namegnome.cli.commands.scan_directory")
 def test_scan_command_json_output(
-    mock_scan: MagicMock, mock_create_plan: MagicMock
+    mock_scan: MagicMock, mock_create_plan: MagicMock, tmp_path: Path
 ) -> None:
-    """Test that scan command can output JSON, or prints warning if no files found."""
+    """Test that scan command can output JSON, or prints warning if no files found.
+
+    Scenario:
+    - Mocks scan and plan creation to simulate empty results.
+    - Invokes scan command with --json and checks for correct output or warning.
+    - Ensures JSON output mode and error handling are robust.
+    """
     runner = CliRunner()
     mock_scan.return_value = ScanResult(
         files=[],
-        root_dir=Path("/tmp"),
+        root_dir=tmp_path,
         media_types=[MediaType.TV],
         platform="plex",
     )
     mock_create_plan.return_value = RenamePlan(
         id="test-plan",
         created_at=datetime.now(),
-        root_dir=Path("/tmp"),
+        root_dir=tmp_path,
         items=[],
         platform="plex",
         media_types=[MediaType.TV],
@@ -153,7 +191,7 @@ def test_scan_command_json_output(
         llm_model=None,
     )
     result = runner.invoke(
-        app, ["scan", "/tmp", "--media-type", "tv", "--json", "--no-color"]
+        app, ["scan", str(tmp_path), "--media-type", "tv", "--json", "--no-color"]
     )
     assert result.exit_code != 0
     assert "No media files found." in result.output or "Usage:" in result.output
@@ -162,16 +200,24 @@ def test_scan_command_json_output(
 @patch("rich.progress.Progress", new=lambda *a, **kw: contextlib.nullcontext())
 @patch("rich.console.Console.status", new=lambda *a, **kw: contextlib.nullcontext())
 @patch("namegnome.cli.commands.scan_directory")
-def test_scan_command_no_color(mock_scan: MagicMock) -> None:
-    """Test that scan command respects no-color flag and handles empty scans as error."""
+def test_scan_command_no_color(mock_scan: MagicMock, tmp_path: Path) -> None:
+    """Test that scan command respects no-color flag and handles empty scans as error.
+
+    Scenario:
+    - Mocks scan to simulate empty results.
+    - Invokes scan command with --no-color and checks for correct output or warning.
+    - Ensures no-color output mode and error handling are robust.
+    """
     runner = CliRunner()
     mock_scan.return_value = ScanResult(
         files=[],
-        root_dir=Path("/tmp"),
+        root_dir=tmp_path,
         media_types=[MediaType.TV],
         platform="plex",
     )
-    result = runner.invoke(app, ["scan", "/tmp", "--media-type", "tv", "--no-color"])
+    result = runner.invoke(
+        app, ["scan", str(tmp_path), "--media-type", "tv", "--no-color"]
+    )
     assert result.exit_code != 0
     assert "No media files found." in result.output or "Usage:" in result.output
 
@@ -181,27 +227,35 @@ def test_scan_command_no_color(mock_scan: MagicMock) -> None:
 @patch("namegnome.cli.commands.create_rename_plan")
 @patch("namegnome.cli.commands.scan_directory")
 def test_scan_with_media_type(
-    mock_scan: MagicMock, mock_create_plan: MagicMock
+    mock_scan: MagicMock, mock_create_plan: MagicMock, tmp_path: Path
 ) -> None:
-    """Test that scan command accepts media type, or prints warning if no files found."""
+    """Test that scan command accepts media type, or prints warning if no files found.
+
+    Scenario:
+    - Mocks scan and plan creation to simulate empty results.
+    - Invokes scan command with --media-type and checks for correct output or warning.
+    - Ensures media type argument is handled correctly.
+    """
     runner = CliRunner()
     mock_scan.return_value = ScanResult(
         files=[],
-        root_dir=Path("/tmp"),
+        root_dir=tmp_path,
         media_types=[MediaType.TV],
         platform="plex",
     )
     mock_create_plan.return_value = RenamePlan(
         id="test-plan",
         created_at=datetime.now(),
-        root_dir=Path("/tmp"),
+        root_dir=tmp_path,
         items=[],
         platform="plex",
         media_types=[MediaType.TV],
         metadata_providers=[],
         llm_model=None,
     )
-    result = runner.invoke(app, ["scan", "/tmp", "--media-type", "tv", "--no-color"])
+    result = runner.invoke(
+        app, ["scan", str(tmp_path), "--media-type", "tv", "--no-color"]
+    )
     assert result.exit_code != 0
     assert "No media files found." in result.output or "Usage:" in result.output
 
@@ -211,20 +265,20 @@ def test_scan_with_media_type(
 @patch("namegnome.cli.commands.create_rename_plan")
 @patch("namegnome.cli.commands.scan_directory")
 def test_scan_with_all_options(
-    mock_scan: MagicMock, mock_create_plan: MagicMock
+    mock_scan: MagicMock, mock_create_plan: MagicMock, tmp_path: Path
 ) -> None:
     """Test that scan command accepts all optional flags, or prints warning if no files found."""
     runner = CliRunner()
     mock_scan.return_value = ScanResult(
         files=[],
-        root_dir=Path("/tmp"),
+        root_dir=tmp_path,
         media_types=[MediaType.TV, MediaType.MOVIE],
         platform="jellyfin",
     )
     mock_create_plan.return_value = RenamePlan(
         id="test-plan",
         created_at=datetime.now(),
-        root_dir=Path("/tmp"),
+        root_dir=tmp_path,
         items=[],
         platform="jellyfin",
         media_types=[MediaType.TV, MediaType.MOVIE],
@@ -235,7 +289,7 @@ def test_scan_with_all_options(
         app,
         [
             "scan",
-            "/tmp",
+            str(tmp_path),
             "--media-type",
             "tv",
             "--media-type",
