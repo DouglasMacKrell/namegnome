@@ -622,6 +622,11 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **0.12 Docs Update** (2024-07-25) - Expanded README with install, usage, and roadmap; added architecture diagram under docs/; created CONTRIBUTING.md with commit style guidelines; added CI and coverage badges; performed a full documentation and comment sweep for all modules, ensuring Google-style docstrings, inline reasoning comments, and E501 compliance. All docs pass markdown-lint and render correctly on GitHub.
 * **1.1 Filesystem Abstraction Layer** (2024-07-25) - Implemented and fully tested atomic_move with cross-platform, cross-device, dry-run, and overwrite logic. Added comprehensive documentation, usage examples, and advanced usage doc. Updated README and CONTRIBUTING.md. All tests pass and docs are E501-compliant.
 * **1.2 SHA-256 Hash Utility** (2024-05-12) - Implemented sha256sum utility for file integrity, integrated with scan and apply workflows, and added comprehensive tests for all hash scenarios.
+* **1.3 Apply Engine** (2024-07-25) - Implemented transactional apply_plan with rollback, hash verification, skip-identical logic, and status updates. Fully tested with unit and CLI tests. All requirements from TASK.md covered.
+* **1.4 Undo Engine & CLI** (2024-07-25) - Implemented undo engine and Typer CLI command with confirmation prompt, plan ID autocompletion, error handling for source/destination conflicts, and multi-file support. Fully tested with unit, CLI, and integration tests.
+* **1.5 Progress & Logging** (2024-07-25) - Integrated Rich progress bars, spinners, and structured logging into all CLI workflows. All operations are logged and user-visible. CLI output and logs are tested and documented.
+* **1.6 Integration Tests** (2024-07-25) - Added end-to-end integration tests for multi-file undo, error cases, and CLI flows. Ensured all practical user scenarios are covered. Tests run on all supported OSes in CI.
+* **1.7 Docs Update** (2024-07-25) - Created and cross-linked showcase-quality documentation: fs-operations.md, apply-undo.md, hashing.md, progress-logging.md, integration-testing.md, cli-commands.md, and updated README.md. Visual demo (GIF) of progress/rollback is planned for Sprint 2+ when real metadata is available.
 
 ---
 
