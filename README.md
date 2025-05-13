@@ -22,12 +22,16 @@ A command-line tool for organizing and renaming media files according to platfor
 ## Features
 
 - Scan directories for media files
-- Support for TV shows and movies
+- Support for TV shows, movies, and music (album/track)
 - Platform-specific naming conventions
 - Multi-segment episode handling
 - Explicit media information control
 - JSON output support
-- File integrity verification
+- File integrity verification (SHA-256)
+- **Apply & Undo engine**: Transactional, reversible renames
+- **Rich progress bars & logging**: CLI feedback and audit trail
+- **Integration tests**: End-to-end, cross-platform
+- **Pluggable metadata providers**: TMDB, TVDB, MusicBrainz (API compliant)
 
 ## Project Structure
 
@@ -125,15 +129,31 @@ namegnome scan /path/to/media/files --media-type tv --media-type movie
 ### Movie Options
 - `--movie-year 2023`: Specify release year for movie files
 
+### Music Options
+- `--media-type music`: Scan and organize music files (albums/tracks)
+
 ### Output & Verification
 - `--json`: Output results as JSON
 - `--no-color`: Disable colored output (for logs/CI)
 - `--verify`: Compute and store SHA-256 checksums for file integrity
 - `--llm-model "model-name"`: Use a specific LLM for fuzzy matching
 
-### Apply and Undo (coming in Sprint 1)
-- `namegnome apply <plan-id>`: Apply a saved rename plan
-- `namegnome undo <plan-id>`: Roll back a previous operation
+### Apply and Undo
+Apply a saved rename plan:
+```bash
+namegnome apply <plan-id>
+```
+Undo a previous operation:
+```bash
+namegnome undo <plan-id>
+```
+
+### Music Metadata Lookup
+- Music files are matched using MusicBrainz (API compliant: 1 req/sec, custom User-Agent)
+- Example:
+```bash
+namegnome scan /media/Music --media-type music
+```
 
 ## Undo Command
 
@@ -185,9 +205,45 @@ The undo command restores all files in the plan. Each file is logged as it is re
 - **Rich**: Beautiful CLI output (tables, spinners, progress bars)
 - **Pydantic v2**: Data validation and serialization
 - **httpx + asyncio**: Async HTTP for metadata providers
+- **TMDB, TVDB, MusicBrainz API clients**: async, rate-limited, custom User-Agent
 - **pytest**: Testing framework (80%+ coverage enforced)
 - **black, ruff, mypy**: Formatting, linting, and static typing
 - **Ollama**: Local LLM server for fuzzy matching and edge-case handling
+
+## Metadata Providers
+
+NameGnome supports pluggable metadata providers:
+- **TMDB**: Movies and TV metadata
+- **TVDB**: TV episode and series metadata
+- **MusicBrainz**: Music album/track/artist metadata
+  - Fully compliant with [MusicBrainz API](https://musicbrainz.org/doc/MusicBrainz_API):
+    - 1 request/sec rate limiting
+    - Custom User-Agent header
+
+## Attribution
+
+<p align="center">
+  <a href="https://thetvdb.com">
+    <img src="https://thetvdb.com/images/logo.png" alt="TheTVDB Logo" width="120"/>
+  </a><br>
+  Metadata provided by <a href="https://thetvdb.com">TheTVDB</a>.<br>
+  Please consider adding missing information or subscribing.
+</p>
+
+<p align="center">
+  <a href="https://www.themoviedb.org/">
+    <img src="https://www.themoviedb.org/assets/2/v4/logos/stacked-blue-3c3c3c3c.png" alt="TMDB Logo" width="120"/>
+  </a><br>
+  This product uses the TMDB API but is not endorsed or certified by TMDB.<br>
+  <a href="https://www.themoviedb.org/documentation/api/terms-of-use">TMDB API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://musicbrainz.org/">
+    <img src="https://musicbrainz.org/static/images/entity-header-logo.svg" alt="MusicBrainz Logo" width="120"/>
+  </a><br>
+  Music metadata provided by <a href="https://musicbrainz.org/">MusicBrainz</a>.
+</p>
 
 ## Examples
 
@@ -244,7 +300,7 @@ renaming and reorganization. This ensures:
 See the full API, advanced usage, and guarantees in  
 [`docs/fs-operations.md`](docs/fs-operations.md).
 
-## Roadmap
+## Roadmap / Completed
 
 ### Sprint 0 (MVP 0.1 "Dry-Run Scanner")
 - Project scaffolding, pre-commit, and CI setup
@@ -267,4 +323,12 @@ See the full API, advanced usage, and guarantees in
 - Undo engine and CLI command
 - Progress bars and logging
 - Integration tests across OSes
-- Expanded documentation 
+- Expanded documentation
+
+### Sprint 2 (MVP 0.3 "Metadata APIs")
+- Provider abstraction interface
+- TMDB client (movies/TV)
+- TVDB client (TV)
+- MusicBrainz client (music, API compliant)
+- Metadata integration and tests
+- Coverage and compliance improvements 
