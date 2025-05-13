@@ -628,6 +628,8 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **1.6 Integration Tests** (2024-07-25) - Added end-to-end integration tests for multi-file undo, error cases, and CLI flows. Ensured all practical user scenarios are covered. Tests run on all supported OSes in CI.
 * **1.7 Docs Update** (2024-07-25) - Created and cross-linked showcase-quality documentation: fs-operations.md, apply-undo.md, hashing.md, progress-logging.md, integration-testing.md, cli-commands.md, and updated README.md. Visual demo (GIF) of progress/rollback is planned for Sprint 2+ when real metadata is available.
 * **2.1 Provider Abstraction Interface** (2024-07-25) - Implemented MetadataClient ABC in src/namegnome/metadata/base.py with async search and details methods, using existing MediaMetadata model. Added TDD tests in tests/metadata/test_base.py for expected, edge, and failure cases. All tests pass and code is E501/Google docstring compliant.
+* **2.2 TMDB Client** (2024-07-25) - Implemented TMDBClient with async search and details for movies and TV, mapped poster/backdrop artwork, all TDD tests pass, E501/Google docstring compliant. All requirements for Sprint 2.2 met.
+
 
 ---
 
