@@ -9,6 +9,16 @@ See [docs/architecture.md](docs/architecture.md) for a full architecture diagram
 
 A command-line tool for organizing and renaming media files according to platform-specific conventions (e.g., Plex, Jellyfin).
 
+## 📚 Documentation
+
+- [**Architecture Overview**](docs/architecture.md): High-level design and component diagram.
+- [**Filesystem Operations**](docs/fs-operations.md): Atomic, cross-platform file moves and guarantees.
+- [**Apply & Undo Engines**](docs/apply-undo.md): Transactional renaming, rollback, and CLI/Python usage.
+- [**Hashing & Integrity**](docs/hashing.md): SHA-256 utility, integrity checks, and skip-identical logic.
+- [**Progress Bars & Logging**](docs/progress-logging.md): Rich CLI UX, progress bars, spinners, and audit logging.
+- [**Integration Testing**](docs/integration-testing.md): End-to-end test philosophy, structure, and guarantees.
+- [**CLI Command Reference**](docs/cli-commands.md): All commands, flags, usage, exit codes, and advanced options.
+
 ## Features
 
 - Scan directories for media files
@@ -33,7 +43,13 @@ namegnome/                  # Project root
 │       └── prompts/     # LLM prompt templates
 ├── tests/               # Test directory (mirrors src structure)
 ├── docs/               # Documentation
-│   └── ADR-*.md       # Architecture Decision Records
+│   ├── fs-operations.md
+│   ├── apply-undo.md
+│   ├── hashing.md
+│   ├── progress-logging.md
+│   ├── integration-testing.md
+│   ├── cli-commands.md
+│   └── architecture.md
 ├── config/            # Configuration files and scripts
 │   └── scripts/       # Development and utility scripts
 ├── README.md          # Project overview
