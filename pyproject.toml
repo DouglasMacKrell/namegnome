@@ -21,6 +21,7 @@ classifiers = [
 ]
 dependencies = [
   "typer==0.15.3",
+  "click==8.1.8",
   "rich>=13.3.5",
   "httpx>=0.24.1",
   "pydantic>=2.0.0",
@@ -182,7 +183,8 @@ DEP002 = [
   "deptry",
   "types-requests",
   "types-PyYAML",
-  "pydantic-settings"
+  "pydantic-settings",
+  "click"
 ]
 DEP003 = [
   "namegnome",
