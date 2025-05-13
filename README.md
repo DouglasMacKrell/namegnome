@@ -1,6 +1,6 @@
 ![NameGnome](public/images/NameGnome_README_Headder.png)
 
-[![CI](https://github.com/yourusername/namegnome/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/namegnome/actions)
+[![CI](https://github.com/DouglasMacKrell/namegnome/actions/workflows/ci.yml/badge.svg)](https://github.com/DouglasMacKrell/namegnome/actions)
 [![Coverage Status](https://img.shields.io/badge/coverage-80%25-brightgreen)](https://github.com/yourusername/namegnome)
 
 See [docs/architecture.md](docs/architecture.md) for a full architecture diagram.
