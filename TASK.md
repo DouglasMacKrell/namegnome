@@ -628,8 +628,10 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **1.6 Integration Tests** (2024-07-25) - Added end-to-end integration tests for multi-file undo, error cases, and CLI flows. Ensured all practical user scenarios are covered. Tests run on all supported OSes in CI.
 * **1.7 Docs Update** (2024-07-25) - Created and cross-linked showcase-quality documentation: fs-operations.md, apply-undo.md, hashing.md, progress-logging.md, integration-testing.md, cli-commands.md, and updated README.md. Visual demo (GIF) of progress/rollback is planned for Sprint 2+ when real metadata is available.
 * **2.1 Provider Abstraction Interface** (2024-07-25) - Implemented MetadataClient ABC in src/namegnome/metadata/base.py with async search and details methods, using existing MediaMetadata model. Added TDD tests in tests/metadata/test_base.py for expected, edge, and failure cases. All tests pass and code is E501/Google docstring compliant.
-* **2.2 TMDB Client** (2024-07-25) - Implemented TMDBClient with async search and details for movies and TV, mapped poster/backdrop artwork, all TDD tests pass, E501/Google docstring compliant. All requirements for Sprint 2.2 met.
-* **2.3 TVDB Client** (2024-07-25) - Implemented TVDBClient with async search and details, including authentication, token refresh, paginated episode fetching, and mapping to MediaMetadata. All TDD tests for expected, edge, failure, pagination, and token refresh cases pass. All requirements for Sprint 2.3 met.
+* **2.2 TMDB Client** (2024-07-25) - Implemented TMDB client with async search/details, mapped to MediaMetadata, and added compliance attribution in README.
+* **2.3 TVDB Client** (2024-07-25) - Implemented TVDB client with async search/details, mapped to MediaMetadata, and added required attribution (logo, text, link) to README per TheTVDB API requirements.
+* **Sprint 2 (MVP 0.3 "Metadata APIs")** (2024-07-25) - Completed provider abstraction interface, TMDB/TVDB/MusicBrainz clients, metadata integration, compliance, and documentation. All features tested and documented. README and attribution fully up to date.
+* **2.4 MusicBrainz Client** (2024-07-25) - Implemented async MusicBrainz client with album/track metadata lookup, rate limiting (1 req/sec), custom User-Agent, and TDD. Fully compliant with MusicBrainz API. Added tests for all edge/failure cases. Updated README with provider compliance and attribution.
 
 
 ---
