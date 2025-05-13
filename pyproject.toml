@@ -25,7 +25,10 @@ dependencies = [
   "rich>=13.3.5",
   "httpx>=0.24.1",
   "pydantic>=2.0.0",
-  "structlog>=23.1.0",
+  "pydantic-settings",
+  "types-requests",
+  "deptry",
+  "mypy",
 ]
 
 [project.optional-dependencies]
@@ -38,6 +41,7 @@ dev = [
   "pre-commit",
   "pytest-asyncio",
   "pytest-mock",
+  "respx",
   "types-requests",
   "types-PyYAML",
 ]
@@ -160,4 +164,29 @@ packages = ["src/namegnome"]
 [tool.hatch.build.targets.sdist]
 include = [
   "src/namegnome/py.typed",
+]
+
+[tool.deptry]
+# No ignore_unused_dependencies or ignore_transitive_dependencies; use per_rule_ignores below.
+
+[tool.deptry.per_rule_ignores]
+DEP002 = [
+  "black",
+  "ruff",
+  "mypy",
+  "pytest",
+  "pytest-cov",
+  "pre-commit",
+  "pytest-asyncio",
+  "pytest-mock",
+  "respx",
+  "deptry",
+  "types-requests",
+  "types-PyYAML",
+  "pydantic-settings",
+  "click"
+]
+DEP003 = [
+  "namegnome",
+  "yaml"
 ]
