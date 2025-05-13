@@ -49,6 +49,13 @@ All notable changes to the namegnome project will be documented in this file.
   - Mapping to MediaMetadata model
   - TDD tests for expected, edge, failure, pagination, and token refresh cases
 - All requirements for Sprint 2.3 met.
+- MusicBrainz client: async album/track metadata lookup, 1 req/sec rate limiting, custom User-Agent, TDD, and full API compliance. All edge/failure cases tested. README updated with provider compliance and attribution.
+- TMDB client: async search/details, mapped to MediaMetadata, README updated with compliance attribution.
+- TVDB client: async search/details, mapped to MediaMetadata, README updated with required attribution (logo, text, link) per TheTVDB API requirements.
+- Provider abstraction interface for metadata clients (TMDB, TVDB, MusicBrainz).
+- Metadata integration and tests for all providers.
+- README updates: provider compliance, attribution, and usage examples for music/album/track.
+- Attribution section in README with logos and links for TheTVDB, TMDB, and MusicBrainz.
 
 ### Fixed
 - Fixed test failures related to console output capture
@@ -77,6 +84,7 @@ All notable changes to the namegnome project will be documented in this file.
 - Removed all skipped/redundant tests; all tests now pass with zero skips.
 - Migrated to Pydantic v2 ConfigDict to resolve deprecation warnings.
 - Ensured full cross-platform CI compatibility and green pipeline.
+- Roadmap and Completed sections in README and TASK.md now reflect all Sprint 2 features as completed and documented.
 
 ## [0.2.1] - 2025-05-10
 
