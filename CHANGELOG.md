@@ -34,6 +34,13 @@ All notable changes to the namegnome project will be documented in this file.
 - Custom pre-commit hook (windows-compat-check) and supporting script to detect and block Windows-incompatible patterns (e.g., /tmp, os.path, backslashes, Windows drive letters) in Python files before commit. Helps prevent CI failures on Windows runners by catching issues early.
 - 0.12 Docs Update: Expanded README (install, usage, roadmap), added architecture diagram under docs/, created CONTRIBUTING.md with commit style guidelines, added CI and coverage badges, and performed a full documentation and comment sweep for all modules (Google-style docstrings, inline reasoning comments, E501 compliance). Confirmed all docs pass markdown-lint and render on GitHub.
 - Implemented and fully tested atomic_move with cross-platform, cross-device, dry-run, and overwrite logic. Added comprehensive documentation, usage examples, and advanced usage doc. Updated README and CONTRIBUTING.md. All tests pass and docs are E501-compliant.
+- Implementation and testing of transactional apply engine (apply_plan) with rollback, hash verification, skip-identical logic, and status updates (Sprint 1.3).
+- Undo engine and Typer CLI command with confirmation prompt, plan ID autocompletion, error handling for source/destination conflicts, and multi-file support (Sprint 1.4).
+- Rich progress bars, spinners, and structured logging integrated into all CLI workflows (Sprint 1.5).
+- End-to-end integration tests for multi-file undo, error cases, and CLI flows, running on all supported OSes in CI (Sprint 1.6).
+- Created and cross-linked showcase-quality documentation: fs-operations.md, apply-undo.md, hashing.md, progress-logging.md, integration-testing.md, cli-commands.md.
+- Updated README.md to add a '📚 Documentation' section with links to all new docs and reflect expanded documentation.
+- Visual demo (GIF) of progress/rollback is planned for Sprint 2+ when real metadata is available.
 
 ### Fixed
 - Fixed test failures related to console output capture
