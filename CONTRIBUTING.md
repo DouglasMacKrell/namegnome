@@ -44,4 +44,11 @@ Thank you for your interest in contributing! Please follow these guidelines to e
 - Add or update tests as needed
 - Reference the relevant task or ticket in your PR description
 
+## Dependency Management & Pre-commit Checks
+- The project uses **deptry** as a pre-commit hook to ensure all imports are declared in `pyproject.toml` and to flag unused dependencies.
+- If you add a new package (for runtime, dev, or tests), add it to the appropriate section in `pyproject.toml`.
+- If deptry fails due to a missing or unused dependency, update `pyproject.toml` or `deptry.toml` as needed.
+- Some dev/test tools are intentionally ignored in `deptry.toml` to reduce noise; update this config if you add new dev tools.
+- Run `pre-commit run deptry --all-files` to check manually before committing if needed.
+
 Thank you for helping make NameGnome better! 

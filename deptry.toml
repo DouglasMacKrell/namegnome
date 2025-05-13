@@ -1,0 +1,23 @@
+[tool.deptry]
+ignore_unused_dependencies = [
+  "black",
+  "ruff",
+  "mypy",
+  "pytest",
+  "pytest-cov",
+  "pre-commit",
+  "pytest-asyncio",
+  "pytest-mock",
+  "respx",
+  "deptry",
+  "types-requests",
+  "types-PyYAML",
+  "pydantic-settings"
+]
+ignore_transitive_dependencies = [
+  "namegnome",
+  "yaml"
+]
+
+[tool.deptry.per_rule_ignores]
+# Example: "DEP001" = ["tests/*"] 
