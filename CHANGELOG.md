@@ -42,7 +42,13 @@ All notable changes to the namegnome project will be documented in this file.
 - Updated README.md to add a '📚 Documentation' section with links to all new docs and reflect expanded documentation.
 - Visual demo (GIF) of progress/rollback is planned for Sprint 2+ when real metadata is available.
 - Sprint 2.1: Provider Abstraction Interface. Implemented MetadataClient ABC in src/namegnome/metadata/base.py with async search and details methods, using existing MediaMetadata model. Added TDD tests in tests/metadata/test_base.py for expected, edge, and failure cases. All code is E501/Google docstring compliant and passes all tests.
-- Implemented TMDBClient with async search and details for movies and TV, mapped poster/backdrop artwork, all TDD tests pass, E501/Google docstring compliant. All requirements for Sprint 2.2 met.
+- Implemented TVDBClient with async search and details for TV series, including:
+  - Authentication and token refresh logic
+  - Series search and details endpoints
+  - Paginated episode fetching
+  - Mapping to MediaMetadata model
+  - TDD tests for expected, edge, failure, pagination, and token refresh cases
+- All requirements for Sprint 2.3 met.
 
 ### Fixed
 - Fixed test failures related to console output capture
