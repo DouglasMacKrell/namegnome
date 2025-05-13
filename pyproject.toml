@@ -26,6 +26,8 @@ dependencies = [
   "httpx>=0.24.1",
   "pydantic>=2.0.0",
   "structlog>=23.1.0",
+  "pydantic-settings",
+  "types-requests",
 ]
 
 [project.optional-dependencies]
