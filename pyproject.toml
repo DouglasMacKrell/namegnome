@@ -38,6 +38,7 @@ dev = [
   "pre-commit",
   "pytest-asyncio",
   "pytest-mock",
+  "respx",
   "types-requests",
   "types-PyYAML",
 ]
