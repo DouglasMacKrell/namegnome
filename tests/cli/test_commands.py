@@ -373,3 +373,26 @@ def test_scan_command_windows_usage_error(tmp_path: Path) -> None:
     assert (
         "does not exist" in result.output or "Invalid value for 'ROOT'" in result.output
     )
+
+
+def test_config_show_command(monkeypatch: MonkeyPatch) -> None:
+    """Test the 'config --show' CLI command prints resolved settings and handles missing keys."""
+    runner = CliRunner()
+    # Set required env vars
+    monkeypatch.setenv("TMDB_API_KEY", "dummy-key")
+    monkeypatch.setenv("OMDB_API_KEY", "dummy-omdb")
+    # Optional keys
+    monkeypatch.delenv("TVDB_API_KEY", raising=False)
+    monkeypatch.delenv("FANARTTV_API_KEY", raising=False)
+    result = runner.invoke(app, ["config", "--show"])
+    assert result.exit_code == 0
+    assert "TMDB_API_KEY" in result.output
+    assert "dumm..." in result.output  # Masked value
+    assert "OMDB_API_KEY" in result.output
+    assert "dumm..." in result.output  # Masked value
+    # Now unset a required key and check for error
+    monkeypatch.delenv("TMDB_API_KEY", raising=False)
+    result2 = runner.invoke(app, ["config", "--show"])
+    assert result2.exit_code == 1
+    assert "Missing required API key: TMDB_API_KEY" in result2.output
+    assert "See documentation" in result2.output
