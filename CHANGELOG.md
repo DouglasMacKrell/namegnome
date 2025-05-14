@@ -63,6 +63,12 @@ All notable changes to the namegnome project will be documented in this file.
 - AniList GraphQL client for anime metadata with absolute episode numbering support
 - Mapping of AniList streaming episodes to TVEpisode objects with absolute numbering
 - TDD tests for AniList search, details, and error handling
+- SQLite-backed local cache layer for metadata providers (Sprint 2.9)
+  - Added src/namegnome/metadata/cache.py with SQLite table for provider, key_hash, json_blob, expires_ts
+  - Implemented @cache(ttl=86400) decorator for async provider methods
+  - Added CLI --no-cache flag to bypass cache for fresh API calls
+  - Integrated cache with TMDBClient.search and tested expiry, bypass, and correctness
+  - 100% test coverage for cache module and CLI flag
 
 ### Fixed
 - Fixed test failures related to console output capture

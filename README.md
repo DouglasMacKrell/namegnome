@@ -32,6 +32,7 @@ A command-line tool for organizing and renaming media files according to platfor
 - **Rich progress bars & logging**: CLI feedback and audit trail
 - **Integration tests**: End-to-end, cross-platform
 - **Pluggable metadata/artwork providers**: TMDB, TVDB, MusicBrainz, Fanart.tv, TheAudioDB (API compliant)
+- **Metadata cache**: SQLite-backed cache for provider lookups, reducing API calls and enabling offline scans
 
 ## Project Structure
 
@@ -139,6 +140,7 @@ namegnome scan /path/to/media/files --media-type tv --media-type movie
 - `--no-color`: Disable colored output (for logs/CI)
 - `--verify`: Compute and store SHA-256 checksums for file integrity
 - `--llm-model "model-name"`: Use a specific LLM for fuzzy matching
+- `--no-cache`: Bypass the metadata cache and force fresh API calls (useful for debugging or when you want the latest data)
 
 ### Apply and Undo
 Apply a saved rename plan:
