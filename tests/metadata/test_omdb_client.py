@@ -107,3 +107,73 @@ async def test_omdb_merge_priority(monkeypatch: object) -> None:
         )
     assert merged.vote_average == 9.1
     assert merged.overview == "TMDB plot should win."
+
+
+@pytest.mark.asyncio
+async def test_omdb_not_found(monkeypatch: object) -> None:
+    """Test that OMDb 404 (not found) returns original metadata unchanged."""
+    from namegnome.metadata.models import ExternalIDs, MediaMetadata, MediaMetadataType
+
+    tmdb_metadata = MediaMetadata(
+        title="Inception",
+        media_type=MediaMetadataType.MOVIE,
+        provider="tmdb",
+        provider_id="12345",
+        year=2010,
+        external_ids=ExternalIDs(imdb_id="tt1375666"),
+        overview=None,
+        vote_average=None,
+    )
+
+    class MockResponse:
+        def __init__(self) -> None:
+            self.status_code = 404
+
+        def json(self) -> dict:
+            return {"Response": "False", "Error": "Movie not found!"}
+
+    async def mock_get(*args: object, **kwargs: object) -> object:
+        return MockResponse()
+
+    with patch("httpx.AsyncClient.get", new=mock_get):
+        from namegnome.metadata.clients.omdb import fetch_and_merge_omdb
+
+        merged = await fetch_and_merge_omdb(
+            tmdb_metadata, api_key="dummy", title="Inception", year=2010
+        )
+    assert merged == tmdb_metadata
+
+
+@pytest.mark.asyncio
+async def test_omdb_rate_limit(monkeypatch: object) -> None:
+    """Test that OMDb 429 (rate-limit) raises an exception."""
+    from namegnome.metadata.models import ExternalIDs, MediaMetadata, MediaMetadataType
+
+    tmdb_metadata = MediaMetadata(
+        title="Inception",
+        media_type=MediaMetadataType.MOVIE,
+        provider="tmdb",
+        provider_id="12345",
+        year=2010,
+        external_ids=ExternalIDs(imdb_id="tt1375666"),
+        overview=None,
+        vote_average=None,
+    )
+
+    class MockResponse:
+        def __init__(self) -> None:
+            self.status_code = 429
+
+        def json(self) -> dict:
+            return {"Response": "False", "Error": "Rate limit exceeded"}
+
+    async def mock_get(*args: object, **kwargs: object) -> object:
+        return MockResponse()
+
+    with patch("httpx.AsyncClient.get", new=mock_get):
+        from namegnome.metadata.clients.omdb import fetch_and_merge_omdb
+
+        with pytest.raises(Exception):
+            await fetch_and_merge_omdb(
+                tmdb_metadata, api_key="dummy", title="Inception", year=2010
+            )

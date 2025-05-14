@@ -182,4 +182,12 @@ All notable changes to the namegnome project will be documented in this file.
   - Album lookup and thumbnail download (artwork saved to disk)
   - Updates MediaMetadata.artwork list with downloaded images
   - TDD: expected-flow, edge, and file I/O tests (artist not found, album thumb download)
-- All requirements and tests pass. 
+- All requirements and tests pass.
+
+## [2.11] - 2025-07-27
+### Added
+- Parametrized, fixture-based tests for all metadata providers (TMDB, TVDB, MusicBrainz, OMDb, Fanart.tv, TheAudioDB, AniList)
+- Coverage for expected, 404 (not found), and 429 (rate-limit) error cases
+- All tests pass and coverage ≥85% for metadata package
+- Implementation updated to raise on 429 and handle 404 consistently across all providers
+- Fully compliant with project TDD and coverage requirements 

@@ -41,11 +41,17 @@ class TVDBClient(MetadataClient):
             token = login_resp.json()["token"]
             headers = {"Authorization": f"Bearer {token}"}
             # Search series
-            series_resp = await client.get(
-                f"{self.BASE_URL}/search/series",
-                params={"name": title},
-                headers=headers,
-            )
+            try:
+                series_resp = await client.get(
+                    f"{self.BASE_URL}/search/series",
+                    params={"name": title},
+                    headers=headers,
+                )
+                series_resp.raise_for_status()
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code == HTTPStatus.NOT_FOUND:
+                    return []
+                raise
             series_data = series_resp.json()["data"]
             results = []
             for series in series_data:

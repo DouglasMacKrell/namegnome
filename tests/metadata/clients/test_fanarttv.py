@@ -56,3 +56,51 @@ async def test_fetch_fanart_poster_expected_flow(
     assert result.height == 1500
     assert result.type == "poster"
     assert result.provider == "fanart"
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_fetch_fanart_poster_404(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """404: Fanart.tv returns not found; should return None."""
+    monkeypatch.setenv("FANARTTV_API_KEY", "dummykey")
+    monkeypatch.setenv("TMDB_API_KEY", "dummytmdbkey")
+    tmdbid = "404"
+    api_url = f"https://webservice.fanart.tv/v3/movies/{tmdbid}"
+    respx.get(api_url).mock(
+        return_value=httpx.Response(404, json={"error": "Not found"})
+    )
+    meta = MediaMetadata(
+        title="Missing Movie",
+        media_type=MediaMetadataType.MOVIE,
+        provider="tmdb",
+        provider_id=tmdbid,
+    )
+    artwork_dir = tmp_path / ".namegnome" / "artwork" / tmdbid
+    result = await fetch_fanart_poster(meta, artwork_dir)
+    assert result is None
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_fetch_fanart_poster_429(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """429: Fanart.tv rate-limit error; should raise exception."""
+    monkeypatch.setenv("FANARTTV_API_KEY", "dummykey")
+    monkeypatch.setenv("TMDB_API_KEY", "dummytmdbkey")
+    tmdbid = "ratelimit"
+    api_url = f"https://webservice.fanart.tv/v3/movies/{tmdbid}"
+    respx.get(api_url).mock(
+        return_value=httpx.Response(429, json={"error": "Too Many Requests"})
+    )
+    meta = MediaMetadata(
+        title="Rate Limited Movie",
+        media_type=MediaMetadataType.MOVIE,
+        provider="tmdb",
+        provider_id=tmdbid,
+    )
+    artwork_dir = tmp_path / ".namegnome" / "artwork" / tmdbid
+    with pytest.raises(Exception):
+        await fetch_fanart_poster(meta, artwork_dir)

@@ -36,6 +36,13 @@ def details_response(test_fixtures_dir: Path) -> dict:
         return json.load(f)
 
 
+@pytest.fixture
+def rate_limit_response(test_fixtures_dir: Path) -> dict:
+    """Load the AniList rate-limit (429) error response fixture."""
+    with open(test_fixtures_dir / "rate_limit_response.json") as f:
+        return json.load(f)
+
+
 @pytest.mark.asyncio
 async def test_anilist_search(search_response: dict) -> None:
     """Test that AniList search returns correctly mapped MediaMetadata."""
@@ -141,3 +148,22 @@ async def test_anilist_error_handling() -> None:
         # Assertions for details error
         with pytest.raises(Exception):
             await client.details("9999999")
+
+
+@pytest.mark.asyncio
+async def test_anilist_rate_limit_handling(rate_limit_response: dict) -> None:
+    """Test that AniList client handles rate-limit (HTTP 429) errors gracefully."""
+    with respx.mock:
+        respx.post("https://graphql.anilist.co").mock(
+            return_value=Response(429, json=rate_limit_response)
+        )
+
+        client = AniListClient()
+
+        # Search should return empty list on 429
+        results = await client.search("AnyTitle")
+        assert results == []
+
+        # Details should raise an exception on 429
+        with pytest.raises(Exception):
+            await client.details("1535")
