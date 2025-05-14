@@ -20,6 +20,18 @@ from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 
+class MissingAPIKeyError(Exception):
+    """Raised when a required API key is missing from the environment or .env file."""
+
+    def __init__(self, key: str) -> None:
+        """Initialize the error with the missing key name."""
+        super().__init__(
+            f"Missing required API key: {key}\n"
+            "See documentation: https://github.com/douglasmackrell/namegnome#provider-configuration"
+        )
+        self.key = key
+
+
 class Settings(BaseSettings):
     """Settings for metadata provider API keys.
 
@@ -35,3 +47,10 @@ class Settings(BaseSettings):
     FANARTTV_API_KEY: str | None = None
 
     model_config = ConfigDict(extra="allow")
+
+    def require_keys(self) -> None:
+        """Raise MissingAPIKeyError if any required key is missing."""
+        required = ["TMDB_API_KEY"]
+        for key in required:
+            if not getattr(self, key, None):
+                raise MissingAPIKeyError(key)

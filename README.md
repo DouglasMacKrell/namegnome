@@ -391,6 +391,9 @@ See the full API, advanced usage, and guarantees in
 - Implementation updated to raise on 429 and handle 404 consistently across all providers
 - Fully compliant with project TDD and coverage requirements
 
+### Sprint 2.12 (Config & Error Handling)
+- Settings class, config CLI, and error handling for missing API keys.
+
 ## Technology Stack
 
 - **Python 3.12+**: Modern language features and performance

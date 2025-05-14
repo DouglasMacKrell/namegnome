@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Annotated, Any, Coroutine, List, Optional, TypeVar
 
 import typer
+from pydantic import ValidationError
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.traceback import install as install_traceback
@@ -39,6 +40,7 @@ from namegnome.core.planner import create_rename_plan
 from namegnome.core.scanner import ScanOptions, scan_directory
 from namegnome.core.undo import undo_plan
 from namegnome.metadata.clients.fanarttv import fetch_fanart_poster
+from namegnome.metadata.settings import MissingAPIKeyError, Settings
 from namegnome.models.core import MediaType, ScanResult
 from namegnome.models.scan import ScanOptions as ModelScanOptions
 from namegnome.rules.base import RuleSetConfig
@@ -538,6 +540,58 @@ def undo(
         # Log each file being restored (handled in undo_plan)
         undo_plan(plan_path, log_callback=lambda msg: console.log(msg))
     console.print(f"[green]Undo completed for plan: {plan_id}[/green]")
+
+
+def _print_settings(settings: Settings) -> None:
+    """Print all settings, masking secrets for safety."""
+    for key, value in settings.model_dump().items():
+        if value is None:
+            display = "<unset>"
+        elif "KEY" in key or "TOKEN" in key:
+            display = value[:4] + "..." if value else "<unset>"
+        else:
+            display = str(value)
+        console.print(f"[bold]{key}[/]: {display}")
+
+
+def _handle_settings_error(e: Exception) -> None:
+    """Handle errors for missing or invalid settings."""
+    if isinstance(e, MissingAPIKeyError):
+        console.print(f"[red]{e}[/red]")
+    elif isinstance(e, ValidationError):
+        missing = []
+        for err in e.errors():
+            if err.get("type") == "missing":
+                missing.append(err["loc"][0])
+        if missing:
+            for key in missing:
+                console.print(f"[red]Missing required API key: {key}[/red]")
+            console.print(
+                "[red]See documentation: https://github.com/douglasmackrell/namegnome#provider-configuration[/red]"
+            )
+        else:
+            console.print(f"[red]{e}[/red]")
+    else:
+        console.print(f"[red]{e}[/red]")
+
+
+@app.command()
+def config(
+    show: bool = typer.Option(
+        False,
+        "--show",
+        help="Show all resolved configuration settings (API keys, etc.)",
+    ),
+) -> None:
+    """Show or manage NameGnome configuration (API keys, .env, etc.)."""
+    if show:
+        try:
+            settings = Settings()
+            settings.require_keys()
+            _print_settings(settings)
+        except (MissingAPIKeyError, ValidationError) as e:
+            _handle_settings_error(e)
+            raise typer.Exit(1)
 
 
 def main() -> None:
