@@ -69,6 +69,7 @@ All notable changes to the namegnome project will be documented in this file.
   - Added CLI --no-cache flag to bypass cache for fresh API calls
   - Integrated cache with TMDBClient.search and tested expiry, bypass, and correctness
   - 100% test coverage for cache module and CLI flag
+- Rule engine integration (Sprint 2.10, 2025-07-27): Naming rules now use provider metadata (e.g., movie year, TV episode title) for more accurate and platform-compliant renaming. All tests pass.
 
 ### Fixed
 - Fixed test failures related to console output capture
