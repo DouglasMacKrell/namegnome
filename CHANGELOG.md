@@ -168,3 +168,11 @@ All notable changes to the namegnome project will be documented in this file.
 - Removed all skipped/redundant tests; all tests now pass with zero skips.
 - Migrated to Pydantic v2 ConfigDict to resolve deprecation warnings.
 - Ensured full cross-platform CI compatibility and green pipeline. 
+
+### Sprint 2.8: TheAudioDB Client (2025-07-27)
+- Implemented async TheAudioDB client for artist and album lookup, including:
+  - Artist search via theaudiodb.com API (dev key "2")
+  - Album lookup and thumbnail download (artwork saved to disk)
+  - Updates MediaMetadata.artwork list with downloaded images
+  - TDD: expected-flow, edge, and file I/O tests (artist not found, album thumb download)
+- All requirements and tests pass. 
