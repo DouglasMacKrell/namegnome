@@ -31,7 +31,7 @@ A command-line tool for organizing and renaming media files according to platfor
 - **Apply & Undo engine**: Transactional, reversible renames
 - **Rich progress bars & logging**: CLI feedback and audit trail
 - **Integration tests**: End-to-end, cross-platform
-- **Pluggable metadata/artwork providers**: TMDB, TVDB, MusicBrainz, Fanart.tv (API compliant)
+- **Pluggable metadata/artwork providers**: TMDB, TVDB, MusicBrainz, Fanart.tv, TheAudioDB (API compliant)
 
 ## Project Structure
 
