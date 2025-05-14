@@ -639,6 +639,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **2.7 AniList/AniDB Client** (2025-07-26) - Implemented AniList GraphQL client for anime metadata with absolute episode numbering support. Mapped AniList episodes to TVEpisode objects with absolute numbering for better anime organization. Created TDD tests for search, details, and error handling. All requirements met with passing tests.
 * **2.8 TheAudioDB Client** (2025-07-27) - Implemented async TheAudioDB client for artist and album lookup, including thumbnail download and TDD. All requirements and tests pass.
 * **2.9 Local Cache Layer** (2025-07-27) - Implemented SQLite-backed cache for metadata providers with @cache decorator, CLI --no-cache flag, and 100% test coverage. Integrated with TMDBClient, tested expiry and bypass, and updated CLI. All requirements and tests pass.
+* **2.10 Rule Engine Integration** (2025-07-27) - Rule engine integration: naming rules now use provider metadata (e.g., movie year, TV episode title) for more accurate and platform-compliant renaming. All tests pass.
 
 
 ---

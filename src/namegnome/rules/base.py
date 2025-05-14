@@ -27,9 +27,12 @@ See README.md and PLANNING.md for rationale and usage examples.
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Self
+from typing import TYPE_CHECKING, Optional, Self
 
 from namegnome.models.core import MediaFile, MediaType
+
+if TYPE_CHECKING:
+    from namegnome.metadata.models import MediaMetadata
 
 
 # Reason: RuleSetConfig groups all options that may affect naming, making it easy
@@ -70,16 +73,20 @@ class RuleSet(ABC):
         media_file: MediaFile,
         base_dir: Optional[Path] = None,
         config: Optional[RuleSetConfig] = None,
+        metadata: "MediaMetadata | None" = None,
     ) -> Path:
         """Generate a target path for the given media file.
 
         This method determines where a file should be moved/renamed to based on
-        the platform's naming rules and the file's metadata.
+        the platform's naming rules, the file's metadata, and optional provider
+        metadata.
 
         Args:
             media_file: The media file to generate a target path for.
             base_dir: Optional base directory for the target path.
             config: Optional configuration for the rule set.
+            metadata: Optional provider metadata (e.g., from TMDB/TVDB) to
+                influence naming.
 
         Returns:
             A Path object representing the target location for this file.
