@@ -60,6 +60,9 @@ All notable changes to the namegnome project will be documented in this file.
 - Fanart.tv client for fetching and caching high-res artwork for movies by TMDB ID
 - CLI --artwork flag to trigger artwork download and caching during scan
 - TDD and integration tests for Fanart.tv client and CLI integration
+- AniList GraphQL client for anime metadata with absolute episode numbering support
+- Mapping of AniList streaming episodes to TVEpisode objects with absolute numbering
+- TDD tests for AniList search, details, and error handling
 
 ### Fixed
 - Fixed test failures related to console output capture
