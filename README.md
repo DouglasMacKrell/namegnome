@@ -34,6 +34,8 @@ A command-line tool for organizing and renaming media files according to platfor
 - **Pluggable metadata/artwork providers**: TMDB, TVDB, MusicBrainz, Fanart.tv, TheAudioDB (API compliant)
 - **Metadata cache**: SQLite-backed cache for provider lookups, reducing API calls and enabling offline scans
 - **Metadata-aware rule engine**: Naming rules now use provider metadata (e.g., movie year, TV episode title) for more accurate and platform-compliant renaming
+- **Async Ollama wrapper**: Provides a robust async interface to a local Ollama server for
+  streaming LLM inference, error handling, and future AI-powered features.
 
 ## Project Structure
 
@@ -408,6 +410,10 @@ See the full API, advanced usage, and guarantees in
 
 ### Sprint 2.12 (Config & Error Handling)
 - Settings class, config CLI, and error handling for missing API keys.
+
+### Sprint 3.1 (LLM Fuzzy Assist)
+- Async Ollama wrapper module: async interface to local Ollama server, streaming,
+  error handling, and TDD. Foundation for LLM fuzzy matching and future AI features.
 
 ## Technology Stack
 
