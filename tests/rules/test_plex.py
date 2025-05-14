@@ -264,3 +264,141 @@ class TestPlexRuleSet:
         # Should raise ValueError for unsupported media type
         with pytest.raises(ValueError):
             rule_set.target_path(media_file, base_dir)
+
+    def test_movie_path_with_metadata_year(self, rule_set: PlexRuleSet) -> None:
+        """Test movie path generation uses year from MediaMetadata if provided.
+
+        Scenario:
+        - Movie file without year in filename, but MediaMetadata provides year.
+        - Output path should include year from metadata.
+        """
+        from namegnome.metadata.models import MediaMetadata, MediaMetadataType
+
+        media_file = MediaFile(
+            path=Path("/test/Inception.mp4").absolute(),
+            size=1024,
+            media_type=MediaType.MOVIE,
+            modified_date=datetime.now(),
+        )
+        base_dir = Path("/media").absolute()
+        metadata = MediaMetadata(
+            title="Inception",
+            media_type=MediaMetadataType.MOVIE,
+            provider="tmdb",
+            provider_id="123",
+            year=2010,
+        )
+        target = rule_set.target_path(media_file, base_dir, metadata=metadata)
+        expected = Path(
+            "/media/Movies/Inception (2010)/Inception (2010).mp4"
+        ).absolute()
+        assert target == expected
+
+    def test_tv_show_path_with_metadata_episode_title(
+        self, rule_set: PlexRuleSet
+    ) -> None:
+        """Test TV show path generation uses episode title from MediaMetadata if provided.
+
+        Scenario:
+        - TV file missing episode title in filename, but MediaMetadata provides it.
+        - Output path should use episode title from metadata.
+        """
+        from namegnome.metadata.models import (
+            MediaMetadata,
+            MediaMetadataType,
+            TVEpisode,
+        )
+
+        media_file = MediaFile(
+            path=Path("/test/Breaking Bad S01E05.mp4").absolute(),
+            size=1024,
+            media_type=MediaType.TV,
+            modified_date=datetime.now(),
+        )
+        base_dir = Path("/media").absolute()
+        episode = TVEpisode(
+            title="Gray Matter",
+            episode_number=5,
+            season_number=1,
+        )
+        metadata = MediaMetadata(
+            title="Breaking Bad",
+            media_type=MediaMetadataType.TV_SHOW,
+            provider="tvdb",
+            provider_id="bbad",
+            episodes=[episode],
+        )
+        target = rule_set.target_path(media_file, base_dir, metadata=metadata)
+        expected = Path(
+            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Gray Matter.mp4"
+        ).absolute()
+        assert target == expected
+
+    def test_movie_path_metadata_missing_year_fallback(
+        self, rule_set: PlexRuleSet
+    ) -> None:
+        """Test movie path falls back to filename if MediaMetadata has no year.
+
+        Scenario:
+        - MediaMetadata is provided but year is None.
+        - Output path should not include year.
+        """
+        from namegnome.metadata.models import MediaMetadata, MediaMetadataType
+
+        media_file = MediaFile(
+            path=Path("/test/Inception.mp4").absolute(),
+            size=1024,
+            media_type=MediaType.MOVIE,
+            modified_date=datetime.now(),
+        )
+        base_dir = Path("/media").absolute()
+        metadata = MediaMetadata(
+            title="Inception",
+            media_type=MediaMetadataType.MOVIE,
+            provider="tmdb",
+            provider_id="123",
+            year=None,
+        )
+        target = rule_set.target_path(media_file, base_dir, metadata=metadata)
+        expected = Path("/media/Movies/Inception/Inception.mp4").absolute()
+        assert target == expected
+
+    def test_tv_show_path_metadata_missing_episode_title_fallback(
+        self, rule_set: PlexRuleSet
+    ) -> None:
+        """Test TV show path falls back if MediaMetadata episode title is missing.
+
+        Scenario:
+        - MediaMetadata is provided but episode title is missing for the episode.
+        - Output path should use fallback logic (e.g., 'Unknown Episode').
+        """
+        from namegnome.metadata.models import (
+            MediaMetadata,
+            MediaMetadataType,
+            TVEpisode,
+        )
+
+        media_file = MediaFile(
+            path=Path("/test/Breaking Bad S01E05.mp4").absolute(),
+            size=1024,
+            media_type=MediaType.TV,
+            modified_date=datetime.now(),
+        )
+        base_dir = Path("/media").absolute()
+        episode = TVEpisode(
+            title="",
+            episode_number=5,
+            season_number=1,
+        )
+        metadata = MediaMetadata(
+            title="Breaking Bad",
+            media_type=MediaMetadataType.TV_SHOW,
+            provider="tvdb",
+            provider_id="bbad",
+            episodes=[episode],
+        )
+        target = rule_set.target_path(media_file, base_dir, metadata=metadata)
+        expected = Path(
+            "/media/TV Shows/Breaking Bad/Season 01/Breaking Bad - S01E05 - Unknown Episode.mp4"
+        ).absolute()
+        assert target == expected

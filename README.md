@@ -33,6 +33,7 @@ A command-line tool for organizing and renaming media files according to platfor
 - **Integration tests**: End-to-end, cross-platform
 - **Pluggable metadata/artwork providers**: TMDB, TVDB, MusicBrainz, Fanart.tv, TheAudioDB (API compliant)
 - **Metadata cache**: SQLite-backed cache for provider lookups, reducing API calls and enabling offline scans
+- **Metadata-aware rule engine**: Naming rules now use provider metadata (e.g., movie year, TV episode title) for more accurate and platform-compliant renaming
 
 ## Project Structure
 
@@ -380,4 +381,512 @@ See the full API, advanced usage, and guarantees in
 - Metadata integration and tests
 - Coverage and compliance improvements
 - OMDb client (supplemental movie metadata)
-- Fanart.tv client (high-quality poster artwork, CLI --artwork flag, caching) 
+- Fanart.tv client (high-quality poster artwork, CLI --artwork flag, caching)
+- Rule engine integration: Naming rules now use provider metadata (e.g., movie year, TV episode title) for more accurate and platform-compliant renaming
+
+## Technology Stack
+
+- **Python 3.12+**: Modern language features and performance
+- **Typer**: Declarative CLI framework
+- **Rich**: Beautiful CLI output (tables, spinners, progress bars)
+- **Pydantic v2**: Data validation and serialization
+- **httpx + asyncio**: Async HTTP for metadata providers
+- **TMDB, TVDB, MusicBrainz API clients**: async, rate-limited, custom User-Agent
+- **pytest**: Testing framework (80%+ coverage enforced)
+- **black, ruff, mypy**: Formatting, linting, and static typing
+- **Ollama**: Local LLM server for fuzzy matching and edge-case handling
+
+## Metadata Providers
+
+NameGnome supports pluggable metadata providers:
+- **TMDB**: Movies and TV metadata
+- **TVDB**: TV episode and series metadata
+- **MusicBrainz**: Music album/track/artist metadata
+  - Fully compliant with [MusicBrainz API](https://musicbrainz.org/doc/MusicBrainz_API):
+    - 1 request/sec rate limiting
+    - Custom User-Agent header
+- **OMDb**: Supplements TMDB with IMDb rating and full plot. Requires a free or patron API key (see [OMDb API](https://www.omdbapi.com/)). Free keys are limited to 1,000 requests/day. OMDb fields are only used if missing from TMDB, and TMDB always takes priority.
+- **Fanart.tv**: High-quality poster artwork for movies (by TMDB ID). Requires a free
+  API key (see [Fanart.tv API](https://fanart.tv/api-docs/)). Artwork is downloaded
+  and cached locally when the `--artwork` flag is used.
+- **AniList**: Anime metadata with absolute episode numbering support. Uses AniList's GraphQL API
+  which does not require authentication.
+
+## OMDb API Key Setup
+
+- Register for a free OMDb API key at [omdbapi.com](https://www.omdbapi.com/apikey.aspx).
+- Add `OMDB_API_KEY` to your `.env` file (never hard-code keys).
+- If the key is missing, OMDb supplementation will be skipped.
+
+## Fanart.tv API Key Setup
+
+- Register for a free Fanart.tv API key at [fanart.tv/api](https://fanart.tv/api/).
+- Add `FANARTTV_API_KEY` to your `.env` file (never hard-code keys).
+- If the key is missing, the `--artwork` flag will be ignored and no artwork will be
+  downloaded.
+
+## Attribution
+
+<p align="center">
+  <a href="https://thetvdb.com">
+    <img src="https://thetvdb.com/images/logo.png" alt="TheTVDB Logo" width="120"/>
+  </a><br>
+  Metadata provided by <a href="https://thetvdb.com">TheTVDB</a>.<br>
+  Please consider adding missing information or subscribing.
+</p>
+
+<p align="center">
+  <a href="https://www.themoviedb.org/">
+    <img src="https://www.themoviedb.org/assets/2/v4/logos/stacked-blue-3c3c3c3c.png" alt="TMDB Logo" width="120"/>
+  </a><br>
+  This product uses the TMDB API but is not endorsed or certified by TMDB.<br>
+  <a href="https://www.themoviedb.org/documentation/api/terms-of-use">TMDB API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://musicbrainz.org/">
+    <img src="https://musicbrainz.org/static/images/entity-header-logo.svg" alt="MusicBrainz Logo" width="120"/>
+  </a><br>
+  Music metadata provided by <a href="https://musicbrainz.org/">MusicBrainz</a>.
+</p>
+
+<p align="center">
+  <a href="https://www.omdbapi.com/">
+    <img src="https://www.omdbapi.com/favicon.ico" alt="OMDb Logo" width="32"/>
+  </a><br>
+  Movie metadata supplemented by <a href="https://www.omdbapi.com/">OMDb API</a>.<br>
+  <a href="https://www.omdbapi.com/legal.htm">OMDb API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://fanart.tv/">
+    <img src="https://assets.fanart.tv/fanarttv-logo.svg" alt="Fanart.tv Logo" width="120"/>
+  </a><br>
+  Artwork provided by <a href="https://fanart.tv/">Fanart.tv</a>.<br>
+  <a href="https://fanart.tv/terms/">Fanart.tv API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://anilist.co/">
+    <img src="https://anilist.co/img/icons/icon.svg" alt="AniList Logo" width="32"/>
+  </a><br>
+  Anime metadata provided by <a href="https://anilist.co/">AniList</a>.<br>
+  <a href="https://anilist.gitbook.io/anilist-apiv2-docs/">AniList GraphQL API</a>
+</p>
+
+## Examples
+
+### Organizing a TV Show with Multi-Segment Episodes
+```bash
+namegnome scan /media/TV/PawPatrol \
+  --show-name "Paw Patrol" \
+  --anthology \
+  --adjust-episodes
+```
+
+### Organizing Movies with Explicit Year
+```bash
+namegnome scan /media/Movies \
+  --media-type movie \
+  --movie-year 2023
+```
+
+### Complex Organization (Plex, TV + Movies, JSON output, verification)
+```bash
+namegnome scan /media/Library \
+  --platform plex \
+  --media-type tv \
+  --media-type movie \
+  --show-name "Paw Patrol" \
+  --anthology \
+  --adjust-episodes \
+  --verify \
+  --json
+```
+
+## Exit Codes
+- `0`: Success (all files processed or nothing to do)
+- `1`: Error (general failure)
+- `2`: Manual intervention needed (conflicts or manual review required)
+
+## Notes
+- All rename operations require manual review by default
+- The tool will detect and report conflicts in target paths
+- File integrity verification is optional but recommended
+- JSON output is useful for programmatic processing
+- The `--anthology` flag is for shows with multiple segments per file
+- The `--adjust-episodes` flag helps correct episode numbering when files are in the right order but numbered incorrectly
+
+## Advanced: Atomic & Cross-Platform File Moves
+
+NameGnome uses a robust, cross-platform atomic move engine for all file
+renaming and reorganization. This ensures:
+
+- Safe, auditable, and reversible moves—even across devices or on Windows with
+  long paths.
+- Overwrite protection, dry-run support, and byte-for-byte duplicate detection.
+
+See the full API, advanced usage, and guarantees in  
+[`docs/fs-operations.md`](docs/fs-operations.md).
+
+## Roadmap / Completed
+
+### Sprint 0 (MVP 0.1 "Dry-Run Scanner")
+- Project scaffolding, pre-commit, and CI setup
+- Core package skeleton and CLI
+- Domain models with Pydantic
+- Rule engine prototype (Plex naming)
+- Metadata provider stubs (TMDB, TVDB)
+- Directory scanner for media files
+- Rename planner with conflict detection
+- Rich diff renderer and CLI UX
+- CLI `scan` command
+- Rollback plan store
+- Test harness and baseline coverage
+- Contributor and user documentation
+
+### Sprint 1 (MVP 0.2 "Apply & Undo")
+- Atomic, cross-platform file move helper
+- SHA-256 hash utility for file integrity
+- Apply engine for transactional renames
+- Undo engine and CLI command
+- Progress bars and logging
+- Integration tests across OSes
+- Expanded documentation
+
+### Sprint 2 (MVP 0.3 "Metadata APIs")
+- Provider abstraction interface
+- TMDB client (movies/TV)
+- TVDB client (TV)
+- MusicBrainz client (music, API compliant)
+- Metadata integration and tests
+- Coverage and compliance improvements
+- OMDb client (supplemental movie metadata)
+- Fanart.tv client (high-quality poster artwork, CLI --artwork flag, caching)
+- Rule engine integration: Naming rules now use provider metadata (e.g., movie year, TV episode title) for more accurate and platform-compliant renaming
+
+## Technology Stack
+
+- **Python 3.12+**: Modern language features and performance
+- **Typer**: Declarative CLI framework
+- **Rich**: Beautiful CLI output (tables, spinners, progress bars)
+- **Pydantic v2**: Data validation and serialization
+- **httpx + asyncio**: Async HTTP for metadata providers
+- **TMDB, TVDB, MusicBrainz API clients**: async, rate-limited, custom User-Agent
+- **pytest**: Testing framework (80%+ coverage enforced)
+- **black, ruff, mypy**: Formatting, linting, and static typing
+- **Ollama**: Local LLM server for fuzzy matching and edge-case handling
+
+## Metadata Providers
+
+NameGnome supports pluggable metadata providers:
+- **TMDB**: Movies and TV metadata
+- **TVDB**: TV episode and series metadata
+- **MusicBrainz**: Music album/track/artist metadata
+  - Fully compliant with [MusicBrainz API](https://musicbrainz.org/doc/MusicBrainz_API):
+    - 1 request/sec rate limiting
+    - Custom User-Agent header
+- **OMDb**: Supplements TMDB with IMDb rating and full plot. Requires a free or patron API key (see [OMDb API](https://www.omdbapi.com/)). Free keys are limited to 1,000 requests/day. OMDb fields are only used if missing from TMDB, and TMDB always takes priority.
+- **Fanart.tv**: High-quality poster artwork for movies (by TMDB ID). Requires a free
+  API key (see [Fanart.tv API](https://fanart.tv/api-docs/)). Artwork is downloaded
+  and cached locally when the `--artwork` flag is used.
+- **AniList**: Anime metadata with absolute episode numbering support. Uses AniList's GraphQL API
+  which does not require authentication.
+
+## OMDb API Key Setup
+
+- Register for a free OMDb API key at [omdbapi.com](https://www.omdbapi.com/apikey.aspx).
+- Add `OMDB_API_KEY` to your `.env` file (never hard-code keys).
+- If the key is missing, OMDb supplementation will be skipped.
+
+## Fanart.tv API Key Setup
+
+- Register for a free Fanart.tv API key at [fanart.tv/api](https://fanart.tv/api/).
+- Add `FANARTTV_API_KEY` to your `.env` file (never hard-code keys).
+- If the key is missing, the `--artwork` flag will be ignored and no artwork will be
+  downloaded.
+
+## Attribution
+
+<p align="center">
+  <a href="https://thetvdb.com">
+    <img src="https://thetvdb.com/images/logo.png" alt="TheTVDB Logo" width="120"/>
+  </a><br>
+  Metadata provided by <a href="https://thetvdb.com">TheTVDB</a>.<br>
+  Please consider adding missing information or subscribing.
+</p>
+
+<p align="center">
+  <a href="https://www.themoviedb.org/">
+    <img src="https://www.themoviedb.org/assets/2/v4/logos/stacked-blue-3c3c3c3c.png" alt="TMDB Logo" width="120"/>
+  </a><br>
+  This product uses the TMDB API but is not endorsed or certified by TMDB.<br>
+  <a href="https://www.themoviedb.org/documentation/api/terms-of-use">TMDB API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://musicbrainz.org/">
+    <img src="https://musicbrainz.org/static/images/entity-header-logo.svg" alt="MusicBrainz Logo" width="120"/>
+  </a><br>
+  Music metadata provided by <a href="https://musicbrainz.org/">MusicBrainz</a>.
+</p>
+
+<p align="center">
+  <a href="https://www.omdbapi.com/">
+    <img src="https://www.omdbapi.com/favicon.ico" alt="OMDb Logo" width="32"/>
+  </a><br>
+  Movie metadata supplemented by <a href="https://www.omdbapi.com/">OMDb API</a>.<br>
+  <a href="https://www.omdbapi.com/legal.htm">OMDb API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://fanart.tv/">
+    <img src="https://assets.fanart.tv/fanarttv-logo.svg" alt="Fanart.tv Logo" width="120"/>
+  </a><br>
+  Artwork provided by <a href="https://fanart.tv/">Fanart.tv</a>.<br>
+  <a href="https://fanart.tv/terms/">Fanart.tv API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://anilist.co/">
+    <img src="https://anilist.co/img/icons/icon.svg" alt="AniList Logo" width="32"/>
+  </a><br>
+  Anime metadata provided by <a href="https://anilist.co/">AniList</a>.<br>
+  <a href="https://anilist.gitbook.io/anilist-apiv2-docs/">AniList GraphQL API</a>
+</p>
+
+## Examples
+
+### Organizing a TV Show with Multi-Segment Episodes
+```bash
+namegnome scan /media/TV/PawPatrol \
+  --show-name "Paw Patrol" \
+  --anthology \
+  --adjust-episodes
+```
+
+### Organizing Movies with Explicit Year
+```bash
+namegnome scan /media/Movies \
+  --media-type movie \
+  --movie-year 2023
+```
+
+### Complex Organization (Plex, TV + Movies, JSON output, verification)
+```bash
+namegnome scan /media/Library \
+  --platform plex \
+  --media-type tv \
+  --media-type movie \
+  --show-name "Paw Patrol" \
+  --anthology \
+  --adjust-episodes \
+  --verify \
+  --json
+```
+
+## Exit Codes
+- `0`: Success (all files processed or nothing to do)
+- `1`: Error (general failure)
+- `2`: Manual intervention needed (conflicts or manual review required)
+
+## Notes
+- All rename operations require manual review by default
+- The tool will detect and report conflicts in target paths
+- File integrity verification is optional but recommended
+- JSON output is useful for programmatic processing
+- The `--anthology` flag is for shows with multiple segments per file
+- The `--adjust-episodes` flag helps correct episode numbering when files are in the right order but numbered incorrectly
+
+## Advanced: Atomic & Cross-Platform File Moves
+
+NameGnome uses a robust, cross-platform atomic move engine for all file
+renaming and reorganization. This ensures:
+
+- Safe, auditable, and reversible moves—even across devices or on Windows with
+  long paths.
+- Overwrite protection, dry-run support, and byte-for-byte duplicate detection.
+
+See the full API, advanced usage, and guarantees in  
+[`docs/fs-operations.md`](docs/fs-operations.md).
+
+## Roadmap / Completed
+
+### Sprint 0 (MVP 0.1 "Dry-Run Scanner")
+- Project scaffolding, pre-commit, and CI setup
+- Core package skeleton and CLI
+- Domain models with Pydantic
+- Rule engine prototype (Plex naming)
+- Metadata provider stubs (TMDB, TVDB)
+- Directory scanner for media files
+- Rename planner with conflict detection
+- Rich diff renderer and CLI UX
+- CLI `scan` command
+- Rollback plan store
+- Test harness and baseline coverage
+- Contributor and user documentation
+
+### Sprint 1 (MVP 0.2 "Apply & Undo")
+- Atomic, cross-platform file move helper
+- SHA-256 hash utility for file integrity
+- Apply engine for transactional renames
+- Undo engine and CLI command
+- Progress bars and logging
+- Integration tests across OSes
+- Expanded documentation
+
+### Sprint 2 (MVP 0.3 "Metadata APIs")
+- Provider abstraction interface
+- TMDB client (movies/TV)
+- TVDB client (TV)
+- MusicBrainz client (music, API compliant)
+- Metadata integration and tests
+- Coverage and compliance improvements
+- OMDb client (supplemental movie metadata)
+- Fanart.tv client (high-quality poster artwork, CLI --artwork flag, caching)
+- Rule engine integration: Naming rules now use provider metadata (e.g., movie year, TV episode title) for more accurate and platform-compliant renaming
+
+## Technology Stack
+
+- **Python 3.12+**: Modern language features and performance
+- **Typer**: Declarative CLI framework
+- **Rich**: Beautiful CLI output (tables, spinners, progress bars)
+- **Pydantic v2**: Data validation and serialization
+- **httpx + asyncio**: Async HTTP for metadata providers
+- **TMDB, TVDB, MusicBrainz API clients**: async, rate-limited, custom User-Agent
+- **pytest**: Testing framework (80%+ coverage enforced)
+- **black, ruff, mypy**: Formatting, linting, and static typing
+- **Ollama**: Local LLM server for fuzzy matching and edge-case handling
+
+## Metadata Providers
+
+NameGnome supports pluggable metadata providers:
+- **TMDB**: Movies and TV metadata
+- **TVDB**: TV episode and series metadata
+- **MusicBrainz**: Music album/track/artist metadata
+  - Fully compliant with [MusicBrainz API](https://musicbrainz.org/doc/MusicBrainz_API):
+    - 1 request/sec rate limiting
+    - Custom User-Agent header
+- **OMDb**: Supplements TMDB with IMDb rating and full plot. Requires a free or patron API key (see [OMDb API](https://www.omdbapi.com/)). Free keys are limited to 1,000 requests/day. OMDb fields are only used if missing from TMDB, and TMDB always takes priority.
+- **Fanart.tv**: High-quality poster artwork for movies (by TMDB ID). Requires a free
+  API key (see [Fanart.tv API](https://fanart.tv/api-docs/)). Artwork is downloaded
+  and cached locally when the `--artwork` flag is used.
+- **AniList**: Anime metadata with absolute episode numbering support. Uses AniList's GraphQL API
+  which does not require authentication.
+
+## OMDb API Key Setup
+
+- Register for a free OMDb API key at [omdbapi.com](https://www.omdbapi.com/apikey.aspx).
+- Add `OMDB_API_KEY` to your `.env` file (never hard-code keys).
+- If the key is missing, OMDb supplementation will be skipped.
+
+## Fanart.tv API Key Setup
+
+- Register for a free Fanart.tv API key at [fanart.tv/api](https://fanart.tv/api/).
+- Add `FANARTTV_API_KEY` to your `.env` file (never hard-code keys).
+- If the key is missing, the `--artwork` flag will be ignored and no artwork will be
+  downloaded.
+
+## Attribution
+
+<p align="center">
+  <a href="https://thetvdb.com">
+    <img src="https://thetvdb.com/images/logo.png" alt="TheTVDB Logo" width="120"/>
+  </a><br>
+  Metadata provided by <a href="https://thetvdb.com">TheTVDB</a>.<br>
+  Please consider adding missing information or subscribing.
+</p>
+
+<p align="center">
+  <a href="https://www.themoviedb.org/">
+    <img src="https://www.themoviedb.org/assets/2/v4/logos/stacked-blue-3c3c3c3c.png" alt="TMDB Logo" width="120"/>
+  </a><br>
+  This product uses the TMDB API but is not endorsed or certified by TMDB.<br>
+  <a href="https://www.themoviedb.org/documentation/api/terms-of-use">TMDB API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://musicbrainz.org/">
+    <img src="https://musicbrainz.org/static/images/entity-header-logo.svg" alt="MusicBrainz Logo" width="120"/>
+  </a><br>
+  Music metadata provided by <a href="https://musicbrainz.org/">MusicBrainz</a>.
+</p>
+
+<p align="center">
+  <a href="https://www.omdbapi.com/">
+    <img src="https://www.omdbapi.com/favicon.ico" alt="OMDb Logo" width="32"/>
+  </a><br>
+  Movie metadata supplemented by <a href="https://www.omdbapi.com/">OMDb API</a>.<br>
+  <a href="https://www.omdbapi.com/legal.htm">OMDb API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://fanart.tv/">
+    <img src="https://assets.fanart.tv/fanarttv-logo.svg" alt="Fanart.tv Logo" width="120"/>
+  </a><br>
+  Artwork provided by <a href="https://fanart.tv/">Fanart.tv</a>.<br>
+  <a href="https://fanart.tv/terms/">Fanart.tv API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://anilist.co/">
+    <img src="https://anilist.co/img/icons/icon.svg" alt="AniList Logo" width="32"/>
+  </a><br>
+  Anime metadata provided by <a href="https://anilist.co/">AniList</a>.<br>
+  <a href="https://anilist.gitbook.io/anilist-apiv2-docs/">AniList GraphQL API</a>
+</p>
+
+## Examples
+
+### Organizing a TV Show with Multi-Segment Episodes
+```bash
+namegnome scan /media/TV/PawPatrol \
+  --show-name "Paw Patrol" \
+  --anthology \
+  --adjust-episodes
+```
+
+### Organizing Movies with Explicit Year
+```bash
+namegnome scan /media/Movies \
+  --media-type movie \
+  --movie-year 2023
+```
+
+### Complex Organization (Plex, TV + Movies, JSON output, verification)
+```bash
+namegnome scan /media/Library \
+  --platform plex \
+  --media-type tv \
+  --media-type movie \
+  --show-name "Paw Patrol" \
+  --anthology \
+  --adjust-episodes \
+  --verify \
+  --json
+```
+
+## Exit Codes
+- `0`: Success (all files processed or nothing to do)
+- `1`: Error (general failure)
+- `2`: Manual intervention needed (conflicts or manual review required)
+
+## Notes
+- All rename operations require manual review by default
+- The tool will detect and report conflicts in target paths
+- File integrity verification is optional but recommended
+- JSON output is useful for programmatic processing
+- The `--anthology` flag is for shows with multiple segments per file
+- The `--adjust-episodes` flag helps correct episode numbering when files are in the right order but numbered incorrectly
+
+## Advanced: Atomic & Cross-Platform File Moves
+
+NameGnome uses a robust, cross-platform atomic move engine for all file
+renaming and reorganization. This ensures:
+
+- Safe, auditable, and reversible moves—even across devices or on Windows with
+  long paths.
+- Overwrite protection, dry-run support, and byte-for-byte duplicate detection.
+
+See the full API, advanced usage, and guarantees in  
+[`docs/fs-operations.md`](docs/fs-operations.md). 
