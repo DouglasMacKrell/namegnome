@@ -390,8 +390,6 @@ This sprint adds real metadata lookups, caching, and rule integration.
   3. Update README quick‑start to include key setup.
 * **Done when:** Link checker passes; docs screenshots show provider config.
 
-### 2.8 TheAudioDB Client (2025-07-27) - Implemented async TheAudioDB client for artist and album lookup, including thumbnail download and TDD. All requirements and tests pass.
-
 ---
 
 ## 4 · Sprint 3 (MVP 0.4 "LLM Fuzzy Assist" — Fully Expanded)
@@ -642,6 +640,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **2.10 Rule Engine Integration** (2025-07-27) - Rule engine integration: naming rules now use provider metadata (e.g., movie year, TV episode title) for more accurate and platform-compliant renaming. All tests pass.
 * **2.11 Unit Tests & Fixtures** (2025-07-27) - Parametrized, fixture-based tests for all metadata providers (TMDB, TVDB, MusicBrainz, OMDb, Fanart.tv, TheAudioDB, AniList). Coverage for expected, 404 (not found), and 429 (rate-limit) error cases. All tests pass and coverage ≥85% for metadata package. Implementation updated to raise on 429 and handle 404 consistently across all providers. Fully compliant with project TDD and coverage requirements.
 * **2.12 Config & Error Handling** (2025-07-27) - Implemented Settings class with pydantic, config CLI command, and robust error handling for missing API keys. All requirements and tests pass.
+* **2.13 Docs Update** (2024-07-27) - Created docs/providers.md with provider table, .env.example template (TDD enforced), and updated README.md with provider key setup instructions. All requirements and tests pass.
 
 
 ---
