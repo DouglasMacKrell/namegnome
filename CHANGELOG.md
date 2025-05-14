@@ -56,6 +56,7 @@ All notable changes to the namegnome project will be documented in this file.
 - Metadata integration and tests for all providers.
 - README updates: provider compliance, attribution, and usage examples for music/album/track.
 - Attribution section in README with logos and links for TheTVDB, TMDB, and MusicBrainz.
+- Implemented OMDb client to supplement TMDB with IMDb rating and full plot, with TMDB fields taking priority. OMDb API key loaded from environment, never hard-coded. Merge logic and TDD tests implemented. Integrated into TMDBClient.details for movies. (Sprint 2.5, 2025-05-13)
 
 ### Fixed
 - Fixed test failures related to console output capture

@@ -11,6 +11,7 @@ import logging
 import httpx
 
 from namegnome.metadata.base import MetadataClient
+from namegnome.metadata.clients.omdb import fetch_and_merge_omdb
 from namegnome.metadata.models import ArtworkImage, MediaMetadata, MediaMetadataType
 from namegnome.metadata.settings import Settings
 
@@ -134,10 +135,9 @@ class TMDBClient(MetadataClient):
                             provider="tmdb",
                         )
                     )
-                # Shorten logging to avoid E501
                 logging.debug(f"TMDB details: id={data['id']}")
                 year: int | None = _extract_year(data.get("release_date"))
-                return MediaMetadata(
+                meta = MediaMetadata(
                     title=data["title"],
                     media_type=MediaMetadataType.MOVIE,
                     original_title=data.get("original_title"),
@@ -150,6 +150,13 @@ class TMDBClient(MetadataClient):
                     popularity=data.get("popularity"),
                     artwork=artwork,
                 )
+                # OMDb supplement: only if OMDB_API_KEY is set
+                omdb_key = self.settings.OMDB_API_KEY
+                if omdb_key:
+                    meta = await fetch_and_merge_omdb(
+                        meta, omdb_key, data["title"], year or 0
+                    )
+                return meta
             elif media_type == MediaMetadataType.TV_SHOW:
                 url = f"https://api.themoviedb.org/3/tv/{provider_id}"
                 resp = await client.get(url, params=params)
