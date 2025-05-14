@@ -3,6 +3,7 @@
 Implements async search for fetching artist metadata by name.
 """
 
+from http import HTTPStatus
 from pathlib import Path
 
 import httpx
@@ -28,7 +29,13 @@ class TheAudioDBClient(MetadataClient):
         """
         params = {"s": title}
         async with httpx.AsyncClient() as client:
-            resp = await client.get(self.BASE_URL, params=params)
+            try:
+                resp = await client.get(self.BASE_URL, params=params)
+                resp.raise_for_status()
+            except httpx.HTTPStatusError as exc:
+                if exc.response.status_code == HTTPStatus.NOT_FOUND:
+                    return []
+                raise
             data = resp.json()
             artists = data.get("artists")
             if not artists:

@@ -104,3 +104,29 @@ async def test_fetch_album_thumb_expected_flow(tmp_path: Path) -> None:
     )
     assert result.type == "thumb"
     assert result.provider == "theaudiodb"
+
+
+@pytest.mark.asyncio
+async def test_search_artist_404(respx_mock: respx.MockRouter) -> None:
+    """TheAudioDBClient returns empty list if API returns 404."""
+    artist_name = "404 Artist"
+    api_url = "https://theaudiodb.com/api/v1/json/2/search.php"
+    respx_mock.get(api_url, params={"s": artist_name}).mock(
+        return_value=httpx.Response(404, json={"error": "Not found"})
+    )
+    client = TheAudioDBClient()
+    results = await client.search(artist_name)
+    assert results == []
+
+
+@pytest.mark.asyncio
+async def test_search_artist_429(respx_mock: respx.MockRouter) -> None:
+    """TheAudioDBClient.search raises on 429 rate-limit error."""
+    artist_name = "RateLimit Artist"
+    api_url = "https://theaudiodb.com/api/v1/json/2/search.php"
+    respx_mock.get(api_url, params={"s": artist_name}).mock(
+        return_value=httpx.Response(429, json={"error": "Too Many Requests"})
+    )
+    client = TheAudioDBClient()
+    with pytest.raises(Exception):
+        await client.search(artist_name)

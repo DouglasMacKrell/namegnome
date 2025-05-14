@@ -6,7 +6,9 @@ poster.jpg, returns ArtworkImage. Never hard-codes API keys.
 """
 
 import os
+from http import HTTPStatus
 from pathlib import Path
+from typing import Optional
 
 import httpx
 
@@ -14,7 +16,9 @@ from namegnome.metadata.models import ArtworkImage, MediaMetadata
 from namegnome.metadata.settings import Settings
 
 
-async def fetch_fanart_poster(meta: MediaMetadata, artwork_dir: Path) -> ArtworkImage:
+async def fetch_fanart_poster(
+    meta: MediaMetadata, artwork_dir: Path
+) -> Optional[ArtworkImage]:
     """Fetch and cache the highest-res poster from Fanart.tv for a movie by TMDB ID.
 
     Args:
@@ -22,7 +26,7 @@ async def fetch_fanart_poster(meta: MediaMetadata, artwork_dir: Path) -> Artwork
         artwork_dir: Directory to save the poster image.
 
     Returns:
-        ArtworkImage for the highest-res poster.
+        ArtworkImage for the highest-res poster, or None if not found (404).
     """
     # Initialize settings with required TMDB_API_KEY to satisfy mypy
     # This key isn't used by this function but is required by the Settings class
@@ -31,10 +35,14 @@ async def fetch_fanart_poster(meta: MediaMetadata, artwork_dir: Path) -> Artwork
     tmdbid = meta.provider_id
     url = f"https://webservice.fanart.tv/v3/movies/{tmdbid}"
     async with httpx.AsyncClient() as client:
-        # Fixed headers typing issue by ensuring api-key is a string
         headers = {"api-key": str(api_key) if api_key else ""}
-        resp = await client.get(url, headers=headers)
-        resp.raise_for_status()
+        try:
+            resp = await client.get(url, headers=headers)
+            resp.raise_for_status()
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == HTTPStatus.NOT_FOUND:
+                return None
+            raise
         data = resp.json()
         posters = data.get("movieposter", [])
         if not posters:

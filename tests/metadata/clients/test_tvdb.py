@@ -298,3 +298,39 @@ class TestTVDBClient:
         assert meta.provider_id == str(series_id)
         assert len(meta.episodes) == 1
         assert meta.episodes[0].title == "Details Ep1"
+
+    async def test_search_series_not_found(
+        self, respx_mock: respx.MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Failure: search returns empty list on 404 Not Found from TVDB series search."""
+        respx_mock.post("https://api.thetvdb.com/login").mock(
+            return_value=respx.MockResponse(200, json={"token": "dummy-jwt-token"})
+        )
+        respx_mock.get(
+            "https://api.thetvdb.com/search/series",
+            params={"name": "Missing Show"},
+            headers={"Authorization": "Bearer dummy-jwt-token"},
+        ).mock(return_value=respx.MockResponse(404, json={"Error": "Not found"}))
+        monkeypatch.setenv("TVDB_API_KEY", "dummy-key")
+        client = TVDBClient()
+        results = await client.search("Missing Show")
+        assert results == []
+
+    async def test_search_series_rate_limit(
+        self, respx_mock: respx.MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Failure: search raises HTTPStatusError on 429 Rate Limit from TVDB series search."""
+        respx_mock.post("https://api.thetvdb.com/login").mock(
+            return_value=respx.MockResponse(200, json={"token": "dummy-jwt-token"})
+        )
+        respx_mock.get(
+            "https://api.thetvdb.com/search/series",
+            params={"name": "RateLimit Show"},
+            headers={"Authorization": "Bearer dummy-jwt-token"},
+        ).mock(
+            return_value=respx.MockResponse(429, json={"Error": "Too Many Requests"})
+        )
+        monkeypatch.setenv("TVDB_API_KEY", "dummy-key")
+        client = TVDBClient()
+        with pytest.raises(Exception):
+            await client.search("RateLimit Show")
