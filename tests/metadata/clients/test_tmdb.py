@@ -3,6 +3,8 @@
 Covers expected, edge, and failure cases for movie and TV lookups.
 """
 
+import re
+
 import pytest
 import respx
 
@@ -154,6 +156,10 @@ class TestTMDBClient:
             "https://api.themoviedb.org/3/movie/27205",
             params={"api_key": "dummy"},
         ).mock(return_value=respx.MockResponse(200, json=tmdb_response))
+        # OMDb API mock (minimal, not used in this test)
+        respx_mock.get("http://www.omdbapi.com/").mock(
+            return_value=respx.MockResponse(200, json={"Response": "False"})
+        )
         monkeypatch.setenv("TMDB_API_KEY", "dummy")  # pragma: allowlist secret
         client = TMDBClient()
         movie = await client.details("27205", MediaMetadataType.MOVIE)
@@ -214,6 +220,10 @@ class TestTMDBClient:
         ).mock(
             return_value=respx.MockResponse(404, json={"status_message": "Not found"})
         )
+        # OMDb API mock (minimal, not used in this test)
+        respx_mock.get("http://www.omdbapi.com/").mock(
+            return_value=respx.MockResponse(200, json={"Response": "False"})
+        )
         monkeypatch.setenv("TMDB_API_KEY", "dummy")  # pragma: allowlist secret
         client = TMDBClient()
         with pytest.raises(Exception):
@@ -239,6 +249,10 @@ class TestTMDBClient:
                 401, json={"status_message": "Invalid API key."}
             )
         )
+        # OMDb API mock (minimal, not used in this test)
+        respx_mock.get("http://www.omdbapi.com/").mock(
+            return_value=respx.MockResponse(200, json={"Response": "False"})
+        )
         monkeypatch.setenv("TMDB_API_KEY", "badkey")  # pragma: allowlist secret
         client = TMDBClient()
         with pytest.raises(Exception):
@@ -263,6 +277,10 @@ class TestTMDBClient:
             return_value=respx.MockResponse(
                 500, json={"status_message": "Server error"}
             )
+        )
+        # OMDb API mock (minimal, not used in this test)
+        respx_mock.get("http://www.omdbapi.com/").mock(
+            return_value=respx.MockResponse(200, json={"Response": "False"})
         )
         monkeypatch.setenv("TMDB_API_KEY", "dummy")  # pragma: allowlist secret
         client = TMDBClient()
@@ -290,6 +308,10 @@ class TestTMDBClient:
             "https://api.themoviedb.org/3/movie/27205",
             params={"api_key": "dummy"},
         ).mock(return_value=respx.MockResponse(200, json=tmdb_response))
+        # OMDb API mock (minimal, not used in this test)
+        respx_mock.get("http://www.omdbapi.com/").mock(
+            return_value=respx.MockResponse(200, json={"Response": "False"})
+        )
         monkeypatch.setenv("TMDB_API_KEY", "dummy")  # pragma: allowlist secret
         client = TMDBClient()
         movie = await client.details("27205", MediaMetadataType.MOVIE)
@@ -297,3 +319,46 @@ class TestTMDBClient:
         backdrop_urls = [a.url for a in movie.artwork if a.type == "backdrop"]
         assert any("w500" in str(url) for url in poster_urls)
         assert any("w780" in str(url) for url in backdrop_urls)
+
+    async def test_details_movie_supplementation(
+        self, respx_mock: respx.MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Expected: details maps OMDb supplementation to metadata."""
+        tmdb_response = {
+            "id": 27205,
+            "title": "Inception",
+            "original_title": "Inception",
+            "overview": "A thief who steals corporate secrets...",
+            "release_date": "2010-07-15",
+            "vote_average": 8.3,
+            "vote_count": 32000,
+            "popularity": 60.0,
+            "poster_path": "/poster.jpg",
+            "genres": [{"id": 28, "name": "Action"}, {"id": 878, "name": "Sci-Fi"}],
+        }
+        respx_mock.get(
+            "https://api.themoviedb.org/3/movie/27205",
+            params={"api_key": "dummy"},
+        ).mock(return_value=respx.MockResponse(200, json=tmdb_response))
+        # OMDb API mock (match any OMDb request with params)
+        respx_mock.get(url__regex=re.compile(r"^http://www\.omdbapi\.com/.*")).mock(
+            return_value=respx.MockResponse(
+                200,
+                json={
+                    "Title": "Inception",
+                    "Year": "2010",
+                    "imdbRating": "8.8",
+                    "Plot": "A thief who steals corporate secrets...",
+                    "Response": "True",
+                },
+            )
+        )
+        monkeypatch.setenv("TMDB_API_KEY", "dummy")  # pragma: allowlist secret
+        client = TMDBClient()
+        movie = await client.details("27205", MediaMetadataType.MOVIE)
+        assert movie.title == "Inception"
+        assert movie.provider == "tmdb"
+        assert movie.provider_id == "27205"
+        assert movie.year == 2010
+        assert movie.vote_average == 8.3
+        # Additional asserts for OMDb supplementation can be added here

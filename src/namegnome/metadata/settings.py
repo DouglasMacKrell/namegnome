@@ -27,5 +27,6 @@ class Settings(BaseSettings):
     TMDB_READ_ACCESS_TOKEN: str | None = None
     TVDB_API_KEY: str | None = None
     TVDB_PIN: str | None = None
+    OMDB_API_KEY: str | None = None
 
     model_config = ConfigDict(extra="allow")

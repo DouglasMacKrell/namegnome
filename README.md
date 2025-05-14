@@ -219,6 +219,13 @@ NameGnome supports pluggable metadata providers:
   - Fully compliant with [MusicBrainz API](https://musicbrainz.org/doc/MusicBrainz_API):
     - 1 request/sec rate limiting
     - Custom User-Agent header
+- **OMDb**: Supplements TMDB with IMDb rating and full plot. Requires a free or patron API key (see [OMDb API](https://www.omdbapi.com/)). Free keys are limited to 1,000 requests/day. OMDb fields are only used if missing from TMDB, and TMDB always takes priority.
+
+## OMDb API Key Setup
+
+- Register for a free OMDb API key at [omdbapi.com](https://www.omdbapi.com/apikey.aspx).
+- Add `OMDB_API_KEY` to your `.env` file (never hard-code keys).
+- If the key is missing, OMDb supplementation will be skipped.
 
 ## Attribution
 
@@ -243,6 +250,14 @@ NameGnome supports pluggable metadata providers:
     <img src="https://musicbrainz.org/static/images/entity-header-logo.svg" alt="MusicBrainz Logo" width="120"/>
   </a><br>
   Music metadata provided by <a href="https://musicbrainz.org/">MusicBrainz</a>.
+</p>
+
+<p align="center">
+  <a href="https://www.omdbapi.com/">
+    <img src="https://www.omdbapi.com/favicon.ico" alt="OMDb Logo" width="32"/>
+  </a><br>
+  Movie metadata supplemented by <a href="https://www.omdbapi.com/">OMDb API</a>.<br>
+  <a href="https://www.omdbapi.com/legal.htm">OMDb API Terms of Use</a>
 </p>
 
 ## Examples
