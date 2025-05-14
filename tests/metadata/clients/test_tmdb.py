@@ -362,3 +362,24 @@ class TestTMDBClient:
         assert movie.year == 2010
         assert movie.vote_average == 8.3
         # Additional asserts for OMDb supplementation can be added here
+
+    async def test_search_movie_rate_limit(
+        self, respx_mock: respx.MockRouter, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Failure: search_movie raises HTTPStatusError on 429 Rate Limit."""
+        respx_mock.get(
+            "https://api.themoviedb.org/3/search/movie",
+            params={"query": "Inception", "api_key": "dummy"},
+        ).mock(
+            return_value=respx.MockResponse(
+                429, json={"status_message": "Rate limit exceeded."}
+            )
+        )
+        respx_mock.get(
+            "https://api.themoviedb.org/3/search/tv",
+            params={"query": "Inception", "api_key": "dummy"},
+        ).mock(return_value=respx.MockResponse(200, json={"results": []}))
+        monkeypatch.setenv("TMDB_API_KEY", "dummy")
+        client = TMDBClient()
+        with pytest.raises(Exception):
+            await client.search("Inception")
