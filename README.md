@@ -85,6 +85,21 @@ pipx install namegnome
 namegnome --help
 ```
 
+### Provider API Key Setup
+
+Some features (metadata/artwork lookups) require free API keys from third-party providers.  
+To get started:
+
+1. Copy `.env.example` to `.env` in your project root:
+   ```bash
+   cp .env.example .env
+   ```
+2. Fill in your API keys for the providers you wish to use.  
+   See [docs/providers.md](docs/providers.md) for a full list of supported providers and setup links.
+
+- If a key is missing, only the related feature will be skipped (e.g., no artwork if `FANARTTV_API_KEY` is missing).
+- Never commit your real `.env` file or API keys to version control.
+
 ## Project Highlights
 
 - **Zero-click happy-path**: Scan, preview, and rename in one command
