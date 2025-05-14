@@ -641,6 +641,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **2.9 Local Cache Layer** (2025-07-27) - Implemented SQLite-backed cache for metadata providers with @cache decorator, CLI --no-cache flag, and 100% test coverage. Integrated with TMDBClient, tested expiry and bypass, and updated CLI. All requirements and tests pass.
 * **2.10 Rule Engine Integration** (2025-07-27) - Rule engine integration: naming rules now use provider metadata (e.g., movie year, TV episode title) for more accurate and platform-compliant renaming. All tests pass.
 * **2.11 Unit Tests & Fixtures** (2025-07-27) - Parametrized, fixture-based tests for all metadata providers (TMDB, TVDB, MusicBrainz, OMDb, Fanart.tv, TheAudioDB, AniList). Coverage for expected, 404 (not found), and 429 (rate-limit) error cases. All tests pass and coverage ≥85% for metadata package. Implementation updated to raise on 429 and handle 404 consistently across all providers. Fully compliant with project TDD and coverage requirements.
+* **2.12 Config & Error Handling** (2025-07-27) - Implemented Settings class with pydantic, config CLI command, and robust error handling for missing API keys. All requirements and tests pass.
 
 
 ---
