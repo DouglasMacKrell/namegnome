@@ -8,9 +8,12 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 import typer
+from pydantic import HttpUrl
 from typer.testing import CliRunner
+from typing_extensions import Literal
 
 from namegnome.cli.commands import app
+from namegnome.metadata.models import ArtworkImage
 from namegnome.models.core import MediaFile, MediaType, ScanResult
 from namegnome.models.plan import RenamePlan
 
@@ -190,3 +193,79 @@ def test_scan_command_invalid_media_type() -> None:
     assert (
         "Error: Invalid media type. Must be one of: tv, movie, music" in result.output
     )
+
+
+class DummyContext:
+    """Dummy context manager for patching rich status/progress in tests."""
+
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        """Initialize DummyContext."""
+        pass
+
+    def __enter__(self) -> "DummyContext":
+        """Enter the context manager."""
+        return self
+
+    def __exit__(
+        self, exc_type: object, exc_val: object, exc_tb: object
+    ) -> Literal[False]:
+        """Exit the context manager."""
+        return False
+
+
+def test_scan_command_with_artwork_flag(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Test scan command with --artwork flag triggers artwork download and file creation."""
+    monkeypatch.setenv("FANARTTV_API_KEY", "dummykey")
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        movie_file = Path("movie.mp4")
+        movie_file.touch()
+        tmdbid = "12345"
+        artwork_dir = Path(".namegnome") / "artwork" / tmdbid
+        poster_path = artwork_dir / "poster.jpg"
+
+        async def fake_fetch_fanart_poster(meta: object, dir: Path) -> ArtworkImage:
+            dir.mkdir(parents=True, exist_ok=True)
+            (dir / "poster.jpg").write_bytes(b"FAKEIMAGE")
+            from namegnome.metadata.models import ArtworkImage
+
+            return ArtworkImage(
+                url=HttpUrl("http://img2.jpg/"),
+                width=1000,
+                height=1500,
+                type="poster",
+                provider="fanart",
+            )
+
+        scan_result = ScanResult(
+            files=[
+                MediaFile(
+                    path=movie_file.resolve(),
+                    size=1234,
+                    media_type=MediaType.MOVIE,
+                    modified_date=datetime.now(),
+                )
+            ],
+            root_dir=Path("."),
+            media_types=[MediaType.MOVIE],
+            platform="plex",
+        )
+        with (
+            patch(
+                "namegnome.cli.commands.fetch_fanart_poster", fake_fetch_fanart_poster
+            ),
+            patch("namegnome.cli.commands.scan_directory", return_value=scan_result),
+            patch("rich.console.Console.status", DummyContext),
+            patch("rich.progress.Progress", DummyContext),
+        ):
+            from namegnome.cli.commands import app
+
+            result = runner.invoke(
+                app,
+                ["scan", ".", "--media-type", "movie", "--artwork"],
+            )
+        assert result.exit_code == 0
+        assert poster_path.exists()
+        assert poster_path.read_bytes() == b"FAKEIMAGE"
