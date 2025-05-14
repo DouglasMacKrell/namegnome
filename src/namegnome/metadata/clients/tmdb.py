@@ -11,6 +11,7 @@ import logging
 import httpx
 
 from namegnome.metadata.base import MetadataClient
+from namegnome.metadata.cache import cache
 from namegnome.metadata.clients.omdb import fetch_and_merge_omdb
 from namegnome.metadata.models import ArtworkImage, MediaMetadata, MediaMetadataType
 from namegnome.metadata.settings import Settings
@@ -35,6 +36,7 @@ class TMDBClient(MetadataClient):
         self.api_key = self.settings.TMDB_API_KEY
         self.read_access_token = self.settings.TMDB_READ_ACCESS_TOKEN
 
+    @cache(ttl=86400)
     async def search(self, title: str, year: int | None = None) -> list[MediaMetadata]:
         """Search for movies and TV shows by title and optional year (minimal).
 

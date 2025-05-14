@@ -226,6 +226,17 @@ ARTWORK = Annotated[
     ),
 ]
 
+NO_CACHE = Annotated[
+    bool,
+    typer.Option(
+        "--no-cache",
+        help=(
+            "Bypass all metadata caching (forces fresh API calls; "
+            "disables offline cache)"
+        ),
+    ),
+]
+
 T = TypeVar("T")
 
 
@@ -262,8 +273,13 @@ def scan(  # noqa: PLR0913
     no_color: NO_COLOR = False,
     strict_directory_structure: STRICT_DIRECTORY_STRUCTURE = True,
     artwork: ARTWORK = False,
+    no_cache: NO_CACHE = False,
 ) -> None:
     """Scan a directory for media files and generate a rename plan."""
+    if no_cache:
+        import namegnome.metadata.cache as cache_mod
+
+        cache_mod.BYPASS_CACHE = True
     media_type_list = list(media_type)
     if not media_type_list:
         console.print("[red]At least one media type must be specified.[/red]")
