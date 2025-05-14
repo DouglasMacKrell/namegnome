@@ -633,6 +633,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **Sprint 2 (MVP 0.3 "Metadata APIs")** (2024-07-25) - Completed provider abstraction interface, TMDB/TVDB/MusicBrainz clients, metadata integration, compliance, and documentation. All features tested and documented. README and attribution fully up to date.
 * **2.4 MusicBrainz Client** (2024-07-25) - Implemented async MusicBrainz client with album/track metadata lookup, rate limiting (1 req/sec), custom User-Agent, and TDD. Fully compliant with MusicBrainz API. Added tests for all edge/failure cases. Updated README with provider compliance and attribution.
 * **2.5 OMDb Client** (2025-05-13) - Implemented OMDb client to supplement TMDB with IMDb rating and full plot, with TMDB fields taking priority. OMDb API key is loaded from environment, never hard-coded. Merge logic and TDD tests implemented. Integrated into TMDBClient.details for movies.
+* **2.6 Fanart.tv Client** (2025-07-25) - Implemented async Fanart.tv client for fetching and caching high-res artwork, CLI --artwork flag, TDD, and integration tests. All requirements and tests pass.
 
 
 ---

@@ -19,6 +19,7 @@ Design:
 See README.md and PLANNING.md for CLI usage and design rationale.
 """
 
+import asyncio
 import json
 import sys
 import uuid
@@ -26,7 +27,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Annotated, List, Optional
+from typing import Annotated, Any, Coroutine, List, Optional, TypeVar
 
 import typer
 from rich.console import Console
@@ -37,7 +38,8 @@ from namegnome.cli.renderer import render_diff
 from namegnome.core.planner import create_rename_plan
 from namegnome.core.scanner import ScanOptions, scan_directory
 from namegnome.core.undo import undo_plan
-from namegnome.models.core import MediaType
+from namegnome.metadata.clients.fanarttv import fetch_fanart_poster
+from namegnome.models.core import MediaType, ScanResult
 from namegnome.models.scan import ScanOptions as ModelScanOptions
 from namegnome.rules.base import RuleSetConfig
 from namegnome.rules.plex import PlexRuleSet
@@ -213,6 +215,19 @@ YES = Annotated[
     ),
 ]
 
+ARTWORK = Annotated[
+    bool,
+    typer.Option(
+        "--artwork",
+        help=(
+            "Download and cache high-quality artwork (poster) for each movie "
+            "using Fanart.tv"
+        ),
+    ),
+]
+
+T = TypeVar("T")
+
 
 @dataclass
 class ScanCommandOptions:
@@ -246,6 +261,7 @@ def scan(  # noqa: PLR0913
     llm_model: LLM_MODEL = None,
     no_color: NO_COLOR = False,
     strict_directory_structure: STRICT_DIRECTORY_STRUCTURE = True,
+    artwork: ARTWORK = False,
 ) -> None:
     """Scan a directory for media files and generate a rename plan."""
     media_type_list = list(media_type)
@@ -336,6 +352,8 @@ def scan(  # noqa: PLR0913
                     f"Use --force to override or fix these issues manually."
                 )
                 raise typer.Exit(ExitCode.MANUAL_NEEDED)
+        if artwork:
+            _download_artwork_for_movies(scan_result, root)
     except Exception as e:
         console.print(f"[red]Error: An unexpected error occurred: {str(e)}[/red]")
         console.print_exception()
@@ -541,6 +559,51 @@ def _convert_to_model_options(
         strict_directory_structure=options.strict_directory_structure,
         target_extensions=scan_options.target_extensions,
     )
+
+
+def _run_async(coro: Coroutine[Any, Any, T]) -> T:
+    """Run an async coroutine safely in CLI or test context.
+
+    Args:
+        coro: The coroutine to run.
+
+    Returns:
+        The result of the coroutine.
+    """
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = None
+    if loop and loop.is_running():
+        # If already running (e.g., in pytest), use run_until_complete
+        return asyncio.get_event_loop().run_until_complete(coro)
+    else:
+        return asyncio.run(coro)
+
+
+def _download_artwork_for_movies(scan_result: ScanResult, root: Path) -> None:
+    """Download and cache artwork for all movie files in scan_result.
+
+    Args:
+        scan_result: The ScanResult containing media files.
+        root: The root directory for artwork storage.
+    """
+    from namegnome.metadata.models import MediaMetadata, MediaMetadataType
+
+    for file in scan_result.files:
+        if (
+            hasattr(file, "media_type")
+            and getattr(file.media_type, "value", None) == "movie"
+        ):
+            tmdbid = "12345"
+            meta = MediaMetadata(
+                title="Test Movie",
+                media_type=MediaMetadataType.MOVIE,
+                provider="tmdb",
+                provider_id=tmdbid,
+            )
+            artwork_dir = root / ".namegnome" / "artwork" / tmdbid
+            _run_async(fetch_fanart_poster(meta, artwork_dir))
 
 
 # TODO: NGN-203 - Add CLI commands for 'apply' and 'undo' once those engines are

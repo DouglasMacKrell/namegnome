@@ -31,7 +31,7 @@ A command-line tool for organizing and renaming media files according to platfor
 - **Apply & Undo engine**: Transactional, reversible renames
 - **Rich progress bars & logging**: CLI feedback and audit trail
 - **Integration tests**: End-to-end, cross-platform
-- **Pluggable metadata providers**: TMDB, TVDB, MusicBrainz (API compliant)
+- **Pluggable metadata/artwork providers**: TMDB, TVDB, MusicBrainz, Fanart.tv (API compliant)
 
 ## Project Structure
 
@@ -128,6 +128,8 @@ namegnome scan /path/to/media/files --media-type tv --media-type movie
 
 ### Movie Options
 - `--movie-year 2023`: Specify release year for movie files
+- `--artwork`: Download and cache high-quality poster artwork for each movie using
+  Fanart.tv (requires FANARTTV_API_KEY in your .env)
 
 ### Music Options
 - `--media-type music`: Scan and organize music files (albums/tracks)
@@ -220,12 +222,22 @@ NameGnome supports pluggable metadata providers:
     - 1 request/sec rate limiting
     - Custom User-Agent header
 - **OMDb**: Supplements TMDB with IMDb rating and full plot. Requires a free or patron API key (see [OMDb API](https://www.omdbapi.com/)). Free keys are limited to 1,000 requests/day. OMDb fields are only used if missing from TMDB, and TMDB always takes priority.
+- **Fanart.tv**: High-quality poster artwork for movies (by TMDB ID). Requires a free
+  API key (see [Fanart.tv API](https://fanart.tv/api-docs/)). Artwork is downloaded
+  and cached locally when the `--artwork` flag is used.
 
 ## OMDb API Key Setup
 
 - Register for a free OMDb API key at [omdbapi.com](https://www.omdbapi.com/apikey.aspx).
 - Add `OMDB_API_KEY` to your `.env` file (never hard-code keys).
 - If the key is missing, OMDb supplementation will be skipped.
+
+## Fanart.tv API Key Setup
+
+- Register for a free Fanart.tv API key at [fanart.tv/api](https://fanart.tv/api/).
+- Add `FANARTTV_API_KEY` to your `.env` file (never hard-code keys).
+- If the key is missing, the `--artwork` flag will be ignored and no artwork will be
+  downloaded.
 
 ## Attribution
 
@@ -258,6 +270,14 @@ NameGnome supports pluggable metadata providers:
   </a><br>
   Movie metadata supplemented by <a href="https://www.omdbapi.com/">OMDb API</a>.<br>
   <a href="https://www.omdbapi.com/legal.htm">OMDb API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://fanart.tv/">
+    <img src="https://assets.fanart.tv/fanarttv-logo.svg" alt="Fanart.tv Logo" width="120"/>
+  </a><br>
+  Artwork provided by <a href="https://fanart.tv/">Fanart.tv</a>.<br>
+  <a href="https://fanart.tv/terms/">Fanart.tv API Terms of Use</a>
 </p>
 
 ## Examples
@@ -346,4 +366,6 @@ See the full API, advanced usage, and guarantees in
 - TVDB client (TV)
 - MusicBrainz client (music, API compliant)
 - Metadata integration and tests
-- Coverage and compliance improvements 
+- Coverage and compliance improvements
+- OMDb client (supplemental movie metadata)
+- Fanart.tv client (high-quality poster artwork, CLI --artwork flag, caching) 

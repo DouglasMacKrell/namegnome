@@ -57,6 +57,9 @@ All notable changes to the namegnome project will be documented in this file.
 - README updates: provider compliance, attribution, and usage examples for music/album/track.
 - Attribution section in README with logos and links for TheTVDB, TMDB, and MusicBrainz.
 - Implemented OMDb client to supplement TMDB with IMDb rating and full plot, with TMDB fields taking priority. OMDb API key loaded from environment, never hard-coded. Merge logic and TDD tests implemented. Integrated into TMDBClient.details for movies. (Sprint 2.5, 2025-05-13)
+- Fanart.tv client for fetching and caching high-res artwork for movies by TMDB ID
+- CLI --artwork flag to trigger artwork download and caching during scan
+- TDD and integration tests for Fanart.tv client and CLI integration
 
 ### Fixed
 - Fixed test failures related to console output capture
@@ -78,6 +81,7 @@ All notable changes to the namegnome project will be documented in this file.
 - Fixed serialization of Path objects in YAML files
 - Corrected handling of Enum values in YAML serialization
 - Fixed path handling in file checksums computation
+- Fixed Enum comparison bug in CLI scan command that prevented artwork logic from triggering for movie files
 
 ### Changed
 - Refactored scan command and CLI error handling for proper exit codes and user-facing output.
