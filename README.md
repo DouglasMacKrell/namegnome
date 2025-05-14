@@ -225,6 +225,8 @@ NameGnome supports pluggable metadata providers:
 - **Fanart.tv**: High-quality poster artwork for movies (by TMDB ID). Requires a free
   API key (see [Fanart.tv API](https://fanart.tv/api-docs/)). Artwork is downloaded
   and cached locally when the `--artwork` flag is used.
+- **AniList**: Anime metadata with absolute episode numbering support. Uses AniList's GraphQL API
+  which does not require authentication.
 
 ## OMDb API Key Setup
 
@@ -278,6 +280,14 @@ NameGnome supports pluggable metadata providers:
   </a><br>
   Artwork provided by <a href="https://fanart.tv/">Fanart.tv</a>.<br>
   <a href="https://fanart.tv/terms/">Fanart.tv API Terms of Use</a>
+</p>
+
+<p align="center">
+  <a href="https://anilist.co/">
+    <img src="https://anilist.co/img/icons/icon.svg" alt="AniList Logo" width="32"/>
+  </a><br>
+  Anime metadata provided by <a href="https://anilist.co/">AniList</a>.<br>
+  <a href="https://anilist.gitbook.io/anilist-apiv2-docs/">AniList GraphQL API</a>
 </p>
 
 ## Examples

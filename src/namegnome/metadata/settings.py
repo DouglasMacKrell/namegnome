@@ -23,8 +23,8 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Settings for metadata provider API keys.
 
-    Loads TMDB, TVDB, OMDb, and Fanart.tv credentials from environment variables
-    or .env file.
+    Loads TMDB, TVDB, OMDb, and Fanart.tv credentials from environment
+    variables or .env file.
     """
 
     TMDB_API_KEY: str

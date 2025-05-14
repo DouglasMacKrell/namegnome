@@ -1,0 +1,44 @@
+{
+  "data": {
+    "Media": {
+      "id": 1535,
+      "title": {
+        "romaji": "Death Note",
+        "english": "Death Note",
+        "native": "デスノート"
+      },
+      "description": "Light Yagami is a brilliant high schooler who finds a mysterious notebook called a Death Note. This Death Note belongs to a Shinigami named Ryuk, and grants its user the power to kill anyone whose name and face they know. Light quickly begins to use the Death Note to kill criminals and forge himself a new world as its god. But when criminals begin dropping dead one after another, the authorities send the legendary detective L to track down the killer.",
+      "episodes": 37,
+      "type": "ANIME",
+      "format": "TV",
+      "season": "FALL",
+      "seasonYear": 2006,
+      "streamingEpisodes": [
+        {
+          "title": "Rebirth",
+          "thumbnail": "https://img.example.com/thumb1.jpg",
+          "url": "https://example.com/episode/1",
+          "site": "Crunchyroll"
+        },
+        {
+          "title": "Confrontation",
+          "thumbnail": "https://img.example.com/thumb2.jpg",
+          "url": "https://example.com/episode/2",
+          "site": "Crunchyroll"
+        }
+      ],
+      "airingSchedule": {
+        "nodes": [
+          {
+            "episode": 1,
+            "airingAt": 1162299600
+          },
+          {
+            "episode": 2,
+            "airingAt": 1162904400
+          }
+        ]
+      }
+    }
+  }
+} 

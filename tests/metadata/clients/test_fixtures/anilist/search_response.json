@@ -1,0 +1,29 @@
+{
+  "data": {
+    "Media": {
+      "id": 1535,
+      "title": {
+        "romaji": "Death Note",
+        "english": "Death Note",
+        "native": "デスノート"
+      },
+      "episodes": 37,
+      "type": "ANIME",
+      "format": "TV",
+      "season": "FALL",
+      "seasonYear": 2006,
+      "airingSchedule": {
+        "nodes": [
+          {
+            "episode": 1,
+            "airingAt": 1162299600
+          },
+          {
+            "episode": 2,
+            "airingAt": 1162904400
+          }
+        ]
+      }
+    }
+  }
+} 
