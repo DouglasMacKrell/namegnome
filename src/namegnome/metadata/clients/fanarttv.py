@@ -5,6 +5,7 @@ fetches poster list for TMDB ID, selects highest-res, downloads and saves as
 poster.jpg, returns ArtworkImage. Never hard-codes API keys.
 """
 
+import os
 from pathlib import Path
 
 import httpx
@@ -23,12 +24,16 @@ async def fetch_fanart_poster(meta: MediaMetadata, artwork_dir: Path) -> Artwork
     Returns:
         ArtworkImage for the highest-res poster.
     """
-    settings = Settings()
+    # Initialize settings with required TMDB_API_KEY to satisfy mypy
+    # This key isn't used by this function but is required by the Settings class
+    settings = Settings(TMDB_API_KEY=os.environ.get("TMDB_API_KEY", ""))
     api_key = settings.FANARTTV_API_KEY
     tmdbid = meta.provider_id
     url = f"https://webservice.fanart.tv/v3/movies/{tmdbid}"
     async with httpx.AsyncClient() as client:
-        resp = await client.get(url, headers={"api-key": api_key})
+        # Fixed headers typing issue by ensuring api-key is a string
+        headers = {"api-key": str(api_key) if api_key else ""}
+        resp = await client.get(url, headers=headers)
         resp.raise_for_status()
         data = resp.json()
         posters = data.get("movieposter", [])

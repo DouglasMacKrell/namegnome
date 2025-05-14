@@ -17,6 +17,7 @@ async def test_fetch_fanart_poster_expected_flow(
 ) -> None:
     """Expected-flow: fetches and caches highest-res poster for a movie by TMDB ID."""
     monkeypatch.setenv("FANARTTV_API_KEY", "dummykey")
+    monkeypatch.setenv("TMDB_API_KEY", "dummytmdbkey")
     tmdbid = "12345"
     api_url = f"https://webservice.fanart.tv/v3/movies/{tmdbid}"
     # Mock Fanart.tv API response with two poster images
