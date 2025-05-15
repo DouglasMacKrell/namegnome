@@ -36,6 +36,7 @@ A command-line tool for organizing and renaming media files according to platfor
 - **Metadata-aware rule engine**: Naming rules now use provider metadata (e.g., movie year, TV episode title) for more accurate and platform-compliant renaming
 - **Async Ollama wrapper**: Provides a robust async interface to a local Ollama server for
   streaming LLM inference, error handling, and future AI-powered features.
+- **Prompt template system**: Reusable Jinja2-based prompt template system for LLM workflows (strict loader, editable templates, orchestrator, 100% TDD)
 
 ## Project Structure
 
@@ -48,7 +49,7 @@ namegnome/                  # Project root
 │       ├── rules/       # Platform-specific rules
 │       ├── metadata/    # Metadata providers
 │       ├── fs/          # Filesystem operations
-│       └── prompts/     # LLM prompt templates
+│       └── prompts/     # LLM prompt templates and orchestrator (Jinja2-based)
 ├── tests/               # Test directory (mirrors src structure)
 ├── docs/               # Documentation
 │   ├── fs-operations.md
