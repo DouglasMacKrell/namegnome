@@ -96,6 +96,7 @@ All notable changes to the namegnome project will be documented in this file.
   - Renderer highlights manual items in bright red, displays manual reason, and counts manual items in summary/footer.
   - CLI scan command exits with code 2 if any manual items are present in the plan.
   - All requirements fully tested (planner, renderer, CLI) and documented.
+- Sprint 3.6: LLM Unit & Integration Tests. All LLM unit and integration tests implemented and passing. Mock Ollama responses using respx and monkeypatching. Coverage for llm/ package ≥90%. Integration tests for anthology splitting, confidence/manual flag, and error handling are present and deterministic. No further work required.
 
 ### Fixed
 - Fixed test failures related to console output capture
