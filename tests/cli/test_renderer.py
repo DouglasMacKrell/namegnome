@@ -13,25 +13,11 @@ from namegnome.models.core import MediaFile, MediaType, PlanStatus
 from namegnome.models.plan import RenamePlan, RenamePlanItem
 
 
-# Helper function to create an absolute path that's platform-independent
-def abs_path(path_str: str) -> Path:
-    """Create a platform-independent absolute path."""
-    import os
-    from pathlib import Path
-
-    if os.name == "nt":  # Windows
-        # Convert Unix-style paths to Windows absolute paths
-        if path_str.startswith("/"):
-            return Path("C:" + path_str.replace("/", "\\"))
-    # For Unix systems, keep the path as is
-    return Path(path_str)
-
-
 @pytest.fixture
-def media_file() -> MediaFile:
+def media_file(tmp_path: Path) -> MediaFile:
     """Create a sample media file."""
     return MediaFile(
-        path=abs_path("/tmp/source1.mp4"),
+        path=tmp_path / "source1.mp4",
         size=1024,
         media_type=MediaType.TV,
         modified_date=datetime.now(),
@@ -39,28 +25,28 @@ def media_file() -> MediaFile:
 
 
 @pytest.fixture
-def sample_plan(media_file: MediaFile) -> RenamePlan:
+def sample_plan(tmp_path: Path, media_file: MediaFile) -> RenamePlan:
     """Create a sample rename plan."""
     return RenamePlan(
         id="test-plan",
         created_at=datetime(2025, 5, 6, 16, 22, 7),
-        root_dir=abs_path("/tmp"),
+        root_dir=tmp_path,
         items=[
             RenamePlanItem(
-                source=abs_path("/tmp/source1.mp4"),
-                destination=abs_path("/tmp/target1.mp4"),
+                source=tmp_path / "source1.mp4",
+                destination=tmp_path / "target1.mp4",
                 media_file=media_file,
                 status=PlanStatus.PENDING,
             ),
             RenamePlanItem(
-                source=abs_path("/tmp/source2.mp4"),
-                destination=abs_path("/tmp/target2.mp4"),
+                source=tmp_path / "source2.mp4",
+                destination=tmp_path / "target2.mp4",
                 media_file=media_file,
                 status=PlanStatus.CONFLICT,
             ),
             RenamePlanItem(
-                source=abs_path("/tmp/source3.mp4"),
-                destination=abs_path("/tmp/target3.mp4"),
+                source=tmp_path / "source3.mp4",
+                destination=tmp_path / "target3.mp4",
                 media_file=media_file,
                 status=PlanStatus.MANUAL,
             ),
@@ -73,7 +59,7 @@ def sample_plan(media_file: MediaFile) -> RenamePlan:
 
 
 def test_render_diff_with_color(
-    capsys: pytest.CaptureFixture[str], sample_plan: RenamePlan
+    capsys: pytest.CaptureFixture[str], sample_plan: RenamePlan, tmp_path: Path
 ) -> None:
     """Test that the diff renderer outputs colored text."""
     console = Console(force_terminal=True)
@@ -91,7 +77,7 @@ def test_render_diff_with_color(
     # No specific path checks as they might differ between platforms
 
 
-def test_render_diff_no_color(sample_plan: RenamePlan) -> None:
+def test_render_diff_no_color(sample_plan: RenamePlan, tmp_path: Path) -> None:
     """Test that the diff renderer respects no-color flag."""
     # Use a StringIO to capture output instead of capsys
     string_io = io.StringIO()
@@ -112,12 +98,12 @@ def test_render_diff_no_color(sample_plan: RenamePlan) -> None:
     assert "Reason" in cleaned_output
 
 
-def test_render_diff_empty_plan() -> None:
+def test_render_diff_empty_plan(tmp_path: Path) -> None:
     """Test rendering an empty plan."""
     plan = RenamePlan(
         id="empty-plan",
         created_at=datetime.now(),
-        root_dir=abs_path("/tmp"),
+        root_dir=tmp_path,
         items=[],
         platform="plex",
         media_types=[],
@@ -141,7 +127,7 @@ def test_render_diff_empty_plan() -> None:
 
 
 def test_render_diff_status_colors(
-    capsys: pytest.CaptureFixture[str], sample_plan: RenamePlan
+    capsys: pytest.CaptureFixture[str], sample_plan: RenamePlan, tmp_path: Path
 ) -> None:
     """Test that different statuses get different colors."""
     console = Console(force_terminal=True)
@@ -155,3 +141,40 @@ def test_render_diff_status_colors(
     assert "pending" in captured.out
     assert "conflict" in captured.out
     assert "manual" in captured.out
+
+
+def test_render_diff_manual_highlight_and_summary(
+    sample_plan: RenamePlan, capsys: pytest.CaptureFixture[str], tmp_path: Path
+) -> None:
+    """Test that manual items are highlighted in bright red and summary counts manual items."""
+    # Add a manual item to the plan
+    manual_item = RenamePlanItem(
+        source=tmp_path / "source_manual.mp4",
+        destination=tmp_path / "target_manual.mp4",
+        media_file=sample_plan.items[0].media_file,
+        status=PlanStatus.MANUAL,
+        manual=True,
+        manual_reason="LLM confidence 0.5 below threshold 0.7",
+    )
+    plan = RenamePlan(
+        id="test-plan-manual",
+        created_at=sample_plan.created_at,
+        root_dir=sample_plan.root_dir,
+        items=sample_plan.items + [manual_item],
+        platform=sample_plan.platform,
+        media_types=sample_plan.media_types,
+        metadata_providers=sample_plan.metadata_providers,
+        llm_model=sample_plan.llm_model,
+    )
+    console = Console(force_terminal=True)
+    render_diff(plan, console=console)
+    captured = capsys.readouterr().out
+    # Check for bright red ANSI color code (Rich uses 'bold red' or 'bright_red')
+    assert "\x1b[" in captured  # ANSI present
+    # Check for manual reason in output (allow for Rich table wrapping)
+    assert "LLM confidence 0.5" in captured
+    assert "below threshold 0.7" in captured
+    # Strip ANSI escape codes for summary check
+    cleaned_output = re.sub(r"\x1b\[[0-9;]*m", "", captured)
+    # Check for summary line with manual count
+    assert re.search(r"Manual intervention required:\s*\d+", cleaned_output)

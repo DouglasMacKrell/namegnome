@@ -38,6 +38,7 @@ A command-line tool for organizing and renaming media files according to platfor
   streaming LLM inference, error handling, and future AI-powered features.
 - **Prompt template system**: Reusable Jinja2-based prompt template system for LLM workflows (strict loader, editable templates, orchestrator, 100% TDD)
 - **Anthology episode splitting**: Robust, user-driven LLM-based splitting of multi-episode TV files. Supports S01E01E02, E01-E02, 1x01-1x02, and real-world anthology filenames. Only triggers with --anthology flag.
+- **LLM confidence/manual flag**: Prevents low-confidence AI guesses from auto-renaming. Items below threshold are flagged manual, highlighted in bright red, and require user review. CLI exits with code 2 if manual items are present.
 
 ## Project Structure
 
@@ -161,6 +162,9 @@ namegnome scan /path/to/media/files --media-type tv --media-type movie
 - `--verify`: Compute and store SHA-256 checksums for file integrity
 - `--llm-model "model-name"`: Use a specific LLM for fuzzy matching
 - `--no-cache`: Bypass the metadata cache and force fresh API calls (useful for debugging or when you want the latest data)
+- Low-confidence LLM results are flagged manual and require user review.
+- Manual items are highlighted in bright red in the diff table.
+- CLI exits with code 2 if any manual items are present in the plan.
 
 ### Apply and Undo
 Apply a saved rename plan:

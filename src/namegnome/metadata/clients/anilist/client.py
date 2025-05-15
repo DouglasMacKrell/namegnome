@@ -4,7 +4,6 @@ This module provides an implementation of the MetadataClient interface for the
 AniList GraphQL API, focusing on anime metadata with absolute episode numbering.
 """
 
-import logging
 from typing import Any, Dict, List, Optional
 
 import httpx
@@ -16,8 +15,6 @@ from namegnome.metadata.models import (
     MediaMetadataType,
     TVEpisode,
 )
-
-logger = logging.getLogger(__name__)
 
 # GraphQL queries
 SEARCH_QUERY = """
@@ -116,12 +113,10 @@ class AniListClient(MetadataClient):
 
                 # Check for errors
                 if "errors" in data:
-                    logger.error(f"AniList API error: {data['errors']}")
                     return []
 
                 # Check if media was found
                 if not data.get("data", {}).get("Media"):
-                    logger.info(f"No anime found for title: {title}")
                     return []
 
                 # Map result to MediaMetadata
@@ -134,8 +129,7 @@ class AniListClient(MetadataClient):
 
                 return [metadata]
 
-        except Exception as e:
-            logger.error(f"Error searching AniList: {e}")
+        except Exception:
             return []
 
     async def details(self, provider_id: str) -> MediaMetadata:
@@ -166,13 +160,10 @@ class AniListClient(MetadataClient):
 
                 # Check for errors
                 if "errors" in data:
-                    error_msg = data["errors"][0]["message"]
-                    logger.error(f"AniList API error: {error_msg}")
-                    raise Exception(f"AniList API error: {error_msg}")
+                    raise Exception(data["errors"][0]["message"])
 
                 # Check if media was found
                 if not data.get("data", {}).get("Media"):
-                    logger.error(f"No anime found for ID: {provider_id}")
                     raise Exception(f"No anime found for ID: {provider_id}")
 
                 # Map result to MediaMetadata with episodes
@@ -185,8 +176,7 @@ class AniListClient(MetadataClient):
 
                 return metadata
 
-        except Exception as e:
-            logger.error(f"Error fetching anime details: {e}")
+        except Exception:
             raise
 
     def _map_to_metadata(self, media: Dict[str, Any]) -> MediaMetadata:

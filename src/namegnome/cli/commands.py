@@ -261,7 +261,7 @@ class ScanCommandOptions:
 
 
 @app.command()
-def scan(  # noqa: PLR0913
+def scan(  # noqa: PLR0913, C901, PLR0915
     root: ROOT_PATH,
     media_type: MEDIA_TYPE = [],
     platform: PLATFORM = "plex",
@@ -309,11 +309,13 @@ def scan(  # noqa: PLR0913
                 platform=platform,
             )
             scan_result = scan_directory(
-                root, validated_media_types, options=scan_options
+                root,
+                validated_media_types,
+                options=scan_options,
             )
-            if len(scan_result.files) == 0:
+            if not scan_result.files:
                 console.print("[yellow]No media files found.[/yellow]")
-                raise typer.Exit(ExitCode.SUCCESS)
+                raise typer.Exit(ExitCode.ERROR)
             progress.update(
                 progress.task_ids[0], description="Generating rename plan..."
             )
@@ -372,6 +374,8 @@ def scan(  # noqa: PLR0913
                 raise typer.Exit(ExitCode.MANUAL_NEEDED)
         if artwork:
             _download_artwork_for_movies(scan_result, root)
+    except typer.Exit:
+        raise
     except Exception as e:
         console.print(f"[red]Error: An unexpected error occurred: {str(e)}[/red]")
         console.print_exception()

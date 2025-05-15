@@ -23,7 +23,6 @@ See README.md, PLANNING.md, and TASK.md for rationale and usage examples.
 """
 
 import json
-import logging
 import os
 import platform
 import shutil
@@ -39,9 +38,6 @@ from pydantic import BaseModel
 from namegnome.models.core import MediaType
 from namegnome.models.plan import RenamePlan
 from namegnome.models.scan import ScanOptions
-
-# Logger for this module
-logger = logging.getLogger(__name__)
 
 # Constants
 MAX_FILENAME_CHECK_ATTEMPTS = 8
@@ -127,7 +123,6 @@ def _ensure_plan_dir() -> Path:
     if not plans_dir.exists():
         plans_dir.parent.mkdir(exist_ok=True)
         plans_dir.mkdir(exist_ok=True)
-        logger.info(f"Created plans directory at {plans_dir}")
 
     return plans_dir
 
