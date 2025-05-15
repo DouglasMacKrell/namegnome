@@ -90,6 +90,12 @@ All notable changes to the namegnome project will be documented in this file.
   - 100% TDD coverage for loader, templates, and orchestrator
   - Ready for LLM integration in future sprints
 - Sprint 3.4: Anthology Episode Splitter. User-driven, robust LLM-based splitting of multi-episode TV files. Supports S01E01E02, E01-E02, 1x01-1x02, and real-world anthology filenames. Only triggers with --anthology flag. TDD with synthetic and real examples. All requirements and tests pass.
+- Sprint 3.5: Confidence Scoring & Manual Flags.
+  - LLM confidence float in JSON response, with default threshold 0.7 (NGN_LLM_THRESHOLD).
+  - If confidence < threshold, RenamePlanItem is flagged manual with a reason.
+  - Renderer highlights manual items in bright red, displays manual reason, and counts manual items in summary/footer.
+  - CLI scan command exits with code 2 if any manual items are present in the plan.
+  - All requirements fully tested (planner, renderer, CLI) and documented.
 
 ### Fixed
 - Fixed test failures related to console output capture
