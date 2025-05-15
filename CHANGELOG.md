@@ -97,6 +97,12 @@ All notable changes to the namegnome project will be documented in this file.
   - CLI scan command exits with code 2 if any manual items are present in the plan.
   - All requirements fully tested (planner, renderer, CLI) and documented.
 - Sprint 3.6: LLM Unit & Integration Tests. All LLM unit and integration tests implemented and passing. Mock Ollama responses using respx and monkeypatching. Coverage for llm/ package ≥90%. Integration tests for anthology splitting, confidence/manual flag, and error handling are present and deterministic. No further work required.
+- Sprint 3.7: Performance & Safety Guards (2024-07-27)
+  - Implemented prompt size guard for LLM prompts
+  - Added SQLite-backed cache for LLM responses (SHA-1 keying)
+  - Decorated ollama_client.generate with cache logic (honoring --no-cache flag)
+  - Wrote TDD tests for prompt size, cache hit, and cache bypass
+  - All code, tests, and documentation are compliant with project rules (E501, type annotations, docstrings, etc.)
 
 ### Fixed
 - Fixed test failures related to console output capture
