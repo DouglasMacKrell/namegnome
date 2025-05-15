@@ -78,6 +78,11 @@ All notable changes to the namegnome project will be documented in this file.
   - Custom LLMUnavailableError for connection issues
   - E501 and type annotation compliance throughout
   - Project memory updated per Anthropic Memory MPC rules
+- Async Ollama model discovery (`list_models`) in `ollama_client.py`
+- CLI `llm` command group: `list` and `set-default` subcommands
+- Config persistence for default LLM model (TOML config)
+- Subprocess-based CLI tests for Typer global options (robust to Typer quirks)
+- All requirements and tests for Sprint 3.2 pass as of 2025-07-27
 
 ### Fixed
 - Fixed test failures related to console output capture
