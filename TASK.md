@@ -461,7 +461,7 @@ This sprint introduces AI‑assisted fuzzy matching, anthology handling, and man
 * **Goal:** Ensure deterministic AI behaviour in CI.
 * **Steps:**
 
-  1. Mock Ollama responses using `respx`; store fixture JSON files under `tests/fixtures/llm/`.
+  1. Mock Ollama responses using `respx`; store fixture JSON files under `tests/llm/`.
   2. Tests for success, low confidence, invalid JSON, connection error.
   3. Integration: run `scan` on anthology tree with mock server and assert expanded plan & exit codes.
 * **Done when:** Coverage for `llm/` package ≥ 90 %.
@@ -646,6 +646,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **3.3 Prompt Template System** (2024-07-27) - Implemented reusable Jinja2 prompt template system (loader, templates, orchestrator), 100% TDD coverage, ready for LLM integration. All requirements and tests pass.
 * **3.4 Anthology Episode Splitter** (2025-07-27) - Implemented robust, user-driven anthology episode splitting using LLM. Supports S01E01E02, E01-E02, 1x01-1x02, and real-world anthology filenames. TDD with synthetic and real examples. Only triggers with --anthology flag. All requirements and tests pass.
 * **3.5 Confidence Scoring & Manual Flags** (2025-07-27) - Implemented LLM confidence thresholding, manual flagging, renderer highlighting, and CLI exit code 2 logic. All requirements tested and documented.
+* **3.6 LLM Unit & Integration Tests** (2025-07-27) - All LLM unit and integration tests implemented and passing. Mock Ollama responses using respx and monkeypatching. Coverage for llm/ package ≥90%. Integration tests for anthology splitting, confidence/manual flag, and error handling are present and deterministic. No further work required.
 
 
 ---
