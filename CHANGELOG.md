@@ -83,6 +83,12 @@ All notable changes to the namegnome project will be documented in this file.
 - Config persistence for default LLM model (TOML config)
 - Subprocess-based CLI tests for Typer global options (robust to Typer quirks)
 - All requirements and tests for Sprint 3.2 pass as of 2025-07-27
+- Implemented reusable Jinja2 prompt template system (Sprint 3.3):
+  - Added src/namegnome/prompts/ with editable Jinja2 templates (anthology.j2, title_guess.j2, id_hint.j2)
+  - Created prompt_loader for strict template rendering
+  - Added prompt orchestrator for LLM workflows (anthology splitting, title guessing, ID hinting)
+  - 100% TDD coverage for loader, templates, and orchestrator
+  - Ready for LLM integration in future sprints
 
 ### Fixed
 - Fixed test failures related to console output capture

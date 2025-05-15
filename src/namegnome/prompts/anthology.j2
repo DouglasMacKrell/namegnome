@@ -1,0 +1,7 @@
+Anthology Episode Splitter Prompt
+Show: {{ show_name }}
+Season: {{ season_number }}
+Files: {% for file in files %}
+  - {{ file }}
+{% endfor %}
+Context: {{ context }} 
