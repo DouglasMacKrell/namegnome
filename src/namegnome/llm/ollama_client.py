@@ -76,3 +76,26 @@ async def generate(model: str, prompt: str, stream: bool = True) -> str:
     except httpx.ConnectError as exc:
         raise LLMUnavailableError("Ollama server unavailable") from exc
     return "".join(output)
+
+
+async def list_models() -> list[str]:
+    """List all available LLM models from the local Ollama server.
+
+    Returns:
+        list[str]: List of model names available in Ollama.
+
+    Raises:
+        LLMUnavailableError: If the Ollama server is unreachable or times out.
+    """
+    url = "http://localhost:11434/api/tags"
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(url, timeout=10)
+            resp.raise_for_status()
+            data = resp.json()
+            # Ollama returns {"models": [{"name": ...}, ...]}
+            return [m["name"] for m in data.get("models", [])]
+    except Exception as exc:
+        raise LLMUnavailableError(
+            "Ollama server unavailable or /api/tags failed"
+        ) from exc

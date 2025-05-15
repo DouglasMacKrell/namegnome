@@ -33,18 +33,21 @@ import typer
 from pydantic import ValidationError
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.table import Table
 from rich.traceback import install as install_traceback
 
 from namegnome.cli.renderer import render_diff
 from namegnome.core.planner import create_rename_plan
 from namegnome.core.scanner import ScanOptions, scan_directory
 from namegnome.core.undo import undo_plan
+from namegnome.llm import ollama_client
 from namegnome.metadata.clients.fanarttv import fetch_fanart_poster
 from namegnome.metadata.settings import MissingAPIKeyError, Settings
 from namegnome.models.core import MediaType, ScanResult
 from namegnome.models.scan import ScanOptions as ModelScanOptions
 from namegnome.rules.base import RuleSetConfig
 from namegnome.rules.plex import PlexRuleSet
+from namegnome.utils.config import get_default_llm_model, set_default_llm_model
 from namegnome.utils.json import DateTimeEncoder
 from namegnome.utils.plan_store import list_plans, save_plan
 
@@ -282,6 +285,9 @@ def scan(  # noqa: PLR0913, C901, PLR0915
         import namegnome.metadata.cache as cache_mod
 
         cache_mod.BYPASS_CACHE = True
+    # Use default LLM model from config if not specified
+    if llm_model is None:
+        llm_model = get_default_llm_model()
     media_type_list = list(media_type)
     if not media_type_list:
         console.print("[red]At least one media type must be specified.[/red]")
@@ -682,3 +688,41 @@ def _download_artwork_for_movies(scan_result: ScanResult, root: Path) -> None:
 
 # TODO: NGN-203 - Add CLI commands for 'apply' and 'undo' once those engines are
 # implemented.
+
+llm_app = typer.Typer(help="LLM-related commands (model listing, selection, etc.)")
+
+
+@llm_app.command("list")
+def list_models_cli() -> None:
+    """List all available LLM models from the local Ollama server."""
+    try:
+        models = asyncio.run(ollama_client.list_models())
+    except ollama_client.LLMUnavailableError as e:
+        console.print(f"[red]Error: {e}[/red]")
+        raise typer.Exit(1)
+    if not models:
+        console.print(
+            "[yellow]No LLM models found on the local Ollama server.[/yellow]"
+        )
+        return
+    table = Table(title="Available LLM Models")
+    table.add_column("Model Name", style="cyan", no_wrap=True)
+    for model in models:
+        table.add_row(model)
+    console.print(table)
+
+
+@llm_app.command("set-default")
+def set_default_model_cli(
+    model: str = typer.Argument(..., help="Model name to set as default"),
+) -> None:
+    """Set the default LLM model for future runs."""
+    if not model:
+        console.print("[red]Error: Model name is required.[/red]")
+        raise typer.Exit(1)
+    set_default_llm_model(model)
+    console.print(f"[green]Default LLM model set to:[/green] [bold]{model}[/bold]")
+
+
+# Register llm_app as a subcommand group
+app.add_typer(llm_app, name="llm")
