@@ -18,6 +18,10 @@ A command-line tool for organizing and renaming media files according to platfor
 - [**Progress Bars & Logging**](docs/progress-logging.md): Rich CLI UX, progress bars, spinners, and audit logging.
 - [**Integration Testing**](docs/integration-testing.md): End-to-end test philosophy, structure, and guarantees.
 - [**CLI Command Reference**](docs/cli-commands.md): All commands, flags, usage, exit codes, and advanced options.
+- [**LLM Features & Usage Guide**](docs/llm.md): Model install, selection, troubleshooting.
+- [**Provider Setup & API Keys**](docs/providers.md): How to configure API keys for metadata/artwork providers.
+- [**Known Issues & Troubleshooting**](docs/KNOWN_ISSUES.md): Common issues and solutions.
+- [**Quickstart Guide**](docs/quickstart.md): First-time setup and usage for beginners.
 
 ## Features
 
@@ -39,6 +43,7 @@ A command-line tool for organizing and renaming media files according to platfor
 - **Prompt template system**: Reusable Jinja2-based prompt template system for LLM workflows (strict loader, editable templates, orchestrator, 100% TDD)
 - **Anthology episode splitting**: Robust, user-driven LLM-based splitting of multi-episode TV files. Supports S01E01E02, E01-E02, 1x01-1x02, and real-world anthology filenames. Only triggers with --anthology flag.
 - **LLM confidence/manual flag**: Prevents low-confidence AI guesses from auto-renaming. Items below threshold are flagged manual, highlighted in bright red, and require user review. CLI exits with code 2 if manual items are present.
+- **LLM model selection**: Supports Llama 3 8B (Meta) as default, Mistral 7B as lightweight fallback. See [LLM Features & Usage Guide](docs/llm.md) for install, usage, and troubleshooting.
 
 ## Project Structure
 
@@ -120,20 +125,25 @@ To get started:
 NameGnome is a CLI tool. All commands and options are available via `namegnome --help`.
 
 ### Basic Scan
-Scan a directory for media files and preview the proposed renames:
+Scan a directory for media files and preview the proposed renames (at least one media type is required):
 ```bash
-namegnome scan /path/to/media/files
+namegnome scan /path/to/media/files --media-type tv
 ```
+You can specify multiple types:
+```bash
+namegnome scan /path/to/media/files --media-type tv --media-type movie
+```
+**Note:** The --media-type option is required. NameGnome will not scan unless you specify at least one media type (tv, movie, or music).
 
 ### Platform Selection
 Choose a target platform to apply its naming conventions:
 ```bash
-namegnome scan /path/to/media/files --platform plex
-namegnome scan /path/to/media/files --platform jellyfin
+namegnome scan /path/to/media/files --media-type tv --platform plex
+namegnome scan /path/to/media/files --media-type tv --platform jellyfin
 ```
 
 ### Media Type Filtering
-Limit scan to specific media types:
+Limit scan to specific media types (required):
 ```bash
 # TV only
 namegnome scan /path/to/media/files --media-type tv
@@ -147,6 +157,7 @@ namegnome scan /path/to/media/files --media-type tv --media-type movie
 - `--show-name "Show Title"`: Override detected show name
 - `--anthology`: Handle multi-segment episodes (e.g., Paw Patrol)
 - `--adjust-episodes`: Fix episode numbering if files are in correct order but misnumbered
+- `--media-type tv`: Required for all TV show scans
 
 ### Movie Options
 - `--movie-year 2023`: Specify release year for movie files
@@ -233,10 +244,13 @@ The undo command restores all files in the plan. Each file is logged as it is re
 - **Rich**: Beautiful CLI output (tables, spinners, progress bars)
 - **Pydantic v2**: Data validation and serialization
 - **httpx + asyncio**: Async HTTP for metadata providers
-- **TMDB, TVDB, MusicBrainz API clients**: async, rate-limited, custom User-Agent
 - **pytest**: Testing framework (80%+ coverage enforced)
 - **black, ruff, mypy**: Formatting, linting, and static typing
 - **Ollama**: Local LLM server for fuzzy matching and edge-case handling
+- **Jinja2**: Prompt template system for LLM workflows
+- **SQLite**: Local cache for metadata and LLM responses
+- **TMDB, TVDB, MusicBrainz, OMDb, Fanart.tv, AniList, TheAudioDB**: Pluggable metadata/artwork providers (API compliant)
+- **pipx**: Recommended for isolated CLI installs
 
 ## Metadata Providers
 
@@ -445,10 +459,13 @@ See the full API, advanced usage, and guarantees in
 - **Rich**: Beautiful CLI output (tables, spinners, progress bars)
 - **Pydantic v2**: Data validation and serialization
 - **httpx + asyncio**: Async HTTP for metadata providers
-- **TMDB, TVDB, MusicBrainz API clients**: async, rate-limited, custom User-Agent
 - **pytest**: Testing framework (80%+ coverage enforced)
 - **black, ruff, mypy**: Formatting, linting, and static typing
 - **Ollama**: Local LLM server for fuzzy matching and edge-case handling
+- **Jinja2**: Prompt template system for LLM workflows
+- **SQLite**: Local cache for metadata and LLM responses
+- **TMDB, TVDB, MusicBrainz, OMDb, Fanart.tv, AniList, TheAudioDB**: Pluggable metadata/artwork providers (API compliant)
+- **pipx**: Recommended for isolated CLI installs
 
 ## Metadata Providers
 
@@ -581,4 +598,35 @@ renaming and reorganization. This ensures:
 - Overwrite protection, dry-run support, and byte-for-byte duplicate detection.
 
 See the full API, advanced usage, and guarantees in  
-[`docs/fs-operations.md`](docs/fs-operations.md). 
+[`docs/fs-operations.md`](docs/fs-operations.md).
+
+## LLM Model Recommendation & Usage
+
+NameGnome is designed to work best with local LLMs via Ollama. We recommend:
+
+- **Default:** `llama3:8b` (Meta)
+- **Lightweight fallback:** `mistral:7b`
+- **Code-focused fallback:** `deepseek-coder-v2:16b-lite-instruct-q4_K_M`
+
+**Why DeepSeek-Coder-V2-Instruct?**
+- Lightweight (~10GB quantized), suitable for laptops and resource-limited systems
+- Strong code and reasoning performance, open weights, privacy-friendly
+- Easy to deploy with Ollama, supports commercial use
+- See [Medium deployment guide](https://medium.com/@howard.zhang/deploying-deepseek-coder-locally-guided-by-deepseek-r1-part-2-f77939cdc20b) and [HuggingFace model card](https://huggingface.co/deepseek-ai/DeepSeek-Coder-V2-Instruct)
+
+**Install with Ollama:**
+```sh
+ollama pull llama3:8b
+ollama pull mistral:7b
+ollama pull deepseek-coder-v2:16b-lite-instruct-q4_K_M
+```
+
+Set your preferred default model:
+```sh
+namegnome llm set-default llama3:8b
+# or for lightweight/code workflows:
+namegnome llm set-default mistral:7b
+namegnome llm set-default deepseek-coder-v2:16b-lite-instruct-q4_K_M
+```
+
+See [docs/llm.md](docs/llm.md) for full installation, configuration, CLI usage, and troubleshooting instructions for LLM-powered features. 

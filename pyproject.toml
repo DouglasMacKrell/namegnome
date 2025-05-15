@@ -30,6 +30,8 @@ dependencies = [
   "types-requests",
   "deptry",
   "mypy",
+  "tomli",
+  "tomli-w",
 ]
 
 [project.optional-dependencies]
