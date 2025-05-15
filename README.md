@@ -415,6 +415,13 @@ See the full API, advanced usage, and guarantees in
 - Async Ollama wrapper module: async interface to local Ollama server, streaming,
   error handling, and TDD. Foundation for LLM fuzzy matching and future AI features.
 
+### Sprint 3.2 (Model Discovery & Selection)
+- Async Ollama model discovery (`list_models`)
+- CLI `llm` command group: `list` and `set-default`
+- Config persistence and selection logic for default LLM model
+- Subprocess-based CLI tests for Typer global options
+- All requirements and tests pass as of 2025-07-27
+
 ## Technology Stack
 
 - **Python 3.12+**: Modern language features and performance
