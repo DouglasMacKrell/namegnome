@@ -37,6 +37,7 @@ A command-line tool for organizing and renaming media files according to platfor
 - **Async Ollama wrapper**: Provides a robust async interface to a local Ollama server for
   streaming LLM inference, error handling, and future AI-powered features.
 - **Prompt template system**: Reusable Jinja2-based prompt template system for LLM workflows (strict loader, editable templates, orchestrator, 100% TDD)
+- **Anthology episode splitting**: Robust, user-driven LLM-based splitting of multi-episode TV files. Supports S01E01E02, E01-E02, 1x01-1x02, and real-world anthology filenames. Only triggers with --anthology flag.
 
 ## Project Structure
 
@@ -351,7 +352,7 @@ namegnome scan /media/Library \
 - The tool will detect and report conflicts in target paths
 - File integrity verification is optional but recommended
 - JSON output is useful for programmatic processing
-- The `--anthology` flag is for shows with multiple segments per file
+- The `--anthology` flag enables robust, LLM-powered splitting of multi-segment TV files (e.g., anthology episodes, dual-episode files, or real-world cases like Paw Patrol). This feature supports both pattern-based and real-world filenames, but only triggers when the flag is set.
 - The `--adjust-episodes` flag helps correct episode numbering when files are in the right order but numbered incorrectly
 
 ## Advanced: Atomic & Cross-Platform File Moves
@@ -553,7 +554,7 @@ namegnome scan /media/Library \
 - The tool will detect and report conflicts in target paths
 - File integrity verification is optional but recommended
 - JSON output is useful for programmatic processing
-- The `--anthology` flag is for shows with multiple segments per file
+- The `--anthology` flag enables robust, LLM-powered splitting of multi-segment TV files (e.g., anthology episodes, dual-episode files, or real-world cases like Paw Patrol). This feature supports both pattern-based and real-world filenames, but only triggers when the flag is set.
 - The `--adjust-episodes` flag helps correct episode numbering when files are in the right order but numbered incorrectly
 
 ## Advanced: Atomic & Cross-Platform File Moves

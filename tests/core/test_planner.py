@@ -17,12 +17,14 @@ import json
 import tempfile
 from datetime import datetime
 from pathlib import Path
-from typing import Generator
+from typing import Any, Generator, Never
 
 import pytest
+from _pytest.monkeypatch import MonkeyPatch
 
 from namegnome.core.planner import create_rename_plan, save_plan
 from namegnome.models.core import MediaFile, MediaType, PlanStatus, ScanResult
+from namegnome.rules.base import RuleSetConfig
 from namegnome.rules.plex import PlexRuleSet
 
 
@@ -206,6 +208,270 @@ class TestCreateRenamePlan:
         assert not any(
             item.media_file.media_type == MediaType.MUSIC for item in plan.items
         )
+
+    def test_anthology_episode_splitter_e01_dash_e02(
+        self, temp_dir: Path, monkeypatch: MonkeyPatch
+    ) -> None:
+        """Test anthology episode splitting for E01-E02 pattern using LLM assistance."""
+        import datetime
+
+        from namegnome.core.planner import create_rename_plan
+        from namegnome.models.core import MediaFile, MediaType, PlanStatus, ScanResult
+        from namegnome.rules.plex import PlexRuleSet
+
+        anthology_file = temp_dir / "Show - E01-E02.mkv"
+        anthology_file.write_bytes(b"dummy content")
+        media_file = MediaFile(
+            path=anthology_file.absolute(),
+            size=1024,
+            media_type=MediaType.TV,
+            modified_date=datetime.datetime.now(),
+        )
+        scan_result = ScanResult(
+            files=[media_file],
+            root_dir=temp_dir.absolute(),
+            media_types=[MediaType.TV],
+            platform="plex",
+            total_files=1,
+            skipped_files=0,
+            by_media_type={MediaType.TV: 1},
+            scan_duration_seconds=0.1,
+        )
+
+        def mock_split_anthology(*args: Any, **kwargs: Any) -> list[dict[str, str]]:
+            return [
+                {"episode": "E01", "title": "Episode One"},
+                {"episode": "E02", "title": "Episode Two"},
+            ]
+
+        monkeypatch.setattr(
+            "namegnome.llm.prompt_orchestrator.split_anthology", mock_split_anthology
+        )
+
+        rule_set = PlexRuleSet()
+        plan = create_rename_plan(
+            scan_result=scan_result,
+            rule_set=rule_set,
+            plan_id="anthology-test-plan-e01e02",
+            platform="plex",
+            config=RuleSetConfig(anthology=True),
+        )
+
+        episodes = [
+            item
+            for item in plan.items
+            if item.media_file.path == anthology_file.absolute()
+        ]
+        assert len(episodes) == 2
+        assert {str(item.media_file.episode) for item in episodes} == {"E01", "E02"}
+        assert {item.media_file.title for item in episodes} == {
+            "Episode One",
+            "Episode Two",
+        }
+        for item in episodes:
+            assert item.status == PlanStatus.PENDING
+
+        # Malformed LLM response triggers MANUAL flag
+        def mock_split_anthology_malformed(*args: Any, **kwargs: Any) -> Never:
+            raise ValueError("Malformed LLM JSON")
+
+        monkeypatch.setattr(
+            "namegnome.llm.prompt_orchestrator.split_anthology",
+            mock_split_anthology_malformed,
+        )
+        plan = create_rename_plan(
+            scan_result=scan_result,
+            rule_set=rule_set,
+            plan_id="anthology-test-plan-e01e02-malformed",
+            platform="plex",
+            config=RuleSetConfig(anthology=True),
+        )
+        manual_items = [
+            item
+            for item in plan.items
+            if item.media_file.path == anthology_file.absolute()
+        ]
+        assert len(manual_items) == 1
+        assert manual_items[0].status == PlanStatus.MANUAL
+        assert "Malformed LLM JSON" in (manual_items[0].manual_reason or "")
+
+    def test_anthology_episode_splitter_1x01_dash_1x02(
+        self, temp_dir: Path, monkeypatch: MonkeyPatch
+    ) -> None:
+        """Test anthology episode splitting for 1x01-1x02 pattern using LLM assistance."""
+        import datetime
+
+        from namegnome.core.planner import create_rename_plan
+        from namegnome.models.core import MediaFile, MediaType, PlanStatus, ScanResult
+        from namegnome.rules.plex import PlexRuleSet
+
+        anthology_file = temp_dir / "Show 1x01-1x02.mkv"
+        anthology_file.write_bytes(b"dummy content")
+        media_file = MediaFile(
+            path=anthology_file.absolute(),
+            size=1024,
+            media_type=MediaType.TV,
+            modified_date=datetime.datetime.now(),
+        )
+        scan_result = ScanResult(
+            files=[media_file],
+            root_dir=temp_dir.absolute(),
+            media_types=[MediaType.TV],
+            platform="plex",
+            total_files=1,
+            skipped_files=0,
+            by_media_type={MediaType.TV: 1},
+            scan_duration_seconds=0.1,
+        )
+
+        def mock_split_anthology(*args: Any, **kwargs: Any) -> list[dict[str, str]]:
+            return [
+                {"episode": "1x01", "title": "Episode One"},
+                {"episode": "1x02", "title": "Episode Two"},
+            ]
+
+        monkeypatch.setattr(
+            "namegnome.llm.prompt_orchestrator.split_anthology", mock_split_anthology
+        )
+
+        rule_set = PlexRuleSet()
+        plan = create_rename_plan(
+            scan_result=scan_result,
+            rule_set=rule_set,
+            plan_id="anthology-test-plan-1x01-1x02",
+            platform="plex",
+            config=RuleSetConfig(anthology=True),
+        )
+
+        episodes = [
+            item
+            for item in plan.items
+            if item.media_file.path == anthology_file.absolute()
+        ]
+        assert len(episodes) == 2
+        assert {str(item.media_file.episode) for item in episodes} == {"1x01", "1x02"}
+        assert {item.media_file.title for item in episodes} == {
+            "Episode One",
+            "Episode Two",
+        }
+        for item in episodes:
+            assert item.status == PlanStatus.PENDING
+
+        # Malformed LLM response triggers MANUAL flag
+        def mock_split_anthology_malformed(*args: Any, **kwargs: Any) -> Never:
+            raise ValueError("Malformed LLM JSON")
+
+        monkeypatch.setattr(
+            "namegnome.llm.prompt_orchestrator.split_anthology",
+            mock_split_anthology_malformed,
+        )
+        plan = create_rename_plan(
+            scan_result=scan_result,
+            rule_set=rule_set,
+            plan_id="anthology-test-plan-1x01-1x02-malformed",
+            platform="plex",
+            config=RuleSetConfig(anthology=True),
+        )
+        manual_items = [
+            item
+            for item in plan.items
+            if item.media_file.path == anthology_file.absolute()
+        ]
+        assert len(manual_items) == 1
+        assert manual_items[0].status == PlanStatus.MANUAL
+        assert "Malformed LLM JSON" in (manual_items[0].manual_reason or "")
+
+    def test_anthology_splitter_paw_patrol_real_filename(
+        self, temp_dir: Path, monkeypatch: MonkeyPatch
+    ) -> None:
+        """Test anthology splitting for a real Paw Patrol anthology filename."""
+        import datetime
+
+        from namegnome.core.planner import create_rename_plan
+        from namegnome.models.core import MediaFile, MediaType, PlanStatus, ScanResult
+        from namegnome.rules.plex import PlexRuleSet
+
+        filename = (
+            "Paw Patrol-S01E01-Pups And The Kitty Tastrophe Pups Save A Train.mp4"
+        )
+        anthology_file = temp_dir / filename
+        anthology_file.write_bytes(b"dummy content")
+        media_file = MediaFile(
+            path=anthology_file.absolute(),
+            size=1024,
+            media_type=MediaType.TV,
+            modified_date=datetime.datetime.now(),
+        )
+        scan_result = ScanResult(
+            files=[media_file],
+            root_dir=temp_dir.absolute(),
+            media_types=[MediaType.TV],
+            platform="plex",
+            total_files=1,
+            skipped_files=0,
+            by_media_type={MediaType.TV: 1},
+            scan_duration_seconds=0.1,
+        )
+
+        def mock_split_anthology(*args: Any, **kwargs: Any) -> list[dict[str, str]]:
+            return [
+                {"episode": "S01E01", "title": "Pups And The Kitty Tastrophe"},
+                {"episode": "S01E02", "title": "Pups Save A Train"},
+            ]
+
+        monkeypatch.setattr(
+            "namegnome.llm.prompt_orchestrator.split_anthology", mock_split_anthology
+        )
+
+        rule_set = PlexRuleSet()
+        plan = create_rename_plan(
+            scan_result=scan_result,
+            rule_set=rule_set,
+            plan_id="anthology-test-plan-pawpatrol",
+            platform="plex",
+            config=RuleSetConfig(anthology=True),
+        )
+
+        episodes = [
+            item
+            for item in plan.items
+            if item.media_file.path == anthology_file.absolute()
+        ]
+        assert len(episodes) == 2
+        assert {str(item.media_file.episode) for item in episodes} == {
+            "S01E01",
+            "S01E02",
+        }
+        assert {item.media_file.title for item in episodes} == {
+            "Pups And The Kitty Tastrophe",
+            "Pups Save A Train",
+        }
+        for item in episodes:
+            assert item.status == PlanStatus.PENDING
+
+        # Malformed LLM response triggers MANUAL flag
+        def mock_split_anthology_malformed(*args: Any, **kwargs: Any) -> Never:
+            raise ValueError("Malformed LLM JSON")
+
+        monkeypatch.setattr(
+            "namegnome.llm.prompt_orchestrator.split_anthology",
+            mock_split_anthology_malformed,
+        )
+        plan = create_rename_plan(
+            scan_result=scan_result,
+            rule_set=rule_set,
+            plan_id="anthology-test-plan-pawpatrol-malformed",
+            platform="plex",
+            config=RuleSetConfig(anthology=True),
+        )
+        manual_items = [
+            item
+            for item in plan.items
+            if item.media_file.path == anthology_file.absolute()
+        ]
+        assert len(manual_items) == 1
+        assert manual_items[0].status == PlanStatus.MANUAL
+        assert "Malformed LLM JSON" in (manual_items[0].manual_reason or "")
 
 
 class TestSavePlan:
