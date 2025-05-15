@@ -473,6 +473,79 @@ class TestCreateRenamePlan:
         assert manual_items[0].status == PlanStatus.MANUAL
         assert "Malformed LLM JSON" in (manual_items[0].manual_reason or "")
 
+    def test_llm_confidence_manual_flag(
+        self, temp_dir: Path, monkeypatch: MonkeyPatch
+    ) -> None:
+        """Test that LLM confidence below threshold sets manual flag and reason."""
+        # Simulate a TV file that would trigger LLM logic
+        tv_file = temp_dir / "Show.S01E01.mp4"
+        tv_file.write_bytes(b"dummy content")
+        media_file = MediaFile(
+            path=tv_file.absolute(),
+            size=1024,
+            media_type=MediaType.TV,
+            modified_date=datetime.now(),
+        )
+        scan_result = ScanResult(
+            files=[media_file],
+            root_dir=temp_dir.absolute(),
+            media_types=[MediaType.TV],
+            platform="plex",
+            total_files=1,
+            skipped_files=0,
+            by_media_type={MediaType.TV: 1},
+            scan_duration_seconds=0.1,
+        )
+
+        # Patch split_anthology to return a segment with low confidence
+        def mock_split_anthology_low_conf(
+            *args: Any, **kwargs: Any
+        ) -> list[dict[str, Any]]:
+            return [{"episode": "S01E01", "title": "Test Title", "confidence": 0.5}]
+
+        monkeypatch.setattr(
+            "namegnome.llm.prompt_orchestrator.split_anthology",
+            mock_split_anthology_low_conf,
+        )
+        from namegnome.rules.base import RuleSetConfig
+        from namegnome.rules.plex import PlexRuleSet
+
+        config = RuleSetConfig(anthology=True)
+        plan = create_rename_plan(
+            scan_result=scan_result,
+            rule_set=PlexRuleSet(),
+            plan_id="test-plan",
+            platform="plex",
+            config=config,
+        )
+        assert len(plan.items) == 1
+        item = plan.items[0]
+        assert item.manual is True
+        assert item.manual_reason is not None
+        assert "confidence" in item.manual_reason
+
+        # Now patch split_anthology to return high confidence
+        def mock_split_anthology_high_conf(
+            *args: Any, **kwargs: Any
+        ) -> list[dict[str, Any]]:
+            return [{"episode": "S01E01", "title": "Test Title", "confidence": 0.95}]
+
+        monkeypatch.setattr(
+            "namegnome.llm.prompt_orchestrator.split_anthology",
+            mock_split_anthology_high_conf,
+        )
+        plan = create_rename_plan(
+            scan_result=scan_result,
+            rule_set=PlexRuleSet(),
+            plan_id="test-plan",
+            platform="plex",
+            config=config,
+        )
+        assert len(plan.items) == 1
+        item = plan.items[0]
+        assert item.manual is False
+        assert item.manual_reason is None
+
 
 class TestSavePlan:
     """Tests for the save_plan function.

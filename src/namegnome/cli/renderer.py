@@ -44,16 +44,22 @@ def render_diff(plan: RenamePlan, console: Console | None = None) -> None:
         PlanStatus.SKIPPED: "cyan",
         PlanStatus.CONFLICT: "red bold",
         PlanStatus.FAILED: "red",
-        PlanStatus.MANUAL: "magenta",
+        PlanStatus.MANUAL: "bright_red bold",  # Use bright red for manual
     }
 
     for item in plan.items:
         status_style = status_styles.get(item.status, "white")
+        # Show manual_reason if present for manual items
+        reason = (
+            item.manual_reason
+            if item.status == PlanStatus.MANUAL and item.manual_reason
+            else item.reason or ""
+        )
         table.add_row(
             item.status.value,
             str(item.source),
             str(item.destination),
-            item.reason or "",
+            reason,
             style=status_style,
         )
 
@@ -69,7 +75,9 @@ def render_diff(plan: RenamePlan, console: Console | None = None) -> None:
     console.print(f"Total: {total} | Conflicts: {conflicts}")
 
     if manual > 0:
-        console.print(f"Manual intervention required: {manual}", style="magenta")
+        console.print(
+            f"Manual intervention required: {manual}", style="bright_red bold"
+        )
 
     if failed > 0:
         console.print(f"Failed items: {failed}", style="red bold")

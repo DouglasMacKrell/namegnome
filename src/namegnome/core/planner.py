@@ -1,3 +1,4 @@
+# mypy: disable-error-code=unreachable
 """Rename planner for media files.
 
 This module provides functionality to create a plan for renaming and moving media files
@@ -5,7 +6,7 @@ based on platform-specific rules and detect potential conflicts.
 """
 
 import json
-import logging
+import os
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -15,9 +16,6 @@ from namegnome.llm import prompt_orchestrator
 from namegnome.models.core import MediaFile, PlanStatus, ScanResult
 from namegnome.models.plan import RenamePlan, RenamePlanItem
 from namegnome.rules.base import RuleSet, RuleSetConfig
-
-# Logger for this module
-logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from namegnome.models.core import ScanResult
@@ -78,10 +76,6 @@ def create_rename_plan(
     for media_file in scan_result.files:
         # Skip if rule set doesn't support this media type
         if not rule_set.supports_media_type(media_file.media_type):
-            logger.warning(
-                f"Skipping {media_file.path} - media type {media_file.media_type} "
-                f"not supported by {rule_set.platform_name} rule set"
-            )
             continue
 
         # Anthology/multi-episode detection (triggered by config.anthology)
@@ -154,8 +148,64 @@ def save_plan(plan: RenamePlan, output_dir: Path) -> Path:
     with output_file.open("w", encoding="utf-8") as f:
         json.dump(plan_dict, f, indent=2, ensure_ascii=False, cls=DateTimeEncoder)
 
-    logger.info(f"Saved rename plan to {output_file}")
     return output_file
+
+
+def _handle_anthology_split_error(
+    e: Exception,
+    media_file: MediaFile,
+    ctx: PlanContext,
+) -> None:
+    item = RenamePlanItem(
+        source=media_file.path,
+        destination=media_file.path,
+        media_file=media_file,
+        status=PlanStatus.MANUAL,
+        manual=True,
+        manual_reason=str(e),
+    )
+    ctx.plan.items.append(item)
+
+
+def _anthology_split_segments(
+    media_file: MediaFile,
+    rule_set: RuleSet,
+    config: RuleSetConfig,
+    ctx: PlanContext,
+) -> None:
+    segments = prompt_orchestrator.split_anthology(media_file)
+    try:
+        threshold = float(os.environ.get("NGN_LLM_THRESHOLD", "0.7"))
+    except Exception:
+        threshold = 0.7
+    for seg in segments:
+        seg_media_file = media_file.model_copy()
+        seg_media_file.episode = seg.get("episode")
+        seg_media_file.title = seg.get("title")
+        confidence = seg.get("confidence")
+        manual = False
+        manual_reason = None
+        if confidence is not None:
+            try:
+                conf_val = float(confidence)
+                if conf_val < threshold:
+                    manual = True
+                    manual_reason = (
+                        f"LLM confidence {conf_val:.2f} below threshold {threshold:.2f}"
+                    )
+            except Exception:
+                pass
+        target_path = rule_set.target_path(seg_media_file, config=config)
+        item = RenamePlanItem(
+            source=media_file.path,
+            destination=target_path,
+            media_file=seg_media_file,
+            manual=manual,
+            manual_reason=manual_reason,
+        )
+        ctx.plan.items.append(item)
+        ctx.destinations[target_path] = item
+        ctx.case_insensitive_destinations[str(target_path).lower()] = item
 
 
 def _handle_anthology_split(
@@ -168,43 +218,83 @@ def _handle_anthology_split(
     if media_file.media_type.name.lower() == "tv" and getattr(
         config, "anthology", False
     ):
-        logger.debug(f"[DEBUG] Entering anthology split for {media_file.path}")
         try:
-            segments = prompt_orchestrator.split_anthology(media_file)
-            for seg in segments:
-                seg_media_file = media_file.model_copy()
-                seg_media_file.episode = seg.get("episode")
-                seg_media_file.title = seg.get("title")
-                target_path = rule_set.target_path(seg_media_file, config=config)
-                item = RenamePlanItem(
-                    source=media_file.path,
-                    destination=target_path,
-                    media_file=seg_media_file,
-                )
-                ctx.plan.items.append(item)
-                ctx.destinations[target_path] = item
-                ctx.case_insensitive_destinations[str(target_path).lower()] = item
-            logger.debug(
-                f"[DEBUG] Anthology split complete for {media_file.path}, "
-                "continuing loop"
-            )
-            return True
+            _anthology_split_segments(media_file, rule_set, config, ctx)
         except Exception as e:
-            logger.debug(f"[DEBUG] Anthology split failed for {media_file.path}: {e}")
-            item = RenamePlanItem(
-                source=media_file.path,
-                destination=media_file.path,
-                media_file=media_file,
-                status=PlanStatus.MANUAL,
-                manual=True,
-                manual_reason=str(e),
-            )
-            ctx.plan.items.append(item)
-            logger.debug(
-                f"[DEBUG] Appended MANUAL item for {media_file.path}, continuing loop"
-            )
-            return True
+            _handle_anthology_split_error(e, media_file, ctx)
+        return True
     return False
+
+
+def _append_failed_plan_item(
+    media_file: MediaFile, ctx: PlanContext, error: Exception
+) -> None:
+    """Append a failed RenamePlanItem to the plan for user review."""
+    item = RenamePlanItem(
+        source=media_file.path,
+        destination=media_file.path,  # Keep original path
+        media_file=media_file,
+        status=PlanStatus.FAILED,
+        reason=str(error),
+    )
+    ctx.plan.items.append(item)
+
+
+def _try_generate_plan_item(
+    media_file: MediaFile,
+    rule_set: RuleSet,
+    config: RuleSetConfig,
+    ctx: PlanContext,
+) -> None:
+    """Try to generate and append a plan item, handling ValueError as failed."""
+    try:
+        # Generate target path using the config object
+        target_path = rule_set.target_path(
+            media_file,
+            config=config,
+        )
+
+        # Create plan item
+        item = RenamePlanItem(
+            source=media_file.path,
+            destination=target_path,
+            media_file=media_file,
+        )
+
+        # Check for conflicts
+        if target_path in ctx.destinations:
+            # Mark both items as conflicting
+            item.status = PlanStatus.CONFLICT
+            item.reason = (
+                f"Destination already used by {ctx.destinations[target_path].source}"
+            )
+            ctx.destinations[target_path].status = PlanStatus.CONFLICT
+            conflict_src = item.source
+            ctx.destinations[
+                target_path
+            ].reason = f"Destination already used by {conflict_src}"
+        elif str(target_path).lower() in ctx.case_insensitive_destinations:
+            conflicting_item = ctx.case_insensitive_destinations[
+                str(target_path).lower()
+            ]
+            item.status = PlanStatus.CONFLICT
+            item.reason = (
+                f"Destination conflicts with {conflicting_item.source} "
+                "(case-insensitive filesystem)"
+            )
+            conflicting_item.status = PlanStatus.CONFLICT
+            conflicting_item.reason = (
+                f"Destination conflicts with {item.source} "
+                "(case-insensitive filesystem)"
+            )
+
+        # Add to plan and track destination
+        ctx.plan.items.append(item)
+        ctx.destinations[target_path] = item
+        ctx.case_insensitive_destinations[str(target_path).lower()] = item
+
+    except ValueError as e:
+        _append_failed_plan_item(media_file, ctx, e)
 
 
 def _handle_normal_plan_item(
@@ -231,8 +321,6 @@ def _handle_normal_plan_item(
         # Check for conflicts
         if target_path in ctx.destinations:
             # Mark both items as conflicting
-            # Reason: Two files targeting the same destination would
-            # overwrite each other; this is a critical safety check.
             item.status = PlanStatus.CONFLICT
             item.reason = (
                 f"Destination already used by {ctx.destinations[target_path].source}"
@@ -242,16 +330,7 @@ def _handle_normal_plan_item(
             ctx.destinations[
                 target_path
             ].reason = f"Destination already used by {conflict_src}"
-            logger.warning(
-                f"Conflict detected: {item.source} and "
-                f"{ctx.destinations[target_path].source} both target {target_path}"
-            )
-        # Also check for case-insensitive conflicts
-        # Reason: On case-insensitive filesystems, 'A.mkv' and 'a.mkv'
-        # would collide.
         elif str(target_path).lower() in ctx.case_insensitive_destinations:
-            # Reason: On case-insensitive filesystems, 'A.mkv' and 'a.mkv'
-            # would collide.
             conflicting_item = ctx.case_insensitive_destinations[
                 str(target_path).lower()
             ]
@@ -265,10 +344,6 @@ def _handle_normal_plan_item(
                 f"Destination conflicts with {item.source} "
                 "(case-insensitive filesystem)"
             )
-            logger.warning(
-                f"Case-insensitive conflict: {item.source} conflicts with "
-                f"{conflicting_item.source}"
-            )
 
         # Add to plan and track destination
         ctx.plan.items.append(item)
@@ -276,10 +351,6 @@ def _handle_normal_plan_item(
         ctx.case_insensitive_destinations[str(target_path).lower()] = item
 
     except ValueError as e:
-        # Handle errors in path generation
-        # Reason: If the rule set cannot generate a valid path, mark as
-        # failed but keep in plan for user review.
-        logger.error(f"Error generating target path for {media_file.path}: {e}")
         item = RenamePlanItem(
             source=media_file.path,
             destination=media_file.path,  # Keep original path

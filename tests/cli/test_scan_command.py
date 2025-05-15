@@ -14,8 +14,8 @@ from typing_extensions import Literal
 
 from namegnome.cli.commands import app
 from namegnome.metadata.models import ArtworkImage
-from namegnome.models.core import MediaFile, MediaType, ScanResult
-from namegnome.models.plan import RenamePlan
+from namegnome.models.core import MediaFile, MediaType, PlanStatus, ScanResult
+from namegnome.models.plan import RenamePlan, RenamePlanItem
 
 
 @pytest.fixture
@@ -269,3 +269,87 @@ def test_scan_command_with_artwork_flag(
         assert result.exit_code == 0
         assert poster_path.exists()
         assert poster_path.read_bytes() == b"FAKEIMAGE"
+
+
+def make_manual_plan(tmp_path: Path) -> RenamePlan:
+    """Helper to create a RenamePlan with a manual item for testing."""
+    from datetime import datetime
+
+    from namegnome.models.core import MediaFile, MediaType
+    from namegnome.models.plan import RenamePlan
+
+    manual_item = RenamePlanItem(
+        source=tmp_path / "file1.mp4",
+        destination=tmp_path / "file1_renamed.mp4",
+        media_file=MediaFile(
+            path=tmp_path / "file1.mp4",
+            size=1024,
+            media_type=MediaType.TV,
+            modified_date=datetime.now(),
+        ),
+        status=PlanStatus.MANUAL,
+        manual=True,
+        manual_reason="LLM confidence 0.5 below threshold 0.7",
+    )
+    return RenamePlan(
+        id="test_plan",
+        created_at=datetime.now(),
+        root_dir=tmp_path,
+        platform="plex",
+        items=[manual_item],
+        media_types=[MediaType.TV],
+        metadata_providers=[],
+        llm_model=None,
+    )
+
+
+def test_scan_command_exit_code_manual(tmp_path: Path) -> None:
+    """Test that scan command exits with code 2 if manual items are present."""
+    from unittest.mock import MagicMock, patch
+
+    from namegnome.cli.commands import app
+
+    plan = make_manual_plan(tmp_path)
+    runner = CliRunner()
+    with (
+        patch("namegnome.cli.commands.create_rename_plan", return_value=plan),
+        patch("namegnome.cli.commands.Progress", MagicMock()),
+        patch("namegnome.cli.commands.console.status", MagicMock()),
+    ):
+        result = runner.invoke(
+            app,
+            [
+                "scan",
+                str(tmp_path),
+                "--media-type",
+                "tv",
+                "--no-color",
+            ],
+        )
+    assert result.exit_code == 2
+
+
+def test_scan_command_manual_message(tmp_path: Path) -> None:
+    """Test that scan command output includes manual confirmation message."""
+    from unittest.mock import MagicMock, patch
+
+    from namegnome.cli.commands import app
+
+    plan = make_manual_plan(tmp_path)
+    runner = CliRunner()
+    with (
+        patch("namegnome.cli.commands.create_rename_plan", return_value=plan),
+        patch("namegnome.cli.commands.Progress", MagicMock()),
+        patch("namegnome.cli.commands.console.status", MagicMock()),
+    ):
+        result = runner.invoke(
+            app,
+            [
+                "scan",
+                str(tmp_path),
+                "--media-type",
+                "tv",
+                "--no-color",
+            ],
+        )
+    assert "require manual confirmation" in result.output

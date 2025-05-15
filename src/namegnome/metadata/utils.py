@@ -16,12 +16,8 @@ Design:
 """
 
 import json
-import logging
 from pathlib import Path
 from typing import Any
-
-# Create a logger for this module
-logger = logging.getLogger(__name__)
 
 
 def load_fixture(provider: str, fixture_name: str) -> dict[str, Any]:
@@ -47,11 +43,6 @@ def load_fixture(provider: str, fixture_name: str) -> dict[str, Any]:
     # The path should point to namegnome/tests/fixtures/stubs/provider
     # Using parents[3] since: current file -> metadata -> src -> namegnome -> tests
     base_path = Path(__file__).parents[3] / "tests" / "fixtures" / "stubs" / provider
-
-    # Check if path exists and is a directory, if not create it
-    if not base_path.exists():
-        logger.warning(f"Creating missing fixture directory: {base_path}")
-        base_path.mkdir(parents=True, exist_ok=True)
 
     fixture_path = base_path / f"{fixture_name}.json"
 

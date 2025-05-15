@@ -645,6 +645,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **3.2 Model Discovery & Selection** (2025-07-27) - Implemented async Ollama model discovery (list_models), CLI llm command group (list/set-default), config persistence and selection logic, and robust TDD with subprocess-based CLI tests for Typer global options. All requirements and tests pass.
 * **3.3 Prompt Template System** (2024-07-27) - Implemented reusable Jinja2 prompt template system (loader, templates, orchestrator), 100% TDD coverage, ready for LLM integration. All requirements and tests pass.
 * **3.4 Anthology Episode Splitter** (2025-07-27) - Implemented robust, user-driven anthology episode splitting using LLM. Supports S01E01E02, E01-E02, 1x01-1x02, and real-world anthology filenames. TDD with synthetic and real examples. Only triggers with --anthology flag. All requirements and tests pass.
+* **3.5 Confidence Scoring & Manual Flags** (2025-07-27) - Implemented LLM confidence thresholding, manual flagging, renderer highlighting, and CLI exit code 2 logic. All requirements tested and documented.
 
 
 ---
