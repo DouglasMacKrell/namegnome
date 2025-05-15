@@ -4,6 +4,9 @@ Provides functions to build prompts for anthology splitting, title guessing,
 and ID hinting using Jinja2 templates.
 """
 
+from typing import NoReturn
+
+from namegnome.models.core import MediaFile
 from namegnome.prompts.prompt_loader import render_prompt
 
 
@@ -68,3 +71,8 @@ def build_id_hint_prompt(
         year=year,
         context=context,
     )
+
+
+def split_anthology(media_file: MediaFile) -> NoReturn:
+    """Stub for anthology episode splitting via LLM. To be implemented."""
+    raise NotImplementedError("split_anthology is not yet implemented.")

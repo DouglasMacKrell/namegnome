@@ -6,11 +6,13 @@ based on platform-specific rules and detect potential conflicts.
 
 import json
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Optional
 
-from namegnome.models.core import PlanStatus, ScanResult
+from namegnome.llm import prompt_orchestrator
+from namegnome.models.core import MediaFile, PlanStatus, ScanResult
 from namegnome.models.plan import RenamePlan, RenamePlanItem
 from namegnome.rules.base import RuleSet, RuleSetConfig
 
@@ -21,6 +23,15 @@ if TYPE_CHECKING:
     from namegnome.models.core import ScanResult
     from namegnome.models.plan import RenamePlan
     from namegnome.rules.base import RuleSet
+
+
+@dataclass
+class PlanContext:
+    """Context object holding plan and destination tracking for rename planning."""
+
+    plan: RenamePlan
+    destinations: dict[Path, RenamePlanItem]
+    case_insensitive_destinations: dict[str, RenamePlanItem]
 
 
 def create_rename_plan(
@@ -61,6 +72,8 @@ def create_rename_plan(
     # See PLANNING.md for cross-platform requirements.
     case_insensitive_destinations: dict[str, RenamePlanItem] = {}
 
+    ctx = PlanContext(plan, destinations, case_insensitive_destinations)
+
     # Process each media file
     for media_file in scan_result.files:
         # Skip if rule set doesn't support this media type
@@ -71,80 +84,21 @@ def create_rename_plan(
             )
             continue
 
-        try:
-            # Generate target path using the config object
-            target_path = rule_set.target_path(
-                media_file,
-                config=config,
-            )
+        # Anthology/multi-episode detection (triggered by config.anthology)
+        if _handle_anthology_split(
+            media_file,
+            rule_set,
+            config,
+            ctx,
+        ):
+            continue
 
-            # Create plan item
-            item = RenamePlanItem(
-                source=media_file.path,
-                destination=target_path,
-                media_file=media_file,
-            )
-
-            # Check for conflicts
-            if target_path in destinations:
-                # Mark both items as conflicting
-                # Reason: Two files targeting the same destination would
-                # overwrite each other; this is a critical safety check.
-                item.status = PlanStatus.CONFLICT
-                item.reason = (
-                    f"Destination already used by {destinations[target_path].source}"
-                )
-                destinations[target_path].status = PlanStatus.CONFLICT
-                conflict_src = item.source
-                destinations[
-                    target_path
-                ].reason = f"Destination already used by {conflict_src}"
-                logger.warning(
-                    f"Conflict detected: {item.source} and "
-                    f"{destinations[target_path].source} both target {target_path}"
-                )
-            # Also check for case-insensitive conflicts
-            # Reason: On case-insensitive filesystems, 'A.mkv' and 'a.mkv'
-            # would collide.
-            elif str(target_path).lower() in case_insensitive_destinations:
-                # Reason: On case-insensitive filesystems, 'A.mkv' and 'a.mkv'
-                # would collide.
-                conflicting_item = case_insensitive_destinations[
-                    str(target_path).lower()
-                ]
-                item.status = PlanStatus.CONFLICT
-                item.reason = (
-                    f"Destination conflicts with {conflicting_item.source} "
-                    "(case-insensitive filesystem)"
-                )
-                conflicting_item.status = PlanStatus.CONFLICT
-                conflicting_item.reason = (
-                    f"Destination conflicts with {item.source} "
-                    "(case-insensitive filesystem)"
-                )
-                logger.warning(
-                    f"Case-insensitive conflict: {item.source} conflicts with "
-                    f"{conflicting_item.source}"
-                )
-
-            # Add to plan and track destination
-            plan.items.append(item)
-            destinations[target_path] = item
-            case_insensitive_destinations[str(target_path).lower()] = item
-
-        except ValueError as e:
-            # Handle errors in path generation
-            # Reason: If the rule set cannot generate a valid path, mark as
-            # failed but keep in plan for user review.
-            logger.error(f"Error generating target path for {media_file.path}: {e}")
-            item = RenamePlanItem(
-                source=media_file.path,
-                destination=media_file.path,  # Keep original path
-                media_file=media_file,
-                status=PlanStatus.FAILED,
-                reason=str(e),
-            )
-            plan.items.append(item)
+        _handle_normal_plan_item(
+            media_file,
+            rule_set,
+            config,
+            ctx,
+        )
 
     return plan
 
@@ -202,6 +156,138 @@ def save_plan(plan: RenamePlan, output_dir: Path) -> Path:
 
     logger.info(f"Saved rename plan to {output_file}")
     return output_file
+
+
+def _handle_anthology_split(
+    media_file: MediaFile,
+    rule_set: RuleSet,
+    config: RuleSetConfig,
+    ctx: PlanContext,
+) -> bool:
+    """Handle anthology splitting for a media file. Returns True if handled."""
+    if media_file.media_type.name.lower() == "tv" and getattr(
+        config, "anthology", False
+    ):
+        logger.debug(f"[DEBUG] Entering anthology split for {media_file.path}")
+        try:
+            segments = prompt_orchestrator.split_anthology(media_file)
+            for seg in segments:
+                seg_media_file = media_file.model_copy()
+                seg_media_file.episode = seg.get("episode")
+                seg_media_file.title = seg.get("title")
+                target_path = rule_set.target_path(seg_media_file, config=config)
+                item = RenamePlanItem(
+                    source=media_file.path,
+                    destination=target_path,
+                    media_file=seg_media_file,
+                )
+                ctx.plan.items.append(item)
+                ctx.destinations[target_path] = item
+                ctx.case_insensitive_destinations[str(target_path).lower()] = item
+            logger.debug(
+                f"[DEBUG] Anthology split complete for {media_file.path}, "
+                "continuing loop"
+            )
+            return True
+        except Exception as e:
+            logger.debug(f"[DEBUG] Anthology split failed for {media_file.path}: {e}")
+            item = RenamePlanItem(
+                source=media_file.path,
+                destination=media_file.path,
+                media_file=media_file,
+                status=PlanStatus.MANUAL,
+                manual=True,
+                manual_reason=str(e),
+            )
+            ctx.plan.items.append(item)
+            logger.debug(
+                f"[DEBUG] Appended MANUAL item for {media_file.path}, continuing loop"
+            )
+            return True
+    return False
+
+
+def _handle_normal_plan_item(
+    media_file: MediaFile,
+    rule_set: RuleSet,
+    config: RuleSetConfig,
+    ctx: PlanContext,
+) -> None:  # noqa: PLR0913
+    """Handle normal (non-anthology) plan item logic."""
+    try:
+        # Generate target path using the config object
+        target_path = rule_set.target_path(
+            media_file,
+            config=config,
+        )
+
+        # Create plan item
+        item = RenamePlanItem(
+            source=media_file.path,
+            destination=target_path,
+            media_file=media_file,
+        )
+
+        # Check for conflicts
+        if target_path in ctx.destinations:
+            # Mark both items as conflicting
+            # Reason: Two files targeting the same destination would
+            # overwrite each other; this is a critical safety check.
+            item.status = PlanStatus.CONFLICT
+            item.reason = (
+                f"Destination already used by {ctx.destinations[target_path].source}"
+            )
+            ctx.destinations[target_path].status = PlanStatus.CONFLICT
+            conflict_src = item.source
+            ctx.destinations[
+                target_path
+            ].reason = f"Destination already used by {conflict_src}"
+            logger.warning(
+                f"Conflict detected: {item.source} and "
+                f"{ctx.destinations[target_path].source} both target {target_path}"
+            )
+        # Also check for case-insensitive conflicts
+        # Reason: On case-insensitive filesystems, 'A.mkv' and 'a.mkv'
+        # would collide.
+        elif str(target_path).lower() in ctx.case_insensitive_destinations:
+            # Reason: On case-insensitive filesystems, 'A.mkv' and 'a.mkv'
+            # would collide.
+            conflicting_item = ctx.case_insensitive_destinations[
+                str(target_path).lower()
+            ]
+            item.status = PlanStatus.CONFLICT
+            item.reason = (
+                f"Destination conflicts with {conflicting_item.source} "
+                "(case-insensitive filesystem)"
+            )
+            conflicting_item.status = PlanStatus.CONFLICT
+            conflicting_item.reason = (
+                f"Destination conflicts with {item.source} "
+                "(case-insensitive filesystem)"
+            )
+            logger.warning(
+                f"Case-insensitive conflict: {item.source} conflicts with "
+                f"{conflicting_item.source}"
+            )
+
+        # Add to plan and track destination
+        ctx.plan.items.append(item)
+        ctx.destinations[target_path] = item
+        ctx.case_insensitive_destinations[str(target_path).lower()] = item
+
+    except ValueError as e:
+        # Handle errors in path generation
+        # Reason: If the rule set cannot generate a valid path, mark as
+        # failed but keep in plan for user review.
+        logger.error(f"Error generating target path for {media_file.path}: {e}")
+        item = RenamePlanItem(
+            source=media_file.path,
+            destination=media_file.path,  # Keep original path
+            media_file=media_file,
+            status=PlanStatus.FAILED,
+            reason=str(e),
+        )
+        ctx.plan.items.append(item)
 
 
 # TODO: NGN-202 - Add support for user-defined conflict resolution strategies
