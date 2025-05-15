@@ -89,6 +89,7 @@ All notable changes to the namegnome project will be documented in this file.
   - Added prompt orchestrator for LLM workflows (anthology splitting, title guessing, ID hinting)
   - 100% TDD coverage for loader, templates, and orchestrator
   - Ready for LLM integration in future sprints
+- Sprint 3.4: Anthology Episode Splitter. User-driven, robust LLM-based splitting of multi-episode TV files. Supports S01E01E02, E01-E02, 1x01-1x02, and real-world anthology filenames. Only triggers with --anthology flag. TDD with synthetic and real examples. All requirements and tests pass.
 
 ### Fixed
 - Fixed test failures related to console output capture
