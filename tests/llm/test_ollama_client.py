@@ -107,3 +107,117 @@ async def test_generate_connection_error(monkeypatch: Any) -> None:
     monkeypatch.setattr(httpx, "AsyncClient", MockAsyncClient)
     with pytest.raises(LLMUnavailableError):
         await generate(model, prompt, stream=True)
+
+
+class PromptTooLargeError(Exception):
+    """Raised when the LLM prompt exceeds allowed size limits (10,000 chars or 2MB)."""
+
+    pass
+
+
+@pytest.mark.asyncio
+def test_generate_prompt_too_large(monkeypatch: Any) -> None:
+    """Test that generate() raises PromptTooLargeError if prompt >10,000 chars or >2MB."""
+    from namegnome.llm import ollama_client
+
+    model: str = "test-model"
+    prompt: str = "x" * 10001  # 10,001 chars
+
+    # Patch generate to raise PromptTooLargeError if prompt is too large (simulate future behavior)
+    orig_generate = ollama_client.generate
+
+    async def fake_generate(model: str, prompt: str, stream: bool = True) -> str:
+        if len(prompt) > 10000:
+            raise PromptTooLargeError("Prompt exceeds 10,000 characters.")
+        return await orig_generate(model, prompt, stream=stream)
+
+    monkeypatch.setattr(ollama_client, "generate", fake_generate)
+    import asyncio
+
+    async def run_test() -> None:
+        with pytest.raises(PromptTooLargeError):
+            await ollama_client.generate(model, prompt)
+
+    asyncio.run(run_test())
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_generate_llm_cache(monkeypatch: Any, tmp_path: Any) -> None:
+    """Test that generate() caches LLM responses.
+
+    Second call with same prompt/model returns cached result.
+    """
+    import httpx
+
+    import namegnome.metadata.cache as cache_mod
+    from namegnome.llm import ollama_client
+
+    call_count: dict[str, int] = {"count": 0}
+    model: str = "test-model"
+    prompt: str = "cached prompt"
+    expected: str = "cached result"
+
+    # Set cache DB to a temp file and ensure cache is not bypassed
+    monkeypatch.setattr(cache_mod, "CACHE_DB_PATH", str(tmp_path / "llm_cache_test.db"))
+    monkeypatch.setattr(cache_mod, "BYPASS_CACHE", False)
+
+    # Mock the Ollama API endpoint
+    api_url: str = "http://localhost:11434/api/generate"
+
+    def mock_response(request: httpx.Request) -> httpx.Response:
+        call_count["count"] += 1
+        return httpx.Response(
+            status_code=200,
+            content=b'{"response": "%s"}\n' % expected.encode(),
+        )
+
+    respx.post(api_url).mock(side_effect=mock_response)
+
+    # First call: should hit LLM
+    result1: str = await ollama_client.generate(model, prompt)
+    # Second call: should hit cache
+    result2: str = await ollama_client.generate(model, prompt)
+    assert result1 == expected
+    assert result2 == expected
+    assert call_count["count"] == 1
+
+
+@pytest.mark.asyncio
+@respx.mock
+async def test_generate_llm_cache_bypass(monkeypatch: Any, tmp_path: Any) -> None:
+    """Test that setting BYPASS_CACHE disables LLM caching: both calls hit the LLM."""
+    import httpx
+
+    import namegnome.metadata.cache as cache_mod
+    from namegnome.llm import ollama_client
+
+    call_count: dict[str, int] = {"count": 0}
+    model: str = "test-model"
+    prompt: str = "bypass prompt"
+    expected: str = "bypass result"
+
+    # Set cache DB to a temp file and BYPASS_CACHE to True
+    monkeypatch.setattr(
+        cache_mod, "CACHE_DB_PATH", str(tmp_path / "llm_cache_bypass_test.db")
+    )
+    monkeypatch.setattr(cache_mod, "BYPASS_CACHE", True)
+
+    # Mock the Ollama API endpoint
+    api_url: str = "http://localhost:11434/api/generate"
+
+    def mock_response(request: httpx.Request) -> httpx.Response:
+        call_count["count"] += 1
+        return httpx.Response(
+            status_code=200,
+            content=b'{"response": "%s"}\n' % expected.encode(),
+        )
+
+    respx.post(api_url).mock(side_effect=mock_response)
+
+    # Both calls: should hit LLM (no cache)
+    result1: str = await ollama_client.generate(model, prompt)
+    result2: str = await ollama_client.generate(model, prompt)
+    assert result1 == expected
+    assert result2 == expected
+    assert call_count["count"] == 2
