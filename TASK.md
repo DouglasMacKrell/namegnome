@@ -648,6 +648,7 @@ This sprint ships a local web GUI, music tag editing, and optional desktop bundl
 * **3.5 Confidence Scoring & Manual Flags** (2025-07-27) - Implemented LLM confidence thresholding, manual flagging, renderer highlighting, and CLI exit code 2 logic. All requirements tested and documented.
 * **3.6 LLM Unit & Integration Tests** (2025-07-27) - All LLM unit and integration tests implemented and passing. Mock Ollama responses using respx and monkeypatching. Coverage for llm/ package ≥90%. Integration tests for anthology splitting, confidence/manual flag, and error handling are present and deterministic. No further work required.
 * **3.7 Performance & Safety Guards** (2024-07-27) - Implemented prompt size guard for LLM prompts, added SQLite-backed cache for LLM responses with SHA-1 keying, decorated ollama_client.generate with cache logic (honoring --no-cache flag), and wrote TDD tests for prompt size, cache hit, and cache bypass. All code, tests, and documentation are compliant with project rules (E501, type annotations, docstrings, etc.).
+* **3.8 Documentation & Examples** (2024-07-27) - Comprehensive, E501-compliant LLM documentation, onboarding, CLI UX, and tests. All CLI and onboarding docs require explicit --media-type. Tests and code enforce 'llama3:8b' as the default LLM model. All major docs are linked and up to date in the README. Outstanding technical debt (test failure, mypy/deptry) resolved. All tests and pre-commit hooks pass as of this save state.
 
 
 ---

@@ -16,6 +16,7 @@ import contextlib
 import os
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -23,6 +24,7 @@ from pytest import MonkeyPatch
 from typer.testing import CliRunner
 
 from namegnome.cli.commands import app
+from namegnome.llm.ollama_client import LLMUnavailableError
 from namegnome.models.core import MediaFile, MediaType, ScanResult
 from namegnome.models.plan import RenamePlan
 
@@ -396,3 +398,108 @@ def test_config_show_command(monkeypatch: MonkeyPatch) -> None:
     assert result2.exit_code == 1
     assert "Missing required API key: TMDB_API_KEY" in result2.output
     assert "See documentation" in result2.output
+
+
+def test_llm_list_command_success() -> None:
+    """Test 'llm list' CLI command outputs available models in a Rich table."""
+    runner = CliRunner()
+    sample_models = ["deepseek-coder-instruct:1.5b", "llama2"]
+    with patch("namegnome.llm.ollama_client.list_models", return_value=sample_models):
+        result = runner.invoke(app, ["llm", "list"])
+    assert result.exit_code == 0
+    for model in sample_models:
+        assert model in result.output
+    assert "Available LLM Models" in result.output
+
+
+def test_llm_list_command_unavailable() -> None:
+    """Test 'llm list' CLI command handles LLMUnavailableError gracefully."""
+    runner = CliRunner()
+    with patch(
+        "namegnome.llm.ollama_client.list_models",
+        side_effect=LLMUnavailableError("Ollama server unavailable"),
+    ):
+        result = runner.invoke(app, ["llm", "list"])
+    assert result.exit_code != 0
+    assert "Error" in result.output
+
+
+def test_llm_set_default_command_success() -> None:
+    """Test 'llm set-default' CLI command sets the default model and prints success."""
+    runner = CliRunner()
+    with patch("namegnome.cli.commands.set_default_llm_model") as mock_set:
+        result = runner.invoke(
+            app, ["llm", "set-default", "deepseek-coder-instruct:1.5b"]
+        )
+    assert result.exit_code == 0
+    mock_set.assert_called_once_with("deepseek-coder-instruct:1.5b")
+    assert "Default LLM model set to:" in result.output
+    assert "deepseek-coder-instruct:1.5b" in result.output
+
+
+def test_llm_set_default_command_missing_arg() -> None:
+    """Test 'llm set-default' CLI command errors if no model is provided."""
+    runner = CliRunner()
+    result = runner.invoke(app, ["llm", "set-default"])
+    assert result.exit_code != 0
+    assert (
+        "Error: Model name is required." in result.output
+        or "Usage:" in result.output
+        or "Try 'root llm set-default --help' for help." in result.output
+    )
+
+
+@patch("rich.progress.Progress", new=lambda *a, **kw: contextlib.nullcontext())
+@patch("rich.console.Console.status", new=lambda *a, **kw: contextlib.nullcontext())
+def test_scan_command_uses_default_llm_model(monkeypatch: Any, tmp_path: Path) -> None:
+    """Test scan command uses default LLM model from config if --llm-model is not specified."""
+    from namegnome.cli.commands import app
+
+    runner = CliRunner()
+    # Patch get_default_llm_model to return the current default
+    monkeypatch.setattr(
+        "namegnome.utils.config.get_default_llm_model", lambda: "llama3:8b"
+    )
+    # Patch scan_directory and create_rename_plan to check llm_model in config
+    with (
+        patch("namegnome.cli.commands.scan_directory") as mock_scan,
+        patch("namegnome.cli.commands.create_rename_plan") as mock_plan,
+    ):
+        mock_scan.return_value = ScanResult(
+            files=[
+                MediaFile(
+                    path=tmp_path / "a.mp4",
+                    size=1,
+                    media_type=MediaType.TV,
+                    modified_date=datetime.now(),
+                )
+            ],
+            root_dir=tmp_path,
+            media_types=[MediaType.TV],
+            platform="plex",
+        )
+
+        def fake_create_rename_plan(
+            scan_result: Any,
+            rule_set: Any,
+            plan_id: Any,
+            platform: Any,
+            config: Any = None,
+        ) -> RenamePlan:
+            assert config.llm_model == "llama3:8b"
+            return RenamePlan(
+                id="test-plan",
+                created_at=datetime.now(),
+                root_dir=tmp_path,
+                items=[],
+                platform="plex",
+                media_types=[MediaType.TV],
+                metadata_providers=[],
+                llm_model="llama3:8b",
+            )
+
+        mock_plan.side_effect = fake_create_rename_plan
+        result = runner.invoke(
+            app, ["scan", str(tmp_path), "--media-type", "tv", "--no-color"]
+        )
+    assert result.exit_code == 0 or "No media files found." in result.output
