@@ -428,6 +428,9 @@ See the full API, advanced usage, and guarantees in
 - Subprocess-based CLI tests for Typer global options
 - All requirements and tests pass as of 2025-07-27
 
+### Sprint 3.6 (LLM Unit & Integration Tests)
+- All LLM unit and integration tests implemented and passing. Mock Ollama responses using respx and monkeypatching. Coverage for llm/ package ≥90%. Integration tests for anthology splitting, confidence/manual flag, and error handling are present and deterministic. No further work required.
+
 ## Technology Stack
 
 - **Python 3.12+**: Modern language features and performance
