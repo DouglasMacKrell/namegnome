@@ -103,6 +103,7 @@ All notable changes to the namegnome project will be documented in this file.
   - Decorated ollama_client.generate with cache logic (honoring --no-cache flag)
   - Wrote TDD tests for prompt size, cache hit, and cache bypass
   - All code, tests, and documentation are compliant with project rules (E501, type annotations, docstrings, etc.)
+- Sprint 3.8: Comprehensive, E501-compliant LLM documentation, onboarding, CLI UX, and tests. All CLI and onboarding docs require explicit --media-type. Tests and code enforce 'llama3:8b' as the default LLM model. All major docs are linked and up to date in the README. Outstanding technical debt (test failure, mypy/deptry) resolved. All tests and pre-commit hooks pass as of this save state.
 
 ### Fixed
 - Fixed test failures related to console output capture

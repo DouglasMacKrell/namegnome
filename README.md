@@ -452,6 +452,14 @@ See the full API, advanced usage, and guarantees in
 - Wrote TDD tests for prompt size, cache hit, and cache bypass
 - All code, tests, and documentation are compliant with project rules (E501, type annotations, docstrings, etc.)
 
+### Sprint 3.8 (LLM Docs & Examples)
+- Comprehensive, E501-compliant LLM documentation, onboarding, CLI UX, and tests
+- All CLI and onboarding docs require explicit --media-type
+- Tests and code enforce 'llama3:8b' as the default LLM model
+- All major docs are linked and up to date
+- Outstanding technical debt (test failure, mypy/deptry) resolved
+- All tests and pre-commit hooks pass as of this save state
+
 ## Technology Stack
 
 - **Python 3.12+**: Modern language features and performance
