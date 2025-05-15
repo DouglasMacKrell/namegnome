@@ -431,6 +431,13 @@ See the full API, advanced usage, and guarantees in
 ### Sprint 3.6 (LLM Unit & Integration Tests)
 - All LLM unit and integration tests implemented and passing. Mock Ollama responses using respx and monkeypatching. Coverage for llm/ package ≥90%. Integration tests for anthology splitting, confidence/manual flag, and error handling are present and deterministic. No further work required.
 
+### Sprint 3.7 (Performance & Safety Guards)
+- Implemented prompt size guard for LLM prompts
+- Added SQLite-backed cache for LLM responses (SHA-1 keying)
+- Decorated ollama_client.generate with cache logic (honoring --no-cache flag)
+- Wrote TDD tests for prompt size, cache hit, and cache bypass
+- All code, tests, and documentation are compliant with project rules (E501, type annotations, docstrings, etc.)
+
 ## Technology Stack
 
 - **Python 3.12+**: Modern language features and performance
