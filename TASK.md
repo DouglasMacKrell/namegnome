@@ -487,6 +487,39 @@ This sprint introduces AI‑assisted fuzzy matching, anthology handling, and man
   3. Update README with `--llm-model` and manual flag behaviour.
 * **Done when:** Docs pass lint; example commands reproduce expected output.
 
+### 3.9 LLM Orchestration Refactor
+
+* **Goal:** Modularize the LLM prompt orchestration code for maintainability and testability.
+* **Steps:**
+  1. Analyze `llm/prompt_orchestrator.py` and identify logical groupings: prompt builders, LLM orchestration, parsing/sanitization, and debug/log helpers.
+  2. Create new modules under `llm/`:
+     - `prompt_builders.py` (all prompt construction functions)
+     - `llm_parsing.py` (all parsing/sanitization of LLM output)
+     - `prompt_orchestrator.py` (high-level orchestration, public API)
+     - (Optional) `llm_debug.py` (debug/log helpers, if needed)
+  3. Move code from `prompt_orchestrator.py` into the appropriate new modules, updating imports and references throughout the codebase.
+  4. Remove all print statements; replace with logging or Rich `console.log` only where user-facing or essential for debugging.
+  5. Update or add tests for each new module, ensuring coverage for all moved functions.
+  6. Verify that all CLI commands and tests still pass, and that no file exceeds 500 lines.
+  7. Document the new module structure and update any affected docstrings or developer docs.
+* **Done when:** All code is modularized, print statements are removed, tests pass, and documentation is up to date.
+
+### 3.10 Apply Command Implementation
+
+* **Goal:** Implement the `apply` CLI command to execute rename plans transactionally, with rollback and user feedback.
+* **Steps:**
+  1. Create a new Typer CLI command `apply` in `cli/commands.py` that accepts a plan ID or path.
+  2. Load the specified plan using the plan store utilities.
+  3. Iterate over plan items and call `atomic_move` for each, updating status (`MOVED`, `SKIPPED`, `FAILED`) as appropriate.
+  4. Maintain a rollback stack of successful moves; on failure, automatically revert all completed moves.
+  5. Display a Rich progress bar and log each operation to the console and a log file.
+  6. Support flags for dry-run, hash verification, and skip-identical logic.
+  7. Return a summary table of results, including any failures or skipped items.
+  8. Exit with appropriate code: 0 for success, 1 for error, 2 if manual intervention is required.
+  9. Add tests for all expected, edge, and failure cases, including rollback and dry-run.
+  10. Update documentation and CLI help to include the new command and usage examples.
+* **Done when:** The `apply` command is fully functional, tested, documented, and passes all pre-commit and CI checks.
+
 ---
 
 ## 5 · Sprint 4 (MVP 0.5 "GUI Companion & Advanced Tagging" — Fully Expanded)

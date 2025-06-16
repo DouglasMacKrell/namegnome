@@ -32,7 +32,7 @@ A command-line tool for organizing and renaming media files according to platfor
 - Explicit media information control
 - JSON output support
 - File integrity verification (SHA-256)
-- **Apply & Undo engine**: Transactional, reversible renames
+- **Apply & Undo engine**: Transactional, reversible renames. Undo now also removes any empty directories created by apply, restoring your directory structure to its pre-apply state (default and safe).
 - **Rich progress bars & logging**: CLI feedback and audit trail
 - **Integration tests**: End-to-end, cross-platform
 - **Pluggable metadata/artwork providers**: TMDB, TVDB, MusicBrainz, Fanart.tv, TheAudioDB (API compliant)
@@ -72,6 +72,73 @@ namegnome/                  # Project root
 ├── PLANNING.md        # Project planning and vision
 └── TASK.md           # Current tasks and sprints
 ```
+
+## How TV Scan Works: Architecture & Module Map
+
+The `namegnome scan` command is the entry point for analyzing media files, extracting metadata, and planning renames. For TV shows—especially anthologies and multi-segment episodes—the logic is now highly modular, with each part handling a specific responsibility. This design enables robust handling of edge cases, platform-specific rules, and future extensibility.
+
+### Why This Modular Approach?
+- **Maintainability:** Each module has a single responsibility, making it easier to test, debug, and extend.
+- **Testability:** Fine-grained modules allow for targeted regression and edge-case tests.
+- **Extensibility:** New platforms, naming rules, or episode-matching strategies can be added without monolithic rewrites.
+- **Reliability:** Isolating logic reduces the risk of regressions and makes the scan pipeline more robust.
+
+---
+
+### Scan Pipeline: High-Level Flow
+
+```mermaid
+graph TD;
+    A[CLI: scan command] --> B[scanner.py: scan_directory];
+    B --> C[tv_planner.py: TV orchestration];
+    C --> D[segment_splitter.py: segment splitting];
+    D --> E[episode_parser.py: episode matching];
+    E --> F[anthology/TV modules: advanced logic];
+    F --> G[plan_builders.py: plan item assembly];
+    G --> H[plan_conflicts.py: conflict detection];
+    H --> I[CLI: render plan, save, output];
+```
+
+- **A:** User runs the scan command from the CLI.
+- **B:** `scanner.py` finds and classifies media files.
+- **C:** `tv_planner.py` orchestrates the TV scan/plan process.
+- **D:** `segment_splitter.py` splits filename stems into segments.
+- **E:** `episode_parser.py` and anthology modules match segments to canonical episode titles.
+- **F:** Anthology-specific modules handle complex multi-segment and edge cases.
+- **G:** `plan_builders.py` assembles the final rename plan.
+- **H:** `plan_conflicts.py` detects and resolves conflicts.
+- **I:** CLI presents the plan to the user.
+
+---
+
+### Key Modules and Their Roles
+
+- **scanner.py:** Recursively scans directories, classifies files, and builds the initial list of media files for planning.
+- **tv_planner.py:** Orchestrates the TV scan/plan pipeline. Delegates to segment splitting, episode matching, and anthology logic as needed.
+- **segment_splitter.py:** Splits filename stems into episode segments using delimiters, moniker patterns, and fuzzy heuristics.
+- **episode_parser.py:** Matches segments to canonical episode titles using fuzzy matching, token overlap, and rare noun analysis.
+- **anthology/tv_anthology_match.py:** Specialized matching logic for anthology/multi-segment files. Ensures strict span-matching.
+- **anthology/tv_anthology_split.py:** Advanced splitting logic for anthology files, including fallback strategies.
+- **anthology/tv_anthology_orchestration.py:** Orchestrates the creation of plan items for anthology matches.
+- **plan_builders.py:** Assembles plan items from matched episodes and segments.
+- **plan_conflicts.py:** Detects and resolves conflicts in the planned renames.
+- **fuzzy_matcher.py:** Provides fuzzy matching utilities for episode title matching.
+- **utils.py:** Shared utilities for title sanitization, normalization, and other common TV logic.
+
+---
+
+### How It All Connects
+
+- The **scan** command starts in `scanner.py`, which finds files and classifies them.
+- For TV files, `tv_planner.py` takes over, orchestrating the process.
+- Filenames are split into segments by `segment_splitter.py` (and, for anthologies, by `tv_anthology_split.py`).
+- Each segment is matched to canonical episode titles by `episode_parser.py` and, for anthologies, by `tv_anthology_match.py`.
+- Anthology-specific orchestration and fallback logic live in `core/tv/anthology/`.
+- Plan items are built and checked for conflicts before being presented to the user.
+
+---
+
+**For further details, see [`SCAN.md`](SCAN.md) for a comprehensive, always-current breakdown of the scan pipeline, edge cases, and design rationale.**
 
 ## Installation
 
@@ -133,7 +200,39 @@ You can specify multiple types:
 ```bash
 namegnome scan /path/to/media/files --media-type tv --media-type movie
 ```
-**Note:** The --media-type option is required. NameGnome will not scan unless you specify at least one media type (tv, movie, or music).
+
+### Apply a Rename Plan
+Apply a previously generated plan (by plan ID or by specifying the full path to a plan file in `~/.namegnome/plans/`):
+```bash
+namegnome apply <plan-id> --yes
+namegnome apply ~/.namegnome/plans/<plan-id>.json --yes
+```
+- Use `--yes` to skip confirmation.
+- Plan files are stored in `~/.namegnome/plans/` (in your home directory) by default.
+
+### Undo a Rename Plan
+Rollback a previously applied plan (by plan ID or by specifying the full path to a plan file in `~/.namegnome/plans/`):
+```bash
+namegnome undo <plan-id> --yes
+namegnome undo ~/.namegnome/plans/<plan-id>.json --yes
+```
+- Restores all files to their original locations if possible.
+- Updates plan status and prints a summary table.
+- After restoring files, undo will also remove any empty directories created by apply, so your library is left exactly as it was before the rename (including removing hidden files like .DS_Store).
+- If the original source file already exists, undo will fail and not overwrite.
+- If the destination file is missing (already undone), undo will fail for that item.
+
+**Example:**
+```sh
+namegnome undo 123e4567-e89b-12d3-a456-426614174000
+```
+You will be prompted for confirmation unless you pass `--yes`:
+```sh
+Are you sure you want to undo the plan 123e4567-e89b-12d3-a456-426614174000? [y/N]: y
+Restoring /path/to/moved1.txt -> /path/to/original1.txt
+Restoring /path/to/moved2.txt -> /path/to/original2.txt
+[green]Undo completed for plan: 123e4567-e89b-12d3-a456-426614174000[/green]
+```
 
 ### Platform Selection
 Choose a target platform to apply its naming conventions:
@@ -141,6 +240,24 @@ Choose a target platform to apply its naming conventions:
 namegnome scan /path/to/media/files --media-type tv --platform plex
 namegnome scan /path/to/media/files --media-type tv --platform jellyfin
 ```
+
+### Provider Selection
+Choose which metadata provider to use for lookups (TV, movie, or music):
+```bash
+# Use TVDB for TV shows (default)
+namegnome scan /path/to/media/files --media-type tv --provider tvdb
+# Use TMDB for movies
+namegnome scan /path/to/media/files --media-type movie --provider tmdb
+# Use OMDb as a fallback
+namegnome scan /path/to/media/files --media-type movie --provider omdb
+# Use MusicBrainz for music (default for music)
+namegnome scan /path/to/media/files --media-type music --provider musicbrainz
+# Use TheAudioDB as a fallback for music
+namegnome scan /path/to/media/files --media-type music --provider theaudiodb
+```
+Available provider options: `tvdb`, `tmdb`, `omdb`, `musicbrainz`, `theaudiodb`.
+
+If not specified, the default provider is `tvdb` for TV, `tmdb` for movies, and `musicbrainz` for music. The CLI will fall back to other providers automatically if the primary provider fails or is missing data.
 
 ### Media Type Filtering
 Limit scan to specific media types (required):
@@ -177,16 +294,6 @@ namegnome scan /path/to/media/files --media-type tv --media-type movie
 - Manual items are highlighted in bright red in the diff table.
 - CLI exits with code 2 if any manual items are present in the plan.
 
-### Apply and Undo
-Apply a saved rename plan:
-```bash
-namegnome apply <plan-id>
-```
-Undo a previous operation:
-```bash
-namegnome undo <plan-id>
-```
-
 ### Music Metadata Lookup
 - Music files are matched using MusicBrainz (API compliant: 1 req/sec, custom User-Agent)
 - Example:
@@ -194,48 +301,39 @@ namegnome undo <plan-id>
 namegnome scan /media/Music --media-type music
 ```
 
-## Undo Command
+### Cleaning Up Old Plans
+Delete old rename plans from the NameGnome plan store:
+```bash
+namegnome clean-plans [--keep N] [--yes]
+```
+- By default, deletes all plans in `~/.namegnome/plans/` (home directory).
+- Use `--keep N` to keep the N most recent plans.
+- Use `--yes` to skip the confirmation prompt.
 
-The `undo` command reverts a previously executed rename plan, restoring all files to their original locations. It supports multi-file undo, robust error handling, and a confirmation prompt for safety.
+**Examples:**
+```bash
+# Delete all plans:
+namegnome clean-plans
 
-### Usage
+# Keep the 5 most recent plans:
+namegnome clean-plans --keep 5
 
-```sh
-namegnome undo <plan-id> [--yes]
+# Delete all plans without confirmation:
+namegnome clean-plans --yes
 ```
 
-- `<plan-id>`: The ID of the plan to undo (autocompletes from available plans).
-- `--yes`: Skip confirmation prompt and undo immediately.
+## List and Inspect Plans
 
-### Example
-
-```sh
-namegnome undo 123e4567-e89b-12d3-a456-426614174000
-```
-
-You will be prompted for confirmation unless you pass `--yes`:
+You can list all available plan files and inspect their details:
 
 ```sh
-Are you sure you want to undo the plan 123e4567-e89b-12d3-a456-426614174000? [y/N]: y
-Restoring /path/to/moved1.txt -> /path/to/original1.txt
-Restoring /path/to/moved2.txt -> /path/to/original2.txt
-[green]Undo completed for plan: 123e4567-e89b-12d3-a456-426614174000[/green]
+namegnome plans                # List all plans
+namegnome plans --status       # Show status summary for each plan
+namegnome plans --show-paths   # Show full file paths
+namegnome plans <PLAN_ID>      # Show details for a specific plan
+namegnome plans --json         # Output as JSON for scripting
+namegnome plans --latest       # Show the most recent plan
 ```
-
-### Error Handling
-
-- If the original source file already exists, undo will fail and not overwrite:
-  ```sh
-  [red]Cannot restore: source file already exists: /path/to/original1.txt[/red]
-  ```
-- If the destination file is missing (already undone), undo will fail:
-  ```sh
-  [red]Cannot restore: destination file does not exist: /path/to/moved1.txt[/red]
-  ```
-
-### Multi-file Undo
-
-The undo command restores all files in the plan. Each file is logged as it is restored. Progress is shown with a spinner.
 
 ## Technology Stack
 
