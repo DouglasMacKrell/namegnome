@@ -184,7 +184,7 @@ All notable changes to the namegnome project will be documented in this file.
 - Initialized project with Hatch, set up Python 3.12 support
 - Created directory structure following project architecture guidelines
 - Set up development dependencies in pyproject.toml
-- Configured pre-commit hooks (ruff-format, black, ruff, mypy, pytest)
+- Configured pre-commit hooks (ruff-format, ruff, mypy, pytest)
 - Added GitHub Actions CI workflow for multi-OS testing
 - Created basic CLI module with Typer app object
 - Established Git workflow with main and develop branches

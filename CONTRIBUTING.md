@@ -9,7 +9,7 @@ Thank you for your interest in contributing! Please follow these guidelines to e
 
 ## Code Style & Standards
 - **Language:** Python ≥ 3.12 with type hints
-- **Formatting:** Use `black`
+- **Formatting:** Use `ruff-format` (Black-compatible) for code formatting
 - **Linting:** Use `ruff`
 - **Static types:** `mypy --strict`
 - **Tests:** Pytest only; all new code must include tests (expected, edge, failure)

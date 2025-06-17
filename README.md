@@ -343,7 +343,7 @@ namegnome plans --latest       # Show the most recent plan
 - **Pydantic v2**: Data validation and serialization
 - **httpx + asyncio**: Async HTTP for metadata providers
 - **pytest**: Testing framework (80%+ coverage enforced)
-- **black, ruff, mypy**: Formatting, linting, and static typing
+- **ruff-format (Black-compatible), ruff, mypy**: Formatting, linting, and static typing
 - **Ollama**: Local LLM server for fuzzy matching and edge-case handling
 - **Jinja2**: Prompt template system for LLM workflows
 - **SQLite**: Local cache for metadata and LLM responses
@@ -566,7 +566,7 @@ See the full API, advanced usage, and guarantees in
 - **Pydantic v2**: Data validation and serialization
 - **httpx + asyncio**: Async HTTP for metadata providers
 - **pytest**: Testing framework (80%+ coverage enforced)
-- **black, ruff, mypy**: Formatting, linting, and static typing
+- **ruff-format (Black-compatible), ruff, mypy**: Formatting, linting, and static typing
 - **Ollama**: Local LLM server for fuzzy matching and edge-case handling
 - **Jinja2**: Prompt template system for LLM workflows
 - **SQLite**: Local cache for metadata and LLM responses

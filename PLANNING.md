@@ -69,7 +69,7 @@ namegnome/                  # Project root
 | **Validation**          | pydantic v2                                                                         | Typed models for API payloads & plans                       |
 | **ORM / DB (optional)** | SQLModel + SQLite                                                                   | Persist scan history; lightweight                           |
 | **Testing**             | Pytest                                                                              | Sole test runner; coverage 90 %+                            |
-| **Formatting/Lint**     | black, ruff, mypy                                                                   | Consistency & static checks                                 |
+| **Formatting/Lint**     | ruff-format (Black-compatible), ruff, mypy                                           | Consistency & static checks                                 |
 | **Packaging**           | Hatchling + pipx                                                                    | Simple install; pyinstaller later                           |
 | **LLM**                 | Ollama local server (default)                                                       | Offline inference, user‑switchable                          |
 | **GUI**                 | Next.js 14 + Styled Components                                                      | Consistent theming, SSR                                     |

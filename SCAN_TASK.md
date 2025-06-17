@@ -273,7 +273,7 @@ This checklist tracks the implementation of robust, normalized episode-level sup
 - [ ] Document LLM integration, limitations, and troubleshooting in SCAN.md.
 
 ### Sprint 17: Pre-Commit & CI Merge Readiness
-- [ ] Run `black` on all changed files to ensure code formatting compliance.
+- [ ] Run `ruff-format` on all changed files to ensure code formatting compliance.
 - [ ] Run `ruff` and fix all lint errors and warnings. If any files are auto-fixed, stage and commit them with `style: ruff auto-fix` before making further manual changes.
 - [ ] Run `mypy --strict` to ensure all type checks pass. Fix any type errors.
 - [ ] Run `pytest --cov` and ensure all tests pass and coverage is at least 80%.

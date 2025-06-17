@@ -369,7 +369,9 @@ def test_handle_unsupported_media_type(tmp_path: Path) -> None:
     assert plan_ctx.plan.items
 
 
-def test_create_tv_rename_plan_single_episode(tmp_path: Path, monkeypatch: object) -> None:
+def test_create_tv_rename_plan_single_episode(
+    tmp_path: Path, monkeypatch: object
+) -> None:
     """Test create_tv_rename_plan with a single-episode file (actually a span).
 
     Should produce a span plan item with both episode titles.
@@ -405,8 +407,19 @@ def test_create_tv_rename_plan_single_episode(tmp_path: Path, monkeypatch: objec
     )
     monkeypatch.setattr(
         "namegnome.core.tv.plan_orchestration._anthology_split_segments",
-        lambda media_file, rule_set, config, ctx, episode_list_cache=None, **kwargs: __import__("namegnome.core.tv.anthology.tv_anthology_split").core.tv.anthology.tv_anthology_split._anthology_split_segments(
-            media_file, rule_set, config, ctx, episode_list_cache=episode_list_cache or episode_list_cache
+        lambda media_file,
+        rule_set,
+        config,
+        ctx,
+        episode_list_cache=None,
+        **kwargs: __import__(
+            "namegnome.core.tv.anthology.tv_anthology_split"
+        ).core.tv.anthology.tv_anthology_split._anthology_split_segments(
+            media_file,
+            rule_set,
+            config,
+            ctx,
+            episode_list_cache=episode_list_cache or episode_list_cache,
         ),
     )
     plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
@@ -454,8 +467,19 @@ def test_create_tv_rename_plan_anthology(tmp_path: Path, monkeypatch: object) ->
     )
     monkeypatch.setattr(
         "namegnome.core.tv.plan_orchestration._anthology_split_segments",
-        lambda media_file, rule_set, config, ctx, episode_list_cache=None, **kwargs: __import__("namegnome.core.tv.anthology.tv_anthology_split").core.tv.anthology.tv_anthology_split._anthology_split_segments(
-            media_file, rule_set, config, ctx, episode_list_cache=episode_list_cache or episode_list_cache
+        lambda media_file,
+        rule_set,
+        config,
+        ctx,
+        episode_list_cache=None,
+        **kwargs: __import__(
+            "namegnome.core.tv.anthology.tv_anthology_split"
+        ).core.tv.anthology.tv_anthology_split._anthology_split_segments(
+            media_file,
+            rule_set,
+            config,
+            ctx,
+            episode_list_cache=episode_list_cache or episode_list_cache,
         ),
     )
     plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
@@ -514,7 +538,9 @@ def test_normalize_episode_list_regression() -> None:
     assert isinstance(out1, list)
     assert all(isinstance(ep, dict) for ep in out1)
     assert (
-        out1[0]["season"] == 1 and out1[0]["episode"] == "01" and out1[0]["title"] == "Ep1"
+        out1[0]["season"] == 1
+        and out1[0]["episode"] == "01"
+        and out1[0]["title"] == "Ep1"
     )
     obj_input = [
         TVEpisode(title="Ep1", episode_number=1, season_number=1),
@@ -524,7 +550,9 @@ def test_normalize_episode_list_regression() -> None:
     assert isinstance(out2, list)
     assert all(isinstance(ep, dict) for ep in out2)
     assert (
-        out2[0]["season"] == 1 and out2[0]["episode"] == "01" and out2[0]["title"] == "Ep1"
+        out2[0]["season"] == 1
+        and out2[0]["episode"] == "01"
+        and out2[0]["title"] == "Ep1"
     )
 
 
@@ -593,8 +621,19 @@ def test_create_tv_rename_plan_anthology_none_season_regression(
     )
     monkeypatch.setattr(
         "namegnome.core.tv.plan_orchestration._anthology_split_segments",
-        lambda media_file, rule_set, config, ctx, episode_list_cache=None, **kwargs: __import__("namegnome.core.tv.anthology.tv_anthology_split").core.tv.anthology.tv_anthology_split._anthology_split_segments(
-            media_file, rule_set, config, ctx, episode_list_cache=episode_list_cache or episode_list_cache
+        lambda media_file,
+        rule_set,
+        config,
+        ctx,
+        episode_list_cache=None,
+        **kwargs: __import__(
+            "namegnome.core.tv.anthology.tv_anthology_split"
+        ).core.tv.anthology.tv_anthology_split._anthology_split_segments(
+            media_file,
+            rule_set,
+            config,
+            ctx,
+            episode_list_cache=episode_list_cache or episode_list_cache,
         ),
     )
     plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
@@ -606,7 +645,9 @@ def test_create_tv_rename_plan_anthology_none_season_regression(
     assert not item.manual
 
 
-def test_create_tv_rename_plan_anthology_prompt(tmp_path: Path, monkeypatch: object) -> None:
+def test_create_tv_rename_plan_anthology_prompt(
+    tmp_path: Path, monkeypatch: object
+) -> None:
     """Test that the anthology detection prompt is called and respected in the scan/plan flow."""
     mf = make_media_file(
         "Martha Speaks-S01E01-Martha Speaks and Martha Gives Advice",
@@ -639,8 +680,19 @@ def test_create_tv_rename_plan_anthology_prompt(tmp_path: Path, monkeypatch: obj
     )
     monkeypatch.setattr(
         "namegnome.core.tv.plan_orchestration._anthology_split_segments",
-        lambda media_file, rule_set, config, ctx, episode_list_cache=None, **kwargs: __import__("namegnome.core.tv.anthology.tv_anthology_split").core.tv.anthology.tv_anthology_split._anthology_split_segments(
-            media_file, rule_set, config, ctx, episode_list_cache=episode_list_cache or episode_list_cache
+        lambda media_file,
+        rule_set,
+        config,
+        ctx,
+        episode_list_cache=None,
+        **kwargs: __import__(
+            "namegnome.core.tv.anthology.tv_anthology_split"
+        ).core.tv.anthology.tv_anthology_split._anthology_split_segments(
+            media_file,
+            rule_set,
+            config,
+            ctx,
+            episode_list_cache=episode_list_cache or episode_list_cache,
         ),
     )
     # Simulate user confirming anthology
@@ -666,4 +718,7 @@ def test_create_tv_rename_plan_anthology_prompt(tmp_path: Path, monkeypatch: obj
     item = plan.items[0]
     # Should not treat as anthology, so only one title should be present
     titles = item.media_file.episode_title.split(" and ")
-    assert len(titles) == 1 or ("Martha Speaks" in item.media_file.episode_title or "Martha Gives Advice" in item.media_file.episode_title)
+    assert len(titles) == 1 or (
+        "Martha Speaks" in item.media_file.episode_title
+        or "Martha Gives Advice" in item.media_file.episode_title
+    )

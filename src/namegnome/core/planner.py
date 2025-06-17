@@ -18,7 +18,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Optional
 
 from namegnome.cli import console
-from namegnome.core.tv.episode_parser import _extract_show_season_year
+from namegnome.core.episode_parser import _extract_show_season_year
 from namegnome.core.tv.plan_context import TVRenamePlanBuildContext
 from namegnome.core.tv.plan_orchestration import (
     add_plan_item_with_conflict_detection,

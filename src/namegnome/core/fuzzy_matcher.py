@@ -19,11 +19,13 @@ def match_episodes(
     """Fuzzy match episode titles to a filename using multiple metrics and rare word overlap.
     Prefer matches where all rare/unique words from the canonical title are present in the filename.
     Exclude claimed episodes from matching.
+
     Args:
         filename: The filename to match against.
         episode_titles: List of official episode titles.
         threshold: Minimum score (0-100) to consider a match.
         claimed_indices: Set of indices of already-claimed episodes (optional).
+
     Returns:
         List of (title, score) tuples for unclaimed episodes.
     """
@@ -35,8 +37,10 @@ def match_episodes(
         tokens = re.findall(r"\w+", title.lower())
         title_tokens.append(tokens)
         word_counter.update(tokens)
+
     def get_rare_words(tokens):
         return [w for w in tokens if word_counter[w] == 1 and len(w) > 2]
+
     filename_tokens = set(re.findall(r"\w+", filename.lower()))
     results = []
     # Substring-based unique-word anchoring: if any word in the filename is a unique substring in any episode title, always match that episode
@@ -58,7 +62,9 @@ def match_episodes(
                     substring_unique_matches.append((title, 100.0, idx))
                     break
     if substring_unique_matches:
-        substring_unique_matches.sort(key=lambda x: x[2])  # Prefer lowest index (lowest episode number)
+        substring_unique_matches.sort(
+            key=lambda x: x[2]
+        )  # Prefer lowest index (lowest episode number)
         return [(title, score) for title, score, idx in substring_unique_matches]
     # Aggressive unique-word anchoring: if any rare/unique word from a title is present in the filename and that episode is unclaimed, always match it regardless of fuzzy score
     unique_word_matches = []
@@ -81,7 +87,9 @@ def match_episodes(
             unique_word_matches.append((title, best_score, idx))
     if unique_word_matches:
         # Always return unique-word matches as top priority
-        unique_word_matches.sort(key=lambda x: x[2])  # Prefer lowest index (lowest episode number)
+        unique_word_matches.sort(
+            key=lambda x: x[2]
+        )  # Prefer lowest index (lowest episode number)
         return [(title, score) for title, score, idx in unique_word_matches]
     results.sort(key=lambda x: x[1], reverse=True)
     return results
