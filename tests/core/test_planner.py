@@ -19,7 +19,7 @@ from namegnome.core.tv.anthology.tv_anthology_split import _anthology_split_segm
 from namegnome.core.tv.episode_parser import (
     _parse_episode_span_from_filename,
 )
-from namegnome.core.tv.plan_context import PlanContext, TVRenamePlanBuildContext
+from namegnome.core.tv.tv_plan_context import PlanContext, TVRenamePlanBuildContext
 from namegnome.core.tv.plan_helpers import (
     _find_best_episode_match,
     contains_multiple_episode_keywords,
@@ -33,6 +33,7 @@ from namegnome.models.core import MediaFile, MediaType, PlanStatus, ScanResult
 from namegnome.models.plan import RenamePlan
 from namegnome.rules.base import RuleSetConfig
 from namegnome.rules.plex import PlexRuleSet
+from namegnome.core.tv.tv_rule_config import TVRuleSetConfig
 
 
 @pytest.fixture
@@ -1121,3 +1122,27 @@ class TestTVPlannerHelpers:
         assert ep.episode_number == 1
         match, score, ep = _find_best_episode_match("Unrelated", episode_list)
         assert score < 90
+
+    def test_extract_show_season_year_tdd(self, tmp_path):
+        """TDD: Fails until _extract_show_season_year is implemented. Should extract show, season, year from MediaFile and config."""
+        from namegnome.models.core import MediaFile, MediaType
+        from namegnome.rules.base import RuleSetConfig
+        # Import will fail until function is restored
+        try:
+            from namegnome.core.episode_parser import _extract_show_season_year
+        except ImportError:
+            pytest.fail("_extract_show_season_year is missing from episode_parser.py")
+        # Create a mock media file with a year in the show name
+        media_file = MediaFile(
+            path=tmp_path / "Test Show 2015 S01E01.mp4",
+            size=1234,
+            media_type=MediaType.TV,
+            modified_date=datetime.now(),
+            title="Test Show 2015",
+            season=1,
+        )
+        config = TVRuleSetConfig(show_name="Test Show 2015", season=1)
+        show, season, year = _extract_show_season_year(media_file, config)
+        assert show == "Test Show"
+        assert season == 1
+        assert year == 2015

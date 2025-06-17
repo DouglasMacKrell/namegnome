@@ -93,3 +93,14 @@ def strip_articles(title: str) -> str:
             return title[len(article) :]
 
     return title
+
+
+def sanitize_title(title: str) -> str:
+    """
+    Sanitize a title for fuzzy matching: lowercases, strips all special characters except spaces (removes &).
+    This is used for matching input and canonical titles, not for output formatting.
+    For output, canonical episode spans should join with ' & ' (handled elsewhere).
+    """
+    return " ".join(
+        "".join(c.lower() if c.isalnum() or c.isspace() else "" for c in title).split()
+    )

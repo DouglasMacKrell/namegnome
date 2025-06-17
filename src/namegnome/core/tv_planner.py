@@ -25,7 +25,7 @@ from namegnome.core.tv.matching import (
     _find_best_episode_match,
 )
 from namegnome.core.tv.plan_conflicts import add_plan_item_with_conflict_detection
-from namegnome.core.tv.plan_context import (
+from namegnome.core.tv.tv_plan_context import (
     AnthologyContext,
     AnthologyPlanItemContext,
     PlanContext,

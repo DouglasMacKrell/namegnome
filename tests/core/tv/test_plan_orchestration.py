@@ -8,7 +8,7 @@ from typing import Optional
 import pytest
 
 from namegnome.core.tv import plan_orchestration
-from namegnome.core.tv.plan_context import TVRenamePlanBuildContext
+from namegnome.core.tv.tv_plan_context import TVRenamePlanBuildContext
 from namegnome.core.tv.plan_orchestration import create_tv_rename_plan
 from namegnome.metadata.models import TVEpisode
 from namegnome.models.core import MediaFile, MediaType
@@ -243,7 +243,7 @@ def test_handle_anthology_mode(monkeypatch: object, tmp_path: Path) -> None:
     """Test anthology mode plan item handling."""
     from datetime import datetime
 
-    from namegnome.core.tv.plan_context import TVRenamePlanBuildContext
+    from namegnome.core.tv.tv_plan_context import TVRenamePlanBuildContext
     from namegnome.models.core import MediaFile, MediaType
     from namegnome.rules.base import RuleSetConfig
 
