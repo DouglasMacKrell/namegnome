@@ -70,7 +70,7 @@ namegnome/                  # Project root
 | **ORM / DB (optional)** | SQLModel + SQLite                                                                   | Persist scan history; lightweight                           |
 | **Testing**             | Pytest                                                                              | Sole test runner; coverage 90 %+                            |
 | **Formatting/Lint**     | ruff-format (Black-compatible), ruff, mypy                                           | Consistency & static checks                                 |
-| **Packaging**           | Hatchling + pipx                                                                    | Simple install; pyinstaller later                           |
+| **Packaging**           | Poetry + pipx                                                                         | Modern dependency management, lockfile, and venv support    |
 | **LLM**                 | Ollama local server (default)                                                       | Offline inference, user‑switchable                          |
 | **GUI**                 | Next.js 14 + Styled Components                                                      | Consistent theming, SSR                                     |
 | **Naming rules source** | *Media Server File Naming Guide* (canvas doc ID `6818d51b4fc08191b5398af459d6f306`) | Single source of truth                                      |

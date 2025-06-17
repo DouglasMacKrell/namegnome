@@ -13,8 +13,8 @@ Each ticket is self‑contained so Cursor can tackle them sequentially.
 * **Goal:** Scaffold project with enforced lint and test gates.
 * **Steps:**
 
-  1. Initialise Hatch project (`hatch new namegnome`).
-  2. Add dev dependencies in `pyproject.toml` → `[project.optional-dependencies.dev]`: `ruff`, `mypy`, `pytest`, `pytest-cov`, `pre‑commit`.
+  1. Initialise Poetry project (`poetry init --name namegnome`).
+  2. Add dev dependencies in `pyproject.toml` → `[tool.poetry.group.dev.dependencies]`: `ruff`, `mypy`, `pytest`, `pytest-cov`, `pre‑commit`.
   3. Create `.pre‑commit-config.yaml` with hooks in this order: `ruff‑format`, `ruff`, `mypy --strict`, `pytest -q`.
   4. Commit and push; set up GitHub Actions workflow running pre‑commit and `pytest --cov=namegnome --cov-fail-under=80` on OS matrix `ubuntu‑latest`, `macos‑latest`, `windows‑latest`.
 * **Done when:** Local `pre‑commit run --all-files` is clean and CI workflow passes.
