@@ -1126,7 +1126,7 @@ class TestTVPlannerHelpers:
     def test_extract_show_season_year_tdd(self, tmp_path):
         """TDD: Fails until _extract_show_season_year is implemented. Should extract show, season, year from MediaFile and config."""
         from namegnome.models.core import MediaFile, MediaType
-        from namegnome.rules.base import RuleSetConfig
+
         # Import will fail until function is restored
         try:
             from namegnome.core.episode_parser import _extract_show_season_year

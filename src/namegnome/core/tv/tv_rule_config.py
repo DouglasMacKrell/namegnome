@@ -1,6 +1,8 @@
 """TV-specific RuleSetConfig for TV planning and matching logic."""
+
 from dataclasses import dataclass
 from typing import Optional
+
 
 @dataclass
 class TVRuleSetConfig:

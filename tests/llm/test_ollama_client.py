@@ -9,6 +9,7 @@ from typing import Any
 import httpx
 import pytest
 import respx
+import asyncio
 
 from namegnome.llm.ollama_client import LLMUnavailableError, generate
 
@@ -132,7 +133,6 @@ def test_generate_prompt_too_large(monkeypatch: Any) -> None:
         return await orig_generate(model, prompt, stream=stream)
 
     monkeypatch.setattr(ollama_client, "generate", fake_generate)
-    import asyncio
 
     async def run_test() -> None:
         with pytest.raises(PromptTooLargeError):
@@ -221,3 +221,45 @@ async def test_generate_llm_cache_bypass(monkeypatch: Any, tmp_path: Any) -> Non
     assert result1 == expected
     assert result2 == expected
     assert call_count["count"] == 2
+
+
+@pytest.mark.asyncio
+async def test_generate_anthology_double_episode(monkeypatch):
+    """Test LLM generate for anthology double-episode file (Martha Speaks)."""
+    from namegnome.llm import ollama_client
+    model = "test-model"
+    prompt = "Martha Speaks-S01E01-Martha Speaks Martha Gives Advice.mp4"
+    expected = "Martha Speaks & Martha Gives Advice"
+    async def fake_generate(model, prompt, stream=True):
+        return expected
+    monkeypatch.setattr(ollama_client, "generate", fake_generate)
+    result = await ollama_client.generate(model, prompt)
+    assert "Martha Speaks" in result and "Martha Gives Advice" in result
+
+
+@pytest.mark.asyncio
+async def test_generate_fuzzy_title_match(monkeypatch):
+    """Test LLM generate for fuzzy title match (Paw Patrol Kitty Tastrophe)."""
+    from namegnome.llm import ollama_client
+    model = "test-model"
+    prompt = "Paw Patrol-S01E01-Pups And The Kitty Tastrophe Pups Save A Train.mp4"
+    expected = "Pups and the Kitty-tastrophe & Pups Save A Train"
+    async def fake_generate(model, prompt, stream=True):
+        return expected
+    monkeypatch.setattr(ollama_client, "generate", fake_generate)
+    result = await ollama_client.generate(model, prompt)
+    assert "Kitty-tastrophe" in result and "Pups Save A Train" in result
+
+
+@pytest.mark.asyncio
+async def test_generate_manual_flag(monkeypatch):
+    """Test LLM generate for ambiguous/manual flag scenario."""
+    from namegnome.llm import ollama_client
+    model = "test-model"
+    prompt = "Unknown Show-S01E99-Unknown Story.mp4"
+    expected = "manual review required"
+    async def fake_generate(model, prompt, stream=True):
+        return expected
+    monkeypatch.setattr(ollama_client, "generate", fake_generate)
+    result = await ollama_client.generate(model, prompt)
+    assert "manual" in result or "review" in result

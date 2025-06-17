@@ -66,6 +66,28 @@ All work in this recovery plan must follow TDD:
 
 ---
 
+### 0.4 TV Plan Orchestration: Implement Core Functions
+
+* **Goal:** Implement missing core functions in `plan_orchestration.py` and related TV modules to unblock plan/anthology tests and restore TV planning pipeline.
+* **Functions to Implement:**
+  - `fetch_episode_list`
+  - `_add_plan_item_and_callback`
+  - `_handle_unsupported_media_type`
+  - `_anthology_split_segments`
+  - Any other stubs required by failing tests in `test_plan_orchestration.py` and related test modules
+* **Test(s) to Write:**
+  - For each function, write or update a failing test in the relevant test module (e.g., `test_plan_orchestration.py`).
+  - Ensure tests cover normal, edge, and error cases for each function.
+* **Acceptance Criteria:**
+  - All plan orchestration and anthology-related tests pass (or are meaningfully skipped if not yet in scope).
+  - Functions are minimally implemented to pass tests, with clear docstrings and TODOs for future enhancement.
+* **Refactor/Docs:**
+  - Refactor orchestration logic for clarity and maintainability; document any stubbed or incomplete logic in code and `RECOVERY_PLAN.md`.
+* **Done when:**
+  - All orchestration/anthology tests pass and code is refactored.
+
+---
+
 ## 2 · Sprint 1: Robustness & Edge-Case Hardening
 
 ### 1.1 LLM Prompt & Response Handling

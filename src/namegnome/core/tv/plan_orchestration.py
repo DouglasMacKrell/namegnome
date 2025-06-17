@@ -3,12 +3,15 @@
 This module provides the TV-specific entry point for building a rename plan from a scan result,
 and robust conflict detection for planned destinations.
 """
+
 from pathlib import Path
 from namegnome.models.plan import RenamePlan, RenamePlanItem
 from namegnome.core.tv.tv_plan_context import TVRenamePlanBuildContext, PlanContext
 
 
-def create_tv_rename_plan(ctx: TVRenamePlanBuildContext, episode_list_cache: dict = None) -> RenamePlan:
+def create_tv_rename_plan(
+    ctx: TVRenamePlanBuildContext, episode_list_cache: dict = None
+) -> RenamePlan:
     """
     Minimal stub: TV-specific entry point for building a rename plan from a scan result.
     Returns an empty RenamePlan for now (expand with real logic in next steps).
@@ -21,7 +24,9 @@ def create_tv_rename_plan(ctx: TVRenamePlanBuildContext, episode_list_cache: dic
     )
 
 
-def add_plan_item_with_conflict_detection(item: RenamePlanItem, ctx: PlanContext, target_path: Path) -> None:
+def add_plan_item_with_conflict_detection(
+    item: RenamePlanItem, ctx: PlanContext, target_path: Path
+) -> None:
     """
     Minimal stub: Adds a plan item to the plan, checking for destination conflicts.
     If the target path is already planned, marks the item as manual/conflict.

@@ -5,8 +5,12 @@ SRC_DIR = "/Volumes/LaCie/TV Shows/WCO/Paw Patrol"
 DEST_DIR = "/Users/douglasmackrell/Development/namegnome/tests/mocks/tv/Paw Patrol"
 VIDEO_EXTS = {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv"}
 
+
 def get_files(directory):
-    return {f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))}
+    return {
+        f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))
+    }
+
 
 def main():
     if not os.path.exists(SRC_DIR):
@@ -20,7 +24,9 @@ def main():
     dest_files = get_files(DEST_DIR)
 
     # Only consider video files
-    src_video_files = {f for f in src_files if os.path.splitext(f)[1].lower() in VIDEO_EXTS}
+    src_video_files = {
+        f for f in src_files if os.path.splitext(f)[1].lower() in VIDEO_EXTS
+    }
     missing_files = src_video_files - dest_files
 
     print(f"Found {len(src_video_files)} video files in source.")
@@ -34,6 +40,7 @@ def main():
         shutil.copy2(src_path, dest_path)
 
     print("Sync complete.")
+
 
 if __name__ == "__main__":
     main()
