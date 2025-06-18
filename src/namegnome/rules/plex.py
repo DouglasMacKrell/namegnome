@@ -104,6 +104,8 @@ class PlexRuleSet(RuleSet):
         config: Optional[RuleSetConfig] = None,
         metadata: "MediaMetadata | None" = None,
         episode_span: Optional[str] = None,
+        joined_titles: Optional[str] = None,
+        **kwargs: object,
     ) -> Path:
         """Generate a target path for a media file using Plex naming conventions.
 
@@ -115,6 +117,7 @@ class PlexRuleSet(RuleSet):
             metadata: Optional provider metadata (e.g., from TMDB/TVDB) to
                 influence naming.
             episode_span: Optional episode span for output filename generation.
+            joined_titles: Optional joined titles for output filename generation.
 
         Returns:
             A Path object representing the target location for this file.
@@ -145,6 +148,7 @@ class PlexRuleSet(RuleSet):
                 config=config,
                 metadata=metadata,
                 episode_span=episode_span,
+                joined_titles=joined_titles,
             )
         elif media_file.media_type == MediaType.MOVIE:
             return self._movie_path(
@@ -166,6 +170,7 @@ class PlexRuleSet(RuleSet):
         config: Optional[RuleSetConfig] = None,
         metadata: "MediaMetadata | None" = None,
         episode_span: Optional[str] = None,
+        joined_titles: Optional[str] = None,
     ) -> Path:
         """Generate a target path for a TV show file.
 
@@ -185,7 +190,9 @@ class PlexRuleSet(RuleSet):
             # Use episode_span if provided (for spans), else media_file.episode
             episode_val = episode_span or media_file.episode or 1
             episode_title = (
-                getattr(media_file, "episode_title", None) or "Unknown Episode"
+                joined_titles
+                or getattr(media_file, "episode_title", None)
+                or "Unknown Episode"
             ).replace(".", " ")
             # Use metadata for episode title if available
             if metadata and metadata.episodes:

@@ -200,6 +200,22 @@ STRICT_DIRECTORY_STRUCTURE = Annotated[
     ),
 ]
 
+UNTRUSTED_TITLES = Annotated[
+    bool,
+    typer.Option(
+        "--untrusted-titles",
+        help="Ignore input titles and rely solely on canonical metadata",
+    ),
+]
+
+MAX_DURATION = Annotated[
+    Optional[int],
+    typer.Option(
+        "--max-duration",
+        help="Max duration (minutes) to pair episodes in anthology mode",
+    ),
+]
+
 UNDO_PLAN_PATH = Annotated[
     Path,
     typer.Argument(
@@ -261,6 +277,8 @@ class ScanCommandOptions:
     llm_model: Optional[str] = None
     no_color: bool = False
     strict_directory_structure: bool = True
+    untrusted_titles: bool = False
+    max_duration: Optional[int] = None
 
 
 @app.command()
@@ -277,6 +295,8 @@ def scan(  # noqa: PLR0913, C901, PLR0915
     llm_model: LLM_MODEL = None,
     no_color: NO_COLOR = False,
     strict_directory_structure: STRICT_DIRECTORY_STRUCTURE = True,
+    untrusted_titles: UNTRUSTED_TITLES = False,
+    max_duration: MAX_DURATION = None,
     artwork: ARTWORK = False,
     no_cache: NO_CACHE = False,
 ) -> None:
@@ -338,6 +358,8 @@ def scan(  # noqa: PLR0913, C901, PLR0915
                     verify=verify,
                     llm_model=llm_model,
                     strict_directory_structure=strict_directory_structure,
+                    untrusted_titles=untrusted_titles,
+                    max_duration=max_duration,
                 )
                 plan = create_rename_plan(
                     scan_result=scan_result,
@@ -362,6 +384,8 @@ def scan(  # noqa: PLR0913, C901, PLR0915
                     llm_model=llm_model,
                     no_color=no_color,
                     strict_directory_structure=strict_directory_structure,
+                    untrusted_titles=untrusted_titles,
+                    max_duration=max_duration,
                 ),
                 validated_media_types,
                 scan_options,
@@ -481,6 +505,8 @@ def _scan_impl(options: ScanCommandOptions) -> int:
                             verify=options.verify,
                             llm_model=options.llm_model,
                             strict_directory_structure=options.strict_directory_structure,
+                            untrusted_titles=options.untrusted_titles,
+                            max_duration=options.max_duration,
                         )
                         plan = create_rename_plan(
                             scan_result=scan_result,
@@ -668,6 +694,8 @@ def _convert_to_model_options(
         no_color=options.no_color,
         strict_directory_structure=options.strict_directory_structure,
         target_extensions=scan_options.target_extensions,
+        untrusted_titles=getattr(options, "untrusted_titles", False),
+        max_duration=getattr(options, "max_duration", None),
     )
 
 

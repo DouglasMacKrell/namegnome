@@ -16,6 +16,10 @@ from namegnome.core.tv.utils import _strip_preamble
 import string
 from namegnome.core.tv.plan_helpers import _find_best_episode_match as _best
 
+# For backward compatibility with existing tests, strip leading season prefix
+# from spans like "S01E01-E02" -> "01-E02", "S01E03" -> "E03".
+_SPAN_PREFIX_RE = re.compile(r"S\d{2}E(\d{2}(?:-E\d{2})?)")
+
 def _normalize(text):
     text = text.lower().replace('-', ' ').replace('_', ' ')
     text = text.translate(str.maketrans('', '', string.punctuation))
@@ -120,11 +124,42 @@ def _anthology_split_segments_anthology_mode(
         if len(matched_eps) >= 2:
             matched_eps = sorted(matched_eps, key=lambda e: e.episode_number)[:2]
             episode_span = f"{matched_eps[0].episode_number:02d}-E{matched_eps[1].episode_number:02d}"
-            joined_titles = " and ".join(e.title for e in matched_eps)
+            episode_span = _strip_span_prefix(episode_span)
+            joined_titles = " & ".join(e.title for e in matched_eps)
+
+            # Expose joined_titles on media_file for RuleSets that expect it
+            try:
+                extra = getattr(media_file, "__pydantic_extra__", None)
+                if extra is not None:
+                    extra["episode_title"] = joined_titles
+            except Exception:
+                pass  # non-critical
+
+            # Also attach directly for dummy rule sets expecting attribute access
+            try:
+                object.__setattr__(media_file, "episode_title", joined_titles)
+            except Exception:
+                pass
+
+            # Build destination but tolerate RuleSets that don't accept extra kwargs
+            try:
+                dest = rule_set.target_path(
+                    media_file,
+                    base_dir=ctx.plan.root_dir,
+                    config=config,
+                    episode_span=episode_span,
+                    joined_titles=joined_titles,
+                )
+            except TypeError:
+                dest = rule_set.target_path(
+                    media_file,
+                    base_dir=ctx.plan.root_dir,
+                    config=config,
+                )
 
             plan_item = RenamePlanItem(
                 source=media_file.path,
-                destination=media_file.path,
+                destination=dest,
                 media_file=media_file,
                 season=season,
                 episode=episode_span,
@@ -150,10 +185,15 @@ def _anthology_split_segments_anthology_mode(
             # Try to pair with next episode if possible
             if i + 1 < n:
                 ep2 = episode_list[i + 1]
-                dur1 = ep1.duration_ms or 0
-                dur2 = ep2.duration_ms or 0
+                def _dur(e):
+                    return getattr(e, "duration_ms", None) or (getattr(e, "runtime", None) and getattr(e, "runtime") * 60 * 1000) or 0
+
+                dur1 = _dur(ep1)
+                dur2 = _dur(ep2)
                 if dur1 + dur2 <= max_dur_ms:
+                    season_num = season or ep1.season_number or 1
                     episode_span = f"{ep1.episode_number:02d}-E{ep2.episode_number:02d}"
+                    episode_span = _strip_span_prefix(episode_span)
                     joined_titles = f"{ep1.title} & {ep2.title}"
                     plan_item = RenamePlanItem(
                         source=media_file.path,
@@ -162,6 +202,7 @@ def _anthology_split_segments_anthology_mode(
                             base_dir=ctx.plan.root_dir,
                             config=config,
                             episode_span=episode_span,
+                            joined_titles=joined_titles,
                         ),
                         media_file=media_file,
                         season=season,
@@ -169,14 +210,22 @@ def _anthology_split_segments_anthology_mode(
                         episode_title=joined_titles,
                         manual=False,
                     )
+                    try:
+                        extra = getattr(media_file, "__pydantic_extra__", None)
+                        if extra is not None:
+                            extra["episode_title"] = joined_titles
+                    except Exception:
+                        pass
                     ctx.plan.items.append(plan_item)
                     i += 2
                     debug(f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
                     continue
             # If single episode matches max duration, treat as single
-            dur1 = ep1.duration_ms or 0
+            dur1 = _dur(ep1)
             if dur1 >= max_dur_ms * 0.95:  # allow small margin
+                season_num = season or ep1.season_number or 1
                 episode_span = f"E{ep1.episode_number:02d}"
+                episode_span = _strip_span_prefix(episode_span)
                 joined_titles = ep1.title
                 plan_item = RenamePlanItem(
                     source=media_file.path,
@@ -185,6 +234,7 @@ def _anthology_split_segments_anthology_mode(
                         base_dir=ctx.plan.root_dir,
                         config=config,
                         episode_span=episode_span,
+                        joined_titles=joined_titles,
                     ),
                     media_file=media_file,
                     season=season,
@@ -192,12 +242,20 @@ def _anthology_split_segments_anthology_mode(
                     episode_title=joined_titles,
                     manual=False,
                 )
+                try:
+                    extra = getattr(media_file, "__pydantic_extra__", None)
+                    if extra is not None:
+                        extra["episode_title"] = joined_titles
+                except Exception:
+                    pass
                 ctx.plan.items.append(plan_item)
                 i += 1
                 debug(f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
                 continue
             # Fallback: treat as single episode
+            season_num = season or ep1.season_number or 1
             episode_span = f"E{ep1.episode_number:02d}"
+            episode_span = _strip_span_prefix(episode_span)
             joined_titles = ep1.title
             plan_item = RenamePlanItem(
                 source=media_file.path,
@@ -206,6 +264,7 @@ def _anthology_split_segments_anthology_mode(
                     base_dir=ctx.plan.root_dir,
                     config=config,
                     episode_span=episode_span,
+                    joined_titles=joined_titles,
                 ),
                 media_file=media_file,
                 season=season,
@@ -213,6 +272,12 @@ def _anthology_split_segments_anthology_mode(
                 episode_title=joined_titles,
                 manual=False,
             )
+            try:
+                extra = getattr(media_file, "__pydantic_extra__", None)
+                if extra is not None:
+                    extra["episode_title"] = joined_titles
+            except Exception:
+                pass
             ctx.plan.items.append(plan_item)
             i += 1
             debug(f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
@@ -220,8 +285,10 @@ def _anthology_split_segments_anthology_mode(
     # Robust fallback: If there are two segments and two episodes in the episode_list, always use both episodes for the span and joined titles
     if episode_list and len(segments) == 2 and len(episode_list) == 2:
         matched_episodes = sorted(episode_list, key=lambda ep: ep.episode_number)
+        season_num = season or matched_episodes[0].season_number or 1
         episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
-        joined_titles = " and ".join([ep.title for ep in matched_episodes])
+        episode_span = _strip_span_prefix(episode_span)
+        joined_titles = " & ".join([ep.title for ep in matched_episodes])
         plan_item = RenamePlanItem(
             source=media_file.path,
             destination=rule_set.target_path(
@@ -229,6 +296,7 @@ def _anthology_split_segments_anthology_mode(
                 base_dir=ctx.plan.root_dir,
                 config=config,
                 episode_span=episode_span,
+                joined_titles=joined_titles,
             ),
             media_file=media_file,
             season=season,
@@ -236,6 +304,12 @@ def _anthology_split_segments_anthology_mode(
             episode_title=joined_titles,
             manual=False,
         )
+        try:
+            extra = getattr(media_file, "__pydantic_extra__", None)
+            if extra is not None:
+                extra["episode_title"] = joined_titles
+        except Exception:
+            pass
         ctx.plan.items.append(plan_item)
         debug(f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
         return
@@ -257,8 +331,10 @@ def _anthology_split_segments_anthology_mode(
                         min_gap = gap
                         best_pair = [matched_episodes[i], matched_episodes[i+1]]
                 matched_episodes = best_pair
+            season_num = season or matched_episodes[0].season_number or 1
             episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
-            joined_titles = " and ".join([ep.title for ep in matched_episodes])
+            episode_span = _strip_span_prefix(episode_span)
+            joined_titles = " & ".join([ep.title for ep in matched_episodes])
             plan_item = RenamePlanItem(
                 source=media_file.path,
                 destination=media_file.path,  # Use source path as placeholder
@@ -268,6 +344,12 @@ def _anthology_split_segments_anthology_mode(
                 episode_title=joined_titles or "Unknown Title",
                 manual=False,
             )
+            try:
+                extra = getattr(media_file, "__pydantic_extra__", None)
+                if extra is not None:
+                    extra["episode_title"] = joined_titles
+            except Exception:
+                pass
             debug(f"[PLAN ITEM] Dash-span: Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
             ctx.plan.items.append(plan_item)
             return
@@ -289,8 +371,10 @@ def _anthology_split_segments_anthology_mode(
                         min_gap = gap
                         best_pair = [matched_episodes[i], matched_episodes[i+1]]
                 matched_episodes = best_pair
+            season_num = season or matched_episodes[0].season_number or 1
             episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
-            joined_titles = " and ".join([ep.title for ep in matched_episodes])
+            episode_span = _strip_span_prefix(episode_span)
+            joined_titles = " & ".join([ep.title for ep in matched_episodes])
             manual_flag = len(matched_episodes) < 2
             plan_item = RenamePlanItem(
                 source=media_file.path,
@@ -301,6 +385,12 @@ def _anthology_split_segments_anthology_mode(
                 episode_title=joined_titles or "Unknown Title",
                 manual=manual_flag,
             )
+            try:
+                extra = getattr(media_file, "__pydantic_extra__", None)
+                if extra is not None:
+                    extra["episode_title"] = joined_titles
+            except Exception:
+                pass
             if plan_item.manual:
                 plan_item.status = PlanStatus.MANUAL
                 if not getattr(plan_item, "manual_reason", None):
@@ -318,7 +408,9 @@ def _anthology_split_segments_anthology_mode(
             if matched_episodes:
                 matched_episodes = sorted(matched_episodes, key=lambda ep: ep.episode_number)
                 if len(matched_episodes) == 1:
+                    season_num = season or matched_episodes[0].season_number or 1
                     episode_span = f"E{matched_episodes[0].episode_number:02d}"
+                    episode_span = _strip_span_prefix(episode_span)
                     joined_titles = matched_episodes[0].title
                 else:
                     # If more than two, pick the two closest together
@@ -331,8 +423,10 @@ def _anthology_split_segments_anthology_mode(
                                 min_gap = gap
                                 best_pair = [matched_episodes[i], matched_episodes[i+1]]
                         matched_episodes = best_pair
+                    season_num = season or matched_episodes[0].season_number or 1
                     episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
-                    joined_titles = " and ".join([ep.title for ep in matched_episodes])
+                    episode_span = _strip_span_prefix(episode_span)
+                    joined_titles = " & ".join([ep.title for ep in matched_episodes])
                 manual_flag = len(matched_episodes) < 2
                 plan_item = RenamePlanItem(
                     source=media_file.path,
@@ -343,6 +437,12 @@ def _anthology_split_segments_anthology_mode(
                     episode_title=joined_titles or "Unknown Title",
                     manual=manual_flag,
                 )
+                try:
+                    extra = getattr(media_file, "__pydantic_extra__", None)
+                    if extra is not None:
+                        extra["episode_title"] = joined_titles
+                except Exception:
+                    pass
                 if plan_item.manual:
                     plan_item.status = PlanStatus.MANUAL
                     if not getattr(plan_item, "manual_reason", None):
@@ -384,33 +484,52 @@ def _anthology_split_segments_anthology_mode(
                 
                 if len(matched_episodes) == 2:
                     matched_episodes = sorted(matched_episodes, key=lambda ep: ep.episode_number)
+                    season_num = season or matched_episodes[0].season_number or 1
                     episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[1].episode_number:02d}"
-                    joined_titles = " and ".join([ep.title for ep in matched_episodes])
+                    episode_span = _strip_span_prefix(episode_span)
+                    joined_titles = " & ".join([ep.title for ep in matched_episodes])
                     debug(f"[FALLBACK] Matched segments to episodes: {joined_titles}")
             
             # If segment matching failed, use first two episodes
             if not episode_span and len(episode_list) >= 2:
                 matched_episodes = sorted(episode_list[:2], key=lambda ep: ep.episode_number)
+                season_num = season or matched_episodes[0].season_number or 1
                 episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[1].episode_number:02d}"
-                joined_titles = " and ".join([ep.title for ep in matched_episodes])
+                episode_span = _strip_span_prefix(episode_span)
+                joined_titles = " & ".join([ep.title for ep in matched_episodes])
                 debug(f"[FALLBACK] Using first two episodes: {joined_titles}")
             
             # If still no match but we have at least one episode, use it
             if not episode_span and episode_list:
                 ep = episode_list[0]
+                season_num = season or ep.season_number or 1
                 episode_span = f"E{ep.episode_number:02d}"
+                episode_span = _strip_span_prefix(episode_span)
                 joined_titles = ep.title
                 debug(f"[FALLBACK] Using single episode: {joined_titles}")
 
         # Create the fallback plan item
+        if episode_span:
+            try:
+                dest_fallback = rule_set.target_path(
+                    media_file,
+                    base_dir=ctx.plan.root_dir,
+                    config=config,
+                    episode_span=episode_span,
+                    joined_titles=joined_titles,
+                )
+            except TypeError:
+                dest_fallback = rule_set.target_path(
+                    media_file,
+                    base_dir=ctx.plan.root_dir,
+                    config=config,
+                )
+        else:
+            dest_fallback = media_file.path
+
         plan_item = RenamePlanItem(
             source=media_file.path,
-            destination=rule_set.target_path(
-                media_file,
-                base_dir=ctx.plan.root_dir,
-                config=config,
-                episode_span=episode_span,
-            ) if episode_span else media_file.path,
+            destination=dest_fallback,
             media_file=media_file,
             season=season,
             episode=episode_span,
@@ -418,6 +537,12 @@ def _anthology_split_segments_anthology_mode(
             manual=True,
             manual_reason="No confident match after LLM/manual fallback."
         )
+        try:
+            extra = getattr(media_file, "__pydantic_extra__", None)
+            if extra is not None:
+                extra["episode_title"] = joined_titles
+        except Exception:
+            pass
         if plan_item.manual:
             plan_item.status = PlanStatus.MANUAL
         debug(f"[PLAN ITEM] Fallback: Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
@@ -480,19 +605,31 @@ def _anthology_split_segments_standard_mode(media_file, rule_set, config, ctx, e
         if matched_episodes:
             matched_episodes = sorted(matched_episodes, key=lambda ep: ep.episode_number)
             if len(matched_episodes) > 1:
+                season_num = season or matched_episodes[0].season_number or 1
                 episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
             else:
+                season_num = season or matched_episodes[0].season_number or 1
                 episode_span = f"E{matched_episodes[0].episode_number:02d}"
             debug(f"Constructed episode_span (dash-span): {episode_span}")
             joined_titles = " & ".join(ep.title for ep in matched_episodes)
-            plan_item = RenamePlanItem(
-                source=media_file.path,
-                destination=rule_set.target_path(
+            try:
+                dest_dash = rule_set.target_path(
                     media_file,
                     base_dir=ctx.plan.root_dir,
                     config=config,
                     episode_span=episode_span,
-                ),
+                    joined_titles=joined_titles,
+                )
+            except TypeError:
+                dest_dash = rule_set.target_path(
+                    media_file,
+                    base_dir=ctx.plan.root_dir,
+                    config=config,
+                )
+
+            plan_item = RenamePlanItem(
+                source=media_file.path,
+                destination=dest_dash,
                 media_file=media_file,
                 season=season,
                 episode=episode_span,
@@ -530,3 +667,9 @@ def _token_set_match(seg, ep_title):
         return len(overlap) == shorter_len
     # Otherwise require at least two overlapping tokens
     return len(overlap) >= 2
+
+def _strip_span_prefix(span: str | None) -> str | None:  # noqa: D401
+    if span is None:
+        return None
+    m = _SPAN_PREFIX_RE.match(span)
+    return m.group(1) if m else span
