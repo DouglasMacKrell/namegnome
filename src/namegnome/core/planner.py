@@ -25,7 +25,7 @@ from namegnome.core.tv.plan_orchestration import (
 )
 from namegnome.metadata.episode_fetcher import fetch_episode_list
 from namegnome.models.core import MediaFile, PlanStatus, ScanResult
-from namegnome.models.plan import RenamePlan, RenamePlanItem
+from namegnome.models.plan import RenamePlan, RenamePlanItem, PlanStatus
 from namegnome.rules.base import RuleSet, RuleSetConfig
 
 if TYPE_CHECKING:
@@ -118,7 +118,8 @@ def create_rename_plan(  # noqa: C901, PLR0912
     config = ctx.config
     progress_callback = ctx.progress_callback
     # TV delegation: if any TV files, always delegate to create_tv_rename_plan
-    tv_files = [f for f in scan_result.files if f.media_type == "tv"]
+    from namegnome.models.core import MediaType as _MT
+    tv_files = [f for f in scan_result.files if f.media_type == _MT.TV]
     if tv_files:
         # Build a new ScanResult with only TV files
         from namegnome.core.tv.plan_orchestration import create_tv_rename_plan
@@ -428,3 +429,33 @@ def _handle_normal_plan_item(
 
 # TODO: NGN-202 - Add support for user-defined conflict resolution strategies
 # (e.g., auto-rename, skip, prompt).
+
+# --- Helper: unified conflict detection ------------------------------------
+
+
+def add_plan_item_with_conflict_detection(
+    item: RenamePlanItem,
+    ctx: "PlanContext",
+    target_path: Path,
+) -> None:
+    """Add *item* to *ctx.plan* while checking for destination conflicts.
+
+    A conflict is detected when another planned item already targets the same
+    *target_path* (case-insensitive).  In that case, both the existing item
+    and the new one are marked as `CONFLICT`.
+    """
+
+    key = target_path
+    key_ci = str(target_path).lower()
+
+    if key in ctx.destinations or key_ci in ctx.case_insensitive_destinations:
+        # Mark conflict on the new item
+        item.status = PlanStatus.CONFLICT
+        # Mark conflict on the existing item for visibility
+        existing = ctx.destinations.get(key) or ctx.case_insensitive_destinations.get(key_ci)
+        if existing:
+            existing.status = PlanStatus.CONFLICT
+    # Track destinations
+    ctx.plan.items.append(item)
+    ctx.destinations[key] = item
+    ctx.case_insensitive_destinations[key_ci] = item

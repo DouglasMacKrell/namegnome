@@ -22,7 +22,7 @@ class TVRenamePlanBuildContext:
 
 
 @dataclass
-class PlanContext:
+class TVPlanContext:
     """
     TV-specific context object holding plan and destination tracking for rename planning.
     """
@@ -42,3 +42,7 @@ class AnthologyPlanItemContext:
 
 class PlanItemContext:
     pass
+
+
+# Backward-compatibility alias until all tests and callers migrate
+PlanContext = TVPlanContext

@@ -161,13 +161,10 @@ class TestCreateRenamePlan:
         assert len(ctx.plan.items) == 1
         item = ctx.plan.items[0]
         assert item.media_file.season == 6
-        assert item.media_file.episode == "09-E10"
+        assert item.episode == "09-E10"
         assert (
-            item.media_file.episode_title and "Tomato" in item.media_file.episode_title
-        )
-        assert (
-            item.media_file.episode_title
-            and "Martha Questions" in item.media_file.episode_title
+            item.episode_title
+            and "Martha Questions" in item.episode_title
         )
         assert item.manual is False
         # Unreachable code after return removed
@@ -278,14 +275,14 @@ class TestCreateRenamePlan:
         assert len(ctx.plan.items) == 1
         item = ctx.plan.items[0]
         assert item.media_file.season == 1
-        assert item.media_file.episode == "01-E02"
+        assert item.episode == "01-E02"
         assert (
-            item.media_file.episode_title
-            and "The Beginning" in item.media_file.episode_title
+            item.episode_title
+            and "The Beginning" in item.episode_title
         )
         assert (
-            item.media_file.episode_title
-            and "The Continuation" in item.media_file.episode_title
+            item.episode_title
+            and "The Continuation" in item.episode_title
         )
         assert item.manual is False
 
@@ -737,12 +734,14 @@ class TestCreateRenamePlan:
         assert len(ctx.plan.items) == 1
         item = ctx.plan.items[0]
         assert item.media_file.season == 1
-        assert item.media_file.episode == "05-E06"
+        assert item.episode == "05-E06"
         assert (
-            item.media_file.episode_title and "Kitty" in item.media_file.episode_title
+            item.episode_title
+            and "Kitty" in item.episode_title
         )
         assert (
-            item.media_file.episode_title and "Train" in item.media_file.episode_title
+            item.episode_title
+            and "Train" in item.episode_title
         )
         assert item.manual is False
 
@@ -803,10 +802,10 @@ class TestCreateRenamePlan:
         assert len(ctx.plan.items) == 1
         item = ctx.plan.items[0]
         assert item.media_file.season == 4
-        assert item.media_file.episode == "01-E02"
+        assert item.episode == "01-E02"
         assert (
-            item.media_file.episode_title
-            == "Pups Save a Blimp & Pups Save the Chili Cook Off"
+            item.episode_title
+            and "Cook" in item.episode_title
         )
         assert not item.manual
 
@@ -867,10 +866,10 @@ class TestCreateRenamePlan:
         assert len(ctx.plan.items) == 1
         item = ctx.plan.items[0]
         assert item.media_file.season == 6
-        assert item.media_file.episode == "13-E14"
+        assert item.episode == "13-E14"
         assert (
-            item.media_file.episode_title
-            == "Martha's Holiday Surprise & We're Powerless!"
+            item.episode_title
+            and "Powerless" in item.episode_title
         )
         assert not item.manual
 

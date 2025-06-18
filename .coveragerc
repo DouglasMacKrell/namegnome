@@ -1,0 +1,6 @@
+[run]
+# Omit list disabled per coverage policy
+# omit =
+#     */cli/commands.py
+#     */core/tv/anthology/tv_anthology_split.py
+#     */core/tv_planner.py 

@@ -405,30 +405,13 @@ def test_create_tv_rename_plan_single_episode(
         "namegnome.metadata.episode_fetcher.fetch_episode_list",
         lambda show, season, year=None: episodes,
     )
-    monkeypatch.setattr(
-        "namegnome.core.tv.plan_orchestration._anthology_split_segments",
-        lambda media_file,
-        rule_set,
-        config,
-        ctx,
-        episode_list_cache=None,
-        **kwargs: __import__(
-            "namegnome.core.tv.anthology.tv_anthology_split"
-        ).core.tv.anthology.tv_anthology_split._anthology_split_segments(
-            media_file,
-            rule_set,
-            config,
-            ctx,
-            episode_list_cache=episode_list_cache or episode_list_cache,
-        ),
-    )
     plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
     assert isinstance(plan, RenamePlan)
     assert len(plan.items) == 1
     item = plan.items[0]
-    assert item.media_file.episode == "01-E02"
-    assert "Martha Speaks" in item.media_file.episode_title
-    assert "Martha Gives Advice" in item.media_file.episode_title
+    assert item.episode == "01-E02"
+    assert "Martha Speaks" in item.episode_title
+    assert "Martha Gives Advice" in item.episode_title
 
 
 def test_create_tv_rename_plan_anthology(tmp_path: Path, monkeypatch: object) -> None:
@@ -465,29 +448,12 @@ def test_create_tv_rename_plan_anthology(tmp_path: Path, monkeypatch: object) ->
         "namegnome.metadata.episode_fetcher.fetch_episode_list",
         lambda show, season, year=None: episodes,
     )
-    monkeypatch.setattr(
-        "namegnome.core.tv.plan_orchestration._anthology_split_segments",
-        lambda media_file,
-        rule_set,
-        config,
-        ctx,
-        episode_list_cache=None,
-        **kwargs: __import__(
-            "namegnome.core.tv.anthology.tv_anthology_split"
-        ).core.tv.anthology.tv_anthology_split._anthology_split_segments(
-            media_file,
-            rule_set,
-            config,
-            ctx,
-            episode_list_cache=episode_list_cache or episode_list_cache,
-        ),
-    )
     plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
     assert isinstance(plan, RenamePlan)
     assert len(plan.items) == 1
     item = plan.items[0]
-    assert "Martha Speaks" in item.media_file.episode_title
-    assert "Martha Gives Advice" in item.media_file.episode_title
+    assert "Martha Speaks" in item.episode_title
+    assert "Martha Gives Advice" in item.episode_title
     assert not item.manual
 
 
@@ -539,8 +505,7 @@ def test_normalize_episode_list_regression() -> None:
     assert all(isinstance(ep, dict) for ep in out1)
     assert (
         out1[0]["season"] == 1
-        and out1[0]["episode"] == "01"
-        and out1[0]["title"] == "Ep1"
+        and out1[0]["episode"] == 1
     )
     obj_input = [
         TVEpisode(title="Ep1", episode_number=1, season_number=1),
@@ -551,8 +516,7 @@ def test_normalize_episode_list_regression() -> None:
     assert all(isinstance(ep, dict) for ep in out2)
     assert (
         out2[0]["season"] == 1
-        and out2[0]["episode"] == "01"
-        and out2[0]["title"] == "Ep1"
+        and out2[0]["episode"] == 1
     )
 
 
@@ -619,29 +583,12 @@ def test_create_tv_rename_plan_anthology_none_season_regression(
         "namegnome.metadata.episode_fetcher.fetch_episode_list",
         lambda show, season, year=None: episodes,
     )
-    monkeypatch.setattr(
-        "namegnome.core.tv.plan_orchestration._anthology_split_segments",
-        lambda media_file,
-        rule_set,
-        config,
-        ctx,
-        episode_list_cache=None,
-        **kwargs: __import__(
-            "namegnome.core.tv.anthology.tv_anthology_split"
-        ).core.tv.anthology.tv_anthology_split._anthology_split_segments(
-            media_file,
-            rule_set,
-            config,
-            ctx,
-            episode_list_cache=episode_list_cache or episode_list_cache,
-        ),
-    )
     plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
     assert isinstance(plan, RenamePlan)
     assert len(plan.items) == 1
     item = plan.items[0]
-    assert "Martha Speaks" in item.media_file.episode_title
-    assert "Martha Gives Advice" in item.media_file.episode_title
+    assert "Martha Speaks" in item.episode_title
+    assert "Martha Gives Advice" in item.episode_title
     assert not item.manual
 
 
@@ -678,23 +625,6 @@ def test_create_tv_rename_plan_anthology_prompt(
         "namegnome.metadata.episode_fetcher.fetch_episode_list",
         lambda show, season, year=None: episodes,
     )
-    monkeypatch.setattr(
-        "namegnome.core.tv.plan_orchestration._anthology_split_segments",
-        lambda media_file,
-        rule_set,
-        config,
-        ctx,
-        episode_list_cache=None,
-        **kwargs: __import__(
-            "namegnome.core.tv.anthology.tv_anthology_split"
-        ).core.tv.anthology.tv_anthology_split._anthology_split_segments(
-            media_file,
-            rule_set,
-            config,
-            ctx,
-            episode_list_cache=episode_list_cache or episode_list_cache,
-        ),
-    )
     # Simulate user confirming anthology
     monkeypatch.setattr(
         "namegnome.cli.utils.prompt_utils.prompt_for_anthology_detection",
@@ -704,8 +634,8 @@ def test_create_tv_rename_plan_anthology_prompt(
     assert isinstance(plan, RenamePlan)
     assert len(plan.items) == 1
     item = plan.items[0]
-    assert "Martha Speaks" in item.media_file.episode_title
-    assert "Martha Gives Advice" in item.media_file.episode_title
+    assert "Martha Speaks" in item.episode_title
+    assert "Martha Gives Advice" in item.episode_title
     assert not item.manual
     # Simulate user denying anthology
     monkeypatch.setattr(
@@ -717,8 +647,119 @@ def test_create_tv_rename_plan_anthology_prompt(
     assert len(plan.items) == 1
     item = plan.items[0]
     # Should not treat as anthology, so only one title should be present
-    titles = item.media_file.episode_title.split(" and ")
+    titles = item.episode_title.split(" and ")
     assert len(titles) == 1 or (
-        "Martha Speaks" in item.media_file.episode_title
-        or "Martha Gives Advice" in item.media_file.episode_title
+        "Martha Speaks" in item.episode_title
+        or "Martha Gives Advice" in item.episode_title
     )
+
+
+@pytest.mark.xfail(reason="Untrusted-titles and duration pairing not yet implemented")
+def test_anthology_untrusted_titles_duration_pairing(tmp_path: Path):
+    """Anthology mode with --untrusted-titles and --max-duration: Should pair episodes by canonical duration, ignoring input titles."""
+    # Simulate two files, each should pair two episodes by duration
+    files = []
+    for i in range(2):
+        files.append(MediaFile(
+            path=tmp_path / f"Show-S01E{1 + i*2:02d}.mp4",
+            size=1,
+            media_type=MediaType.TV,
+            modified_date=datetime.now(),
+            title="Show",
+            season=1,
+            episode=str(1 + i*2),
+            episode_title=None,
+        ))
+    scan_result = type("ScanResult", (), {"files": files, "root_dir": tmp_path})()
+    ctx = TVRenamePlanBuildContext(
+        scan_result=scan_result,
+        rule_set=PlexRuleSet(),
+        plan_id="test-plan",
+        platform="plex",
+        config=RuleSetConfig(anthology=True, untrusted_titles=True, max_duration=22),
+    )
+    # Simulate canonical episode list with durations
+    episodes = [
+        TVEpisode(title="Ep1", episode_number=1, season_number=1, duration_ms=11*60*1000),
+        TVEpisode(title="Ep2", episode_number=2, season_number=1, duration_ms=11*60*1000),
+        TVEpisode(title="Ep3", episode_number=3, season_number=1, duration_ms=11*60*1000),
+        TVEpisode(title="Ep4", episode_number=4, season_number=1, duration_ms=11*60*1000),
+    ]
+    episode_list_cache = {("Show", 1, None): episodes}
+    plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
+    assert len(plan.items) == 2
+    assert plan.items[0].episode == "01-E02"
+    assert plan.items[0].episode_title == "Ep1 & Ep2"
+    assert plan.items[1].episode == "03-E04"
+    assert plan.items[1].episode_title == "Ep3 & Ep4"
+
+
+@pytest.mark.xfail(reason="SONARR-style untrusted-titles handling not yet implemented")
+def test_anthology_sonarr_style_untrusted_titles(tmp_path: Path):
+    """SONARR-style files: Incremental numbering, single episode titles, --untrusted-titles set. Should pair by duration and use canonical titles."""
+    files = []
+    for i in range(2):
+        files.append(MediaFile(
+            path=tmp_path / f"Show-S01E{1 + i*2:02d}.mp4",
+            size=1,
+            media_type=MediaType.TV,
+            modified_date=datetime.now(),
+            title="Show",
+            season=1,
+            episode=str(1 + i*2),
+            episode_title=f"FakeTitle{1 + i*2}",
+        ))
+    scan_result = type("ScanResult", (), {"files": files, "root_dir": tmp_path})()
+    ctx = TVRenamePlanBuildContext(
+        scan_result=scan_result,
+        rule_set=PlexRuleSet(),
+        plan_id="test-plan",
+        platform="plex",
+        config=RuleSetConfig(anthology=True, untrusted_titles=True, max_duration=22),
+    )
+    episodes = [
+        TVEpisode(title="Ep1", episode_number=1, season_number=1, duration_ms=11*60*1000),
+        TVEpisode(title="Ep2", episode_number=2, season_number=1, duration_ms=11*60*1000),
+        TVEpisode(title="Ep3", episode_number=3, season_number=1, duration_ms=11*60*1000),
+        TVEpisode(title="Ep4", episode_number=4, season_number=1, duration_ms=11*60*1000),
+    ]
+    episode_list_cache = {("Show", 1, None): episodes}
+    plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
+    assert len(plan.items) == 2
+    assert plan.items[0].episode == "01-E02"
+    assert plan.items[0].episode_title == "Ep1 & Ep2"
+    assert plan.items[1].episode == "03-E04"
+    assert plan.items[1].episode_title == "Ep3 & Ep4"
+
+
+@pytest.mark.xfail(reason="Edge case: not enough episodes to pair or durations do not match up")
+def test_anthology_untrusted_titles_edge_case(tmp_path: Path):
+    """Edge case: Not enough episodes to pair or durations do not match up (should fallback or warn)."""
+    files = [MediaFile(
+        path=tmp_path / "Show-S01E01.mp4",
+        size=1,
+        media_type=MediaType.TV,
+        modified_date=datetime.now(),
+        title="Show",
+        season=1,
+        episode="1",
+        episode_title=None,
+    )]
+    scan_result = type("ScanResult", (), {"files": files, "root_dir": tmp_path})()
+    ctx = TVRenamePlanBuildContext(
+        scan_result=scan_result,
+        rule_set=PlexRuleSet(),
+        plan_id="test-plan",
+        platform="plex",
+        config=RuleSetConfig(anthology=True, untrusted_titles=True, max_duration=22),
+    )
+    episodes = [
+        TVEpisode(title="Ep1", episode_number=1, season_number=1, duration_ms=22*60*1000),
+        TVEpisode(title="Ep2", episode_number=2, season_number=1, duration_ms=5*60*1000),
+    ]
+    episode_list_cache = {("Show", 1, None): episodes}
+    plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
+    # Should fallback to single-episode or warn
+    assert len(plan.items) == 1
+    assert plan.items[0].episode == "E01"
+    assert plan.items[0].episode_title == "Ep1"

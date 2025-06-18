@@ -48,6 +48,8 @@ class RuleSetConfig:
     verify: bool = False
     llm_model: Optional[str] = None
     strict_directory_structure: bool = True
+    untrusted_titles: bool = False  # If true, ignore input titles and use only canonical data
+    max_duration: int | None = None  # Max allowed duration (minutes) for pairing episodes in anthology mode
 
 
 # Reason: RuleSet is an abstract base class (ABC) to enforce a consistent

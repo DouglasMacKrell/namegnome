@@ -735,4 +735,15 @@ namegnome llm set-default mistral:7b
 namegnome llm set-default deepseek-coder-v2:16b-lite-instruct-q4_K_M
 ```
 
-See [docs/llm.md](docs/llm.md) for full installation, configuration, CLI usage, and troubleshooting instructions for LLM-powered features. 
+See [docs/llm.md](docs/llm.md) for full installation, configuration, CLI usage, and troubleshooting instructions for LLM-powered features.
+
+## Debug Logging
+
+All debug output in NameGnome must use the universal debug utility in `src/namegnome/utils/debug.py`.
+
+- Use `debug(msg)`, `info(msg)`, `warn(msg)`, and `error(msg)` for all logging.
+- Do not use `print()` or custom log files for debug output.
+- Debug output is enabled by setting the environment variable `NAMEGNOME_DEBUG=1`.
+- See the module docstring in `src/namegnome/utils/debug.py` for usage examples.
+
+This rule is enforced in code review and CI. See `docs/project-cursorrules.mdc` for details. 

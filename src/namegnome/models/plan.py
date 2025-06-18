@@ -54,6 +54,9 @@ class RenamePlanItem(BaseModel):
     """Reason why manual confirmation is required (e.g., fuzzy match, user
     override)."""
 
+    episode_title: Optional[str] = 'Unknown Title'
+    episode: Optional[str] = None
+
     @model_validator(mode="after")
     def validate_paths(self: "RenamePlanItem") -> "RenamePlanItem":
         """Ensure the source and destination paths are absolute.

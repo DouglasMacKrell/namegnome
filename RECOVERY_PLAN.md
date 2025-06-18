@@ -64,9 +64,62 @@ All work in this recovery plan must follow TDD:
 * **Done when:**
   - All expected and edge-case tests pass and code is refactored.
 
+### 0.3.x Incremental Fixes (Atomised)
+
+#### 0.3.1 Episode-list Normalisation
+*Goal:* Ensure `namegnome.core.tv.utils.normalize_episode_list` returns a **list of dicts** whose `season` and `episode` fields are *integers* (no zero-padding) and skips invalid rows, matching both planner and TV-helper expectations.
+*Tests to Write/Update:*
+  * `tests/core/test_planner.py::TestTVPlannerHelpers::test_normalize_episode_list`
+  * `tests/core/test_planner.py::test_normalize_episode_list` (planner variant)
+*Done when:* both tests pass without regression elsewhere.
+
+#### 0.3.2 Episode-span Parser Edge-cases
+*Goal:* Extend `_parse_episode_span_from_filename` to recognise patterns `E03-E04`, `1x01-1x02`, etc.
+*Tests:* `test_parse_episode_span_from_filename`
+*Done when:* span tests all pass.
+
+#### 0.3.3 Delimiter & Segment-split Detection
+*Goal:* Make `_detect_delimiter` & `_split_segments` pick up " and ", " & ", comma, dash.
+*Tests:* `test_detect_delimiter`, `_find_candidate_splits` tests.
+*Done when:* delimiter helper tests pass.
+
+#### 0.3.4 Conflict-detection Consolidation
+*Goal:* Unify `add_plan_item_with_conflict_detection` so `tests/core/test_planner.py::test_detect_conflicts` passes.
+*Done when:* conflict test passes and any planned items get `PlanStatus.CONFLICT` appropriately.
+
+#### 0.3.5 BuildContext-aware Helper Functions
+*Goal:* Ensure helper stubs in `core/tv/plan_orchestration.py` work with both `TVPlanContext` and `TVRenamePlanBuildContext` objects (fix AttributeError failures).
+*Done when:* `test_handle_normal_plan_item`, `_add_plan_item_and_callback`, `_handle_unsupported_media_type` tests pass.
+
+#### 0.3.6 CLI Artwork Flag Exit-code
+*Goal:* Diagnose and fix non-zero exit in `tests/cli/test_scan_command.py::test_scan_command_with_artwork_flag` (likely missing Rich stub/context manager).
+*Done when:* CLI test passes (exit_code == 0).
+
 ---
 
-### 0.4 TV Plan Orchestration: Implement Core Functions
+### 0.4 Anthology/Double-Episode Handling: Canonical Flow & Edge Cases
+
+> **Critical TDD/robustness requirement for all future anthology/plan work.**
+
+#### Canonical Flow
+- **Input prioritization:** If input files have episode titles, always match to canonical metadata from the API. If only episode numbers, trust numbering and use canonical titles for output.
+- **Anthology mode:** If --anthology is passed, always treat as double-episode/anthology file. Never mix with dash-span or single-episode logic.
+- **Output:** Always output filenames as `Show - S01E01-E02 - Title1 & Title2.ext`, using canonical titles and numbers. Join titles with `&` for multi-episode files.
+- **If --untrusted-titles and --max-duration are passed:** Ignore input titles, use episode numbers and durations from API, and pair episodes whose durations sum to max duration. If a single episode's duration matches, treat as single-episode file. If two (or more) consecutive episodes' durations sum to max, treat as a span.
+- **Edge cases:** If not enough episodes to pair, fallback to single-episode logic. If durations do not match up, warn or flag for manual review.
+- **SONARR/untrusted-titles:** If files are from SONARR or similar, and --untrusted-titles is set, ignore input titles and use only episode numbers and canonical data from API. Pair by duration as above.
+
+#### Flag Effects Table
+| Flag(s)                | What it Means/Does                                                                                   |
+|------------------------|------------------------------------------------------------------------------------------------------|
+| --anthology            | Treat as double-episode/anthology file. Use input titles if present, else trust numbering.           |
+| --untrusted-titles     | Ignore input titles. Use only episode numbers and canonical data from API.                           |
+| --max-duration=XX      | Use this as the max allowed duration for a file. Pair episodes whose durations sum to this value.    |
+
+#### Reference
+- See MEDIA-SERVER FILE-NAMING & METADATA GUIDE.md for naming conventions and edge case handling.
+
+### 0.5 TV Plan Orchestration: Implement Core Functions
 
 * **Goal:** Implement missing core functions in `plan_orchestration.py` and related TV modules to unblock plan/anthology tests and restore TV planning pipeline.
 * **Functions to Implement:**
@@ -116,6 +169,28 @@ All work in this recovery plan must follow TDD:
   - Refactor anthology logic for maintainability; document logic and rationale in code and `SCAN.md`.
 * **Done when:**
   - All anthology edge-case tests pass and code is refactored.
+
+### 1.2.1 Anthology/Double-Episode Handling: Canonical Flow & Edge Cases
+
+> **Critical TDD/robustness requirement for all future anthology/plan work.**
+
+#### Canonical Flow
+- **Input prioritization:** If input files have episode titles, always match to canonical metadata from the API. If only episode numbers, trust numbering and use canonical titles for output.
+- **Anthology mode:** If --anthology is passed, always treat as double-episode/anthology file. Never mix with dash-span or single-episode logic.
+- **Output:** Always output filenames as `Show - S01E01-E02 - Title1 & Title2.ext`, using canonical titles and numbers. Join titles with `&` for multi-episode files.
+- **If --untrusted-titles and --max-duration are passed:** Ignore input titles, use episode numbers and durations from API, and pair episodes whose durations sum to max duration. If a single episode's duration matches, treat as single-episode file. If two (or more) consecutive episodes' durations sum to max, treat as a span.
+- **Edge cases:** If not enough episodes to pair, fallback to single-episode logic. If durations do not match up, warn or flag for manual review.
+- **SONARR/untrusted-titles:** If files are from SONARR or similar, and --untrusted-titles is set, ignore input titles and use only episode numbers and canonical data from API. Pair by duration as above.
+
+#### Flag Effects Table
+| Flag(s)                | What it Means/Does                                                                                   |
+|------------------------|------------------------------------------------------------------------------------------------------|
+| --anthology            | Treat as double-episode/anthology file. Use input titles if present, else trust numbering.           |
+| --untrusted-titles     | Ignore input titles. Use only episode numbers and canonical data from API.                           |
+| --max-duration=XX      | Use this as the max allowed duration for a file. Pair episodes whose durations sum to this value.    |
+
+#### Reference
+- See MEDIA-SERVER FILE-NAMING & METADATA GUIDE.md for naming conventions and edge case handling.
 
 ---
 

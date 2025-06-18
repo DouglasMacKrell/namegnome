@@ -103,6 +103,7 @@ class PlexRuleSet(RuleSet):
         base_dir: Optional[Path] = None,
         config: Optional[RuleSetConfig] = None,
         metadata: "MediaMetadata | None" = None,
+        episode_span: Optional[str] = None,
     ) -> Path:
         """Generate a target path for a media file using Plex naming conventions.
 
@@ -113,6 +114,7 @@ class PlexRuleSet(RuleSet):
             config: Optional configuration for the rule set.
             metadata: Optional provider metadata (e.g., from TMDB/TVDB) to
                 influence naming.
+            episode_span: Optional episode span for output filename generation.
 
         Returns:
             A Path object representing the target location for this file.
@@ -142,6 +144,7 @@ class PlexRuleSet(RuleSet):
                 ext,
                 config=config,
                 metadata=metadata,
+                episode_span=episode_span,
             )
         elif media_file.media_type == MediaType.MOVIE:
             return self._movie_path(
@@ -162,6 +165,7 @@ class PlexRuleSet(RuleSet):
         ext: str,
         config: Optional[RuleSetConfig] = None,
         metadata: "MediaMetadata | None" = None,
+        episode_span: Optional[str] = None,
     ) -> Path:
         """Generate a target path for a TV show file.
 
@@ -178,22 +182,16 @@ class PlexRuleSet(RuleSet):
         ):
             show_name = media_file.title.replace(".", " ").title()
             season_val = media_file.season if media_file.season is not None else 1
-            episode_val = media_file.episode if media_file.episode is not None else 1
-            # Convert to int if numeric, else keep as str
-            if isinstance(season_val, int):
-                season_num: int | str = season_val
-            elif isinstance(season_val, str) and season_val.isdigit():
-                season_num = int(season_val)
-            else:
-                season_num = str(season_val)
-            episode_title = (media_file.episode_title or "Unknown Episode").replace(
-                ".", " "
-            )
+            # Use episode_span if provided (for spans), else media_file.episode
+            episode_val = episode_span or media_file.episode or 1
+            episode_title = (
+                getattr(media_file, "episode_title", None) or "Unknown Episode"
+            ).replace(".", " ")
             # Use metadata for episode title if available
             if metadata and metadata.episodes:
                 for ep in metadata.episodes:
                     if (
-                        ep.season_number == season_num
+                        ep.season_number == season_val
                         and ep.episode_number == episode_val
                         and ep.title
                         and ep.title.strip()
@@ -211,22 +209,22 @@ class PlexRuleSet(RuleSet):
                 if episode_title
                 else "Unknown Episode"
             )
-            # PATCH: Use episode span directly if it's a string
-            if isinstance(media_file.episode, str):
+            # Use episode_val for output (can be a span or int)
+            if isinstance(episode_val, str):
                 filename = (
-                    f"{show_name} - S{season_num:02d}E{media_file.episode} - "
+                    f"{show_name} - S{season_val:02d}E{episode_val} - "
                     f"{sanitized_episode_title}{ext}"
                 )
             else:
                 filename = (
-                    f"{show_name} - S{season_num:02d}E{episode_val:02d} - "
+                    f"{show_name} - S{season_val:02d}E{episode_val:02d} - "
                     f"{sanitized_episode_title}{ext}"
                 )
             return (
                 root_dir
                 / "TV Shows"
                 / show_name
-                / f"Season {int(season_num):02d}"
+                / f"Season {int(season_val):02d}"
                 / filename
             ).resolve()
         else:
@@ -238,8 +236,8 @@ class PlexRuleSet(RuleSet):
                     or "Unknown Show"
                 )
                 show_name = show_name.title()
-                season_num: int | str = 1
-                episode_num: int | str = 1
+                season_val = 1
+                episode_val = 1
                 episode_title = "Unknown Episode"
             else:
                 show_name = (
@@ -251,13 +249,13 @@ class PlexRuleSet(RuleSet):
                 season_str = match.group(2)
                 episode_str = match.group(3)
                 if season_str.isdigit():
-                    season_num = int(season_str)
+                    season_val = int(season_str)
                 else:
-                    season_num = season_str
+                    season_val = season_str
                 if episode_str.isdigit():
-                    episode_num = int(episode_str)
+                    episode_val = int(episode_str)
                 else:
-                    episode_num = episode_str
+                    episode_val = episode_str
                 episode_title_raw = match.group(4).strip() if match.group(4) else ""
                 if episode_title_raw.endswith(ext):
                     episode_title_raw = episode_title_raw[: -len(ext)]
@@ -269,15 +267,15 @@ class PlexRuleSet(RuleSet):
                 else:
                     episode_title = episode_title_raw.replace(".", " ").strip()
         # Use metadata for episode title if available
-        if "season_num" not in locals():
-            season_num = 1
-        if "episode_num" not in locals():
-            episode_num = 1
+        if "season_val" not in locals():
+            season_val = 1
+        if "episode_val" not in locals():
+            episode_val = 1
         if metadata and metadata.episodes:
             for ep in metadata.episodes:
                 if (
-                    ep.season_number == season_num
-                    and ep.episode_number == episode_num
+                    ep.season_number == season_val
+                    and ep.episode_number == episode_val
                     and ep.title
                     and ep.title.strip()
                 ):
@@ -294,14 +292,14 @@ class PlexRuleSet(RuleSet):
             else "Unknown Episode"
         )
         filename = (
-            f"{show_name} - S{int(season_num):02d}E{str(episode_num).zfill(2)} - "
+            f"{show_name} - S{int(season_val):02d}E{str(episode_val).zfill(2)} - "
             f"{sanitized_episode_title}{ext}"
         )
         return (
             root_dir
             / "TV Shows"
             / show_name
-            / f"Season {int(season_num):02d}"
+            / f"Season {int(season_val):02d}"
             / filename
         ).resolve()
 
