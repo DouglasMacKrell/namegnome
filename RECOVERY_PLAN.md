@@ -178,7 +178,7 @@ All work in this recovery plan must follow TDD:
 
 ### 1.2.1 Anthology/Double-Episode Handling: Canonical Flow & Edge Cases
 
-> **Critical TDD/robustness requirement for all future anthology/plan work.**
+* **Goal:** Ensure all anthology and episode span edge cases are handled. **✅ Completed**
 
 #### Canonical Flow
 - **Input prioritization:** If input files have episode titles, always match to canonical metadata from the API. If only episode numbers, trust numbering and use canonical titles for output.
@@ -197,6 +197,15 @@ All work in this recovery plan must follow TDD:
 
 #### Reference
 - See MEDIA-SERVER FILE-NAMING & METADATA GUIDE.md for naming conventions and edge case handling.
+
+* **Done when:**
+  - All anthology edge-case tests pass and code is refactored. **(Met 2025-06-19)**
+
+> **Sprint 1.2.1 Summary (2025-06-19):**
+> * Implemented canonical span naming (`S01E01-E02` → `01-E02`) and ampersand-joined titles.
+> * Added per-file pairing for untrusted-titles with max-duration, leveraging episode durations.
+> * All canonical flow hotspot tests now pass (`test_tv_anthology_canonical_flow_hotspot`).
+> * Edge-case tests now behave as expected, with only designed XFAIL remaining.
 
 ---
 
