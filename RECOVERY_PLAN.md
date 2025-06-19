@@ -228,7 +228,7 @@ All work in this recovery plan must follow TDD:
 
 ### 2.1 Test Migration & Coverage Lift
 
-* **Goal:** Migrate legacy tests and ensure 80%+ coverage for scan/LLM logic.
+* **Goal:** Migrate legacy tests and ensure 80%+ coverage for scan/LLM logic. **✅ Completed**
 * **Test(s) to Write:**
   - Move/expand tests to match new module structure.
   - Add missing edge/failure case tests.
@@ -238,7 +238,12 @@ All work in this recovery plan must follow TDD:
 * **Refactor/Docs:**
   - Refactor tests for maintainability; document coverage in `RECOVERY_PLAN.md`.
 * **Done when:**
-  - Coverage threshold met and all tests green.
+  - Coverage threshold met and all tests green. **(Met 2025-06-19, 82% total)**
+
+> **Sprint 2.1 Summary (2025-06-19):**
+> * Added additional anthology split tests to raise coverage; migrated any stray tests.
+> * Coverage now at 82 % with all tests passing.
+> * No legacy test files remaining outside `tests/`; weakest modules identified for future improvement.
 
 ---
 
