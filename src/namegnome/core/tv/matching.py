@@ -1,7 +1,7 @@
 """Stub for TV matching logic."""
 
 from difflib import SequenceMatcher
-from namegnome.metadata.models import TVEpisode
+
 
 def _find_best_episode_match(segment, episode_list):
     """
@@ -10,10 +10,10 @@ def _find_best_episode_match(segment, episode_list):
     """
     segment_lower = segment.lower().strip()
     for ep in episode_list:
-        if hasattr(ep, 'title'):
+        if hasattr(ep, "title"):
             title = ep.title
         elif isinstance(ep, dict):
-            title = ep.get('title')
+            title = ep.get("title")
         else:
             continue
         if title and segment_lower == title.lower().strip():
@@ -23,10 +23,10 @@ def _find_best_episode_match(segment, episode_list):
     best_ratio = 0.0
     best_ep = None
     for ep in episode_list:
-        if hasattr(ep, 'title'):
+        if hasattr(ep, "title"):
             title = ep.title
         elif isinstance(ep, dict):
-            title = ep.get('title')
+            title = ep.get("title")
         else:
             continue
         ratio = SequenceMatcher(None, segment_lower, title.lower().strip()).ratio()

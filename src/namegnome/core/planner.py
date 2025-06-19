@@ -20,12 +20,9 @@ from typing import TYPE_CHECKING, Any, Callable, Optional
 from namegnome.cli import console
 from namegnome.core.episode_parser import _extract_show_season_year
 from namegnome.core.tv.tv_plan_context import TVRenamePlanBuildContext
-from namegnome.core.tv.plan_orchestration import (
-    add_plan_item_with_conflict_detection,
-)
 from namegnome.metadata.episode_fetcher import fetch_episode_list
 from namegnome.models.core import MediaFile, PlanStatus, ScanResult
-from namegnome.models.plan import RenamePlan, RenamePlanItem, PlanStatus
+from namegnome.models.plan import RenamePlan, RenamePlanItem
 from namegnome.rules.base import RuleSet, RuleSetConfig
 
 if TYPE_CHECKING:
@@ -37,14 +34,8 @@ LLM_CONFIDENCE_THRESHOLD = 0.8
 
 MIN_WORD_LENGTH = 3  # For episode keyword matching
 
-
-@dataclass
-class PlanContext:
-    """Context object holding plan and destination tracking for rename planning."""
-
-    plan: RenamePlan
-    destinations: dict[Path, RenamePlanItem]
-    case_insensitive_destinations: dict[str, RenamePlanItem]
+# Use shared TVPlanContext for consistency across modules (imported as alias)
+from namegnome.core.tv.tv_plan_context import TVPlanContext as PlanContext  # noqa: E402
 
 
 @dataclass
@@ -62,7 +53,9 @@ class RenamePlanBuildContext:
 def create_rename_plan(  # noqa: C901, PLR0912
     ctx: RenamePlanBuildContext,
     debug: bool = False,
-    episode_list_cache: dict = None,
+    episode_list_cache: Optional[
+        dict[tuple[str, int | None, int | None], list[Any]]
+    ] = None,
 ) -> RenamePlan:
     """Create a rename plan from a scan result.
 
@@ -119,6 +112,7 @@ def create_rename_plan(  # noqa: C901, PLR0912
     progress_callback = ctx.progress_callback
     # TV delegation: if any TV files, always delegate to create_tv_rename_plan
     from namegnome.models.core import MediaType as _MT
+
     tv_files = [f for f in scan_result.files if f.media_type == _MT.TV]
     if tv_files:
         # Build a new ScanResult with only TV files
@@ -161,7 +155,7 @@ def create_rename_plan(  # noqa: C901, PLR0912
             plan.items.append(item)
         return plan
     files = scan_result.files
-    episode_list_cache: dict[tuple[str, int, int | None], list[Any]] = {}
+    episode_cache: dict[tuple[str, int | None, int | None], list[Any]] = {}
     for media_file in files:
         if media_file.media_type == "tv":
             show, season, year = _extract_show_season_year(
@@ -171,14 +165,14 @@ def create_rename_plan(  # noqa: C901, PLR0912
             media_file.season = (
                 season  # Ensure season is set for correct folder structure
             )
-            key = (show, season, year)
-            if key not in episode_list_cache:
+            key = ((show or ""), season, year)
+            if key not in episode_cache:
                 try:
-                    episode_list_cache[key] = fetch_episode_list(
-                        show, season, year=year
+                    episode_cache[key] = fetch_episode_list(
+                        show or "", season, year=year
                     )
                 except Exception:
-                    episode_list_cache[key] = []
+                    episode_cache[key] = []
 
     plan = RenamePlan(
         id=plan_id,
@@ -452,7 +446,9 @@ def add_plan_item_with_conflict_detection(
         # Mark conflict on the new item
         item.status = PlanStatus.CONFLICT
         # Mark conflict on the existing item for visibility
-        existing = ctx.destinations.get(key) or ctx.case_insensitive_destinations.get(key_ci)
+        existing = ctx.destinations.get(key) or ctx.case_insensitive_destinations.get(
+            key_ci
+        )
         if existing:
             existing.status = PlanStatus.CONFLICT
     # Track destinations

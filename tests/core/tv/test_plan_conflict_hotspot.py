@@ -5,10 +5,8 @@
 from __future__ import annotations
 
 from pathlib import Path
-from types import SimpleNamespace
 from datetime import datetime
 
-import pytest
 
 from namegnome.core.tv.plan_orchestration import (
     add_plan_item_with_conflict_detection,
@@ -51,7 +49,9 @@ def test_case_insensitive_conflict_detection(tmp_path: Path):
     # Second insert triggers case-insensitive conflict
     add_plan_item_with_conflict_detection(item2, ctx, dest1)
     assert item2.status == PlanStatus.CONFLICT
-    assert item1.status == PlanStatus.CONFLICT, "Existing item should also be marked as conflict"
+    assert item1.status == PlanStatus.CONFLICT, (
+        "Existing item should also be marked as conflict"
+    )
 
 
 def test_handle_unsupported_media_type(tmp_path: Path):
@@ -67,4 +67,4 @@ def test_handle_unsupported_media_type(tmp_path: Path):
 
     assert ctx.plan.items, "An item should have been added"
     item = ctx.plan.items[0]
-    assert item.manual and item.manual_reason == "Unsupported media type" 
+    assert item.manual and item.manual_reason == "Unsupported media type"

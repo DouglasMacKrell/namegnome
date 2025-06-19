@@ -2,7 +2,9 @@
 
 from typing import List, Dict, Any
 
-_EPISODE_CACHE: dict[tuple[str, int, int | None, str | None], List[Dict[str, Any]]] = {}
+_EPISODE_CACHE: dict[
+    tuple[str, int | None, int | None, str | None], List[Dict[str, Any]]
+] = {}
 
 
 def _build_dummy_episodes(show: str, season: int) -> List[Dict[str, Any]]:  # noqa: D401
@@ -20,7 +22,7 @@ def _build_dummy_episodes(show: str, season: int) -> List[Dict[str, Any]]:  # no
 
 def fetch_episode_list(
     show: str,
-    season: int,
+    season: int | None,
     year: int | None = None,
     provider: str | None = None,
 ) -> List[Dict[str, Any]]:
@@ -32,12 +34,17 @@ def fetch_episode_list(
     large test suites.
     """
 
-    key = (show.lower(), season, year, (provider or "default").lower())
+    key = (
+        show.lower(),
+        season if season is not None else -1,
+        year,
+        (provider or "default").lower(),
+    )
     if key in _EPISODE_CACHE:
         return _EPISODE_CACHE[key]
 
     # Real implementation would branch on *provider* and perform HTTP calls.
     # For now we always return the same dummy list.
-    episode_list = _build_dummy_episodes(show, season)
+    episode_list = _build_dummy_episodes(show, season or 1)
     _EPISODE_CACHE[key] = episode_list
     return episode_list

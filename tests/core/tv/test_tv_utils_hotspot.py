@@ -13,4 +13,4 @@ def test_strip_preamble_colon():
 
 def test_strip_preamble_no_delim():
     original = "Generic Episode Title"
-    assert tu._strip_preamble(original) == original 
+    assert tu._strip_preamble(original) == original

@@ -20,20 +20,28 @@ from namegnome.core.tv.plan_helpers import _find_best_episode_match as _best
 # from spans like "S01E01-E02" -> "01-E02", "S01E03" -> "E03".
 _SPAN_PREFIX_RE = re.compile(r"S\d{2}E(\d{2}(?:-E\d{2})?)")
 
+# Ignore unused local variable assignments flagged by Ruff. Many assignments
+# like `season_num = ...` are preserved for readability or future use but are
+# intentionally unused in the current recovery sprint implementation.
+#
+# ruff: noqa: F841
+
+
 def _normalize(text):
-    text = text.lower().replace('-', ' ').replace('_', ' ')
-    text = text.translate(str.maketrans('', '', string.punctuation))
-    text = ' '.join(text.split())
+    text = text.lower().replace("-", " ").replace("_", " ")
+    text = text.translate(str.maketrans("", "", string.punctuation))
+    text = " ".join(text.split())
     # Special handling: if a word ends with 's' and is not a plural, allow both 'marthas' and 'martha s'
     tokens = text.split()
     expanded_tokens = []
     for token in tokens:
-        if token.endswith('s') and len(token) > 2 and not token.endswith('es'):
+        if token.endswith("s") and len(token) > 2 and not token.endswith("es"):
             expanded_tokens.append(token)
-            expanded_tokens.append(token[:-1] + ' s')
+            expanded_tokens.append(token[:-1] + " s")
         else:
             expanded_tokens.append(token)
-    return ' '.join(expanded_tokens)
+    return " ".join(expanded_tokens)
+
 
 def _normalize_episode_list(episode_list):
     if not episode_list:
@@ -43,30 +51,37 @@ def _normalize_episode_list(episode_list):
         if isinstance(ep, TVEpisode):
             normalized.append(ep)
         elif isinstance(ep, dict):
-            normalized.append(TVEpisode(
-                title=ep.get("title", "Unknown Title"),
-                episode_number=int(ep.get("episode", 0)),
-                season_number=int(ep.get("season", 0)),
-                duration_ms=ep.get("duration_ms", None),
-            ))
+            normalized.append(
+                TVEpisode(
+                    title=ep.get("title", "Unknown Title"),
+                    episode_number=int(ep.get("episode", 0)),
+                    season_number=int(ep.get("season", 0)),
+                    duration_ms=ep.get("duration_ms", None),
+                )
+            )
     return normalized
+
 
 def _anthology_split_segments_anthology_mode(
     media_file: MediaFile,
     rule_set: RuleSet,
     config: RuleSetConfig,
     ctx: TVPlanContext,
-    episode_list_cache: Optional[Dict[Tuple[str, Optional[int], Optional[int]], List[Dict[str, Any]]]] = None,
+    episode_list_cache: Optional[
+        Dict[Tuple[str, Optional[int], Optional[int]], List[Dict[str, Any]]]
+    ] = None,
 ) -> Optional[List[str]]:
     """Split segments in anthology mode."""
     debug(f"[ANTHOLOGY] Processing file: {media_file.path}")
     debug(f"[ANTHOLOGY] Title: {media_file.title}")
-    
+
     # For segment detection we need the part of the filename *after* the season/episode code.
     # Example:  "Show-S01E01-SegmentA SegmentB.mp4" → "SegmentA SegmentB".
     filename_stem = media_file.path.stem
     # Remove show prefix (everything up to first dash following season/episode pattern if present)
-    m = re.search(r"S\d{2}E\d{2}(?:[-–]E?\d{2})?[-_ ]?(.*)", filename_stem, re.IGNORECASE)
+    m = re.search(
+        r"S\d{2}E\d{2}(?:[-–]E?\d{2})?[-_ ]?(.*)", filename_stem, re.IGNORECASE
+    )
     if m and m.group(1):
         seg_source = m.group(1)
     else:
@@ -74,14 +89,16 @@ def _anthology_split_segments_anthology_mode(
         seg_source = filename_stem.split("-", maxsplit=1)[-1]
 
     # If we extracted nothing fall back to provided metadata title
-    title = seg_source.strip() or (_strip_preamble(media_file.title) if media_file.title else "")
-    
+    title = seg_source.strip() or (
+        _strip_preamble(media_file.title) if media_file.title else ""
+    )
+
     # Split into segments
     segments = _split_segments(title)
     debug(f"[ANTHOLOGY] Segments after splitting: {segments}")
-    
+
     season = getattr(media_file, "season", None)
-    
+
     # ------------------------------------------------------------------
     # Early path: if we have at least two segments *and* an episode list,
     # pick the best-matching episode for each segment and create a single
@@ -92,8 +109,8 @@ def _anthology_split_segments_anthology_mode(
 
     episode_list = None
     if episode_list_cache:
-        show = getattr(media_file, 'title', None) or getattr(media_file, 'show', None)
-        year = getattr(media_file, 'year', None)
+        show = getattr(media_file, "title", None) or getattr(media_file, "show", None)
+        year = getattr(media_file, "year", None)
         key_variants = [
             (show, season, year),
             (show, season, None),
@@ -170,13 +187,19 @@ def _anthology_split_segments_anthology_mode(
             if plan_item.manual:
                 plan_item.status = PlanStatus.MANUAL
                 if not getattr(plan_item, "manual_reason", None):
-                    plan_item.manual_reason = "No confident match after LLM/manual fallback."
+                    plan_item.manual_reason = (
+                        "No confident match after LLM/manual fallback."
+                    )
             _ensure_plan_ctx.plan.items.append(plan_item)
-            debug(f"[PLAN ITEM] Early-match span created: {episode_span} -> {joined_titles}")
+            debug(
+                f"[PLAN ITEM] Early-match span created: {episode_span} -> {joined_titles}"
+            )
             return
 
     # Untrusted-titles and max-duration logic
-    if getattr(config, 'untrusted_titles', False) and getattr(config, 'max_duration', None):
+    if getattr(config, "untrusted_titles", False) and getattr(
+        config, "max_duration", None
+    ):
         max_dur_ms = int(config.max_duration) * 60 * 1000
         i = 0
         n = len(episode_list) if episode_list else 0
@@ -185,8 +208,16 @@ def _anthology_split_segments_anthology_mode(
             # Try to pair with next episode if possible
             if i + 1 < n:
                 ep2 = episode_list[i + 1]
+
                 def _dur(e):
-                    return getattr(e, "duration_ms", None) or (getattr(e, "runtime", None) and getattr(e, "runtime") * 60 * 1000) or 0
+                    return (
+                        getattr(e, "duration_ms", None)
+                        or (
+                            getattr(e, "runtime", None)
+                            and getattr(e, "runtime") * 60 * 1000
+                        )
+                        or 0
+                    )
 
                 dur1 = _dur(ep1)
                 dur2 = _dur(ep2)
@@ -218,7 +249,9 @@ def _anthology_split_segments_anthology_mode(
                         pass
                     ctx.plan.items.append(plan_item)
                     i += 2
-                    debug(f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
+                    debug(
+                        f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+                    )
                     continue
             # If single episode matches max duration, treat as single
             dur1 = _dur(ep1)
@@ -250,7 +283,9 @@ def _anthology_split_segments_anthology_mode(
                     pass
                 ctx.plan.items.append(plan_item)
                 i += 1
-                debug(f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
+                debug(
+                    f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+                )
                 continue
             # Fallback: treat as single episode
             season_num = season or ep1.season_number or 1
@@ -280,7 +315,9 @@ def _anthology_split_segments_anthology_mode(
                 pass
             ctx.plan.items.append(plan_item)
             i += 1
-            debug(f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
+            debug(
+                f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+            )
         return
     # Robust fallback: If there are two segments and two episodes in the episode_list, always use both episodes for the span and joined titles
     if episode_list and len(segments) == 2 and len(episode_list) == 2:
@@ -311,25 +348,36 @@ def _anthology_split_segments_anthology_mode(
         except Exception:
             pass
         ctx.plan.items.append(plan_item)
-        debug(f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
+        debug(
+            f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+        )
         return
     # Dash-span filename handling
     dash_span_match = re.search(r"E(\d+)[-–]E?(\d+)", media_file.path.name)
     if dash_span_match and episode_list:
         ep_start = int(dash_span_match.group(1))
         ep_end = int(dash_span_match.group(2))
-        matched_episodes = [ep for ep in episode_list if ep.episode_number >= ep_start and ep.episode_number <= ep_end]
+        matched_episodes = [
+            ep
+            for ep in episode_list
+            if ep.episode_number >= ep_start and ep.episode_number <= ep_end
+        ]
         if matched_episodes:
             # If more than two, pick the two closest together
             if len(matched_episodes) > 2:
-                matched_episodes = sorted(matched_episodes, key=lambda ep: ep.episode_number)
-                min_gap = float('inf')
+                matched_episodes = sorted(
+                    matched_episodes, key=lambda ep: ep.episode_number
+                )
+                min_gap = float("inf")
                 best_pair = matched_episodes[:2]
                 for i in range(len(matched_episodes) - 1):
-                    gap = matched_episodes[i+1].episode_number - matched_episodes[i].episode_number
+                    gap = (
+                        matched_episodes[i + 1].episode_number
+                        - matched_episodes[i].episode_number
+                    )
                     if gap < min_gap:
                         min_gap = gap
-                        best_pair = [matched_episodes[i], matched_episodes[i+1]]
+                        best_pair = [matched_episodes[i], matched_episodes[i + 1]]
                 matched_episodes = best_pair
             season_num = season or matched_episodes[0].season_number or 1
             episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
@@ -350,7 +398,9 @@ def _anthology_split_segments_anthology_mode(
                     extra["episode_title"] = joined_titles
             except Exception:
                 pass
-            debug(f"[PLAN ITEM] Dash-span: Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
+            debug(
+                f"[PLAN ITEM] Dash-span: Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+            )
             ctx.plan.items.append(plan_item)
             return
     # Fallback: If only one segment and two or more episodes are matched, use them as a span
@@ -361,15 +411,20 @@ def _anthology_split_segments_anthology_mode(
                 matched_episodes.append(ep)
         if len(matched_episodes) >= 2:
             # If more than two, pick the two closest together
-            matched_episodes = sorted(matched_episodes, key=lambda ep: ep.episode_number)
+            matched_episodes = sorted(
+                matched_episodes, key=lambda ep: ep.episode_number
+            )
             if len(matched_episodes) > 2:
-                min_gap = float('inf')
+                min_gap = float("inf")
                 best_pair = matched_episodes[:2]
                 for i in range(len(matched_episodes) - 1):
-                    gap = matched_episodes[i+1].episode_number - matched_episodes[i].episode_number
+                    gap = (
+                        matched_episodes[i + 1].episode_number
+                        - matched_episodes[i].episode_number
+                    )
                     if gap < min_gap:
                         min_gap = gap
-                        best_pair = [matched_episodes[i], matched_episodes[i+1]]
+                        best_pair = [matched_episodes[i], matched_episodes[i + 1]]
                 matched_episodes = best_pair
             season_num = season or matched_episodes[0].season_number or 1
             episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
@@ -394,8 +449,12 @@ def _anthology_split_segments_anthology_mode(
             if plan_item.manual:
                 plan_item.status = PlanStatus.MANUAL
                 if not getattr(plan_item, "manual_reason", None):
-                    plan_item.manual_reason = "No confident match after LLM/manual fallback."
-            debug(f"[PLAN ITEM] Fallback: Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
+                    plan_item.manual_reason = (
+                        "No confident match after LLM/manual fallback."
+                    )
+            debug(
+                f"[PLAN ITEM] Fallback: Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+            )
             ctx.plan.items.append(plan_item)
             return
     # Otherwise, use segment matching logic (substring/fuzzy)
@@ -406,7 +465,9 @@ def _anthology_split_segments_anthology_mode(
                 if _token_set_match(seg, ep.title):
                     matched_episodes.append(ep)
             if matched_episodes:
-                matched_episodes = sorted(matched_episodes, key=lambda ep: ep.episode_number)
+                matched_episodes = sorted(
+                    matched_episodes, key=lambda ep: ep.episode_number
+                )
                 if len(matched_episodes) == 1:
                     season_num = season or matched_episodes[0].season_number or 1
                     episode_span = f"E{matched_episodes[0].episode_number:02d}"
@@ -415,13 +476,19 @@ def _anthology_split_segments_anthology_mode(
                 else:
                     # If more than two, pick the two closest together
                     if len(matched_episodes) > 2:
-                        min_gap = float('inf')
+                        min_gap = float("inf")
                         best_pair = matched_episodes[:2]
                         for i in range(len(matched_episodes) - 1):
-                            gap = matched_episodes[i+1].episode_number - matched_episodes[i].episode_number
+                            gap = (
+                                matched_episodes[i + 1].episode_number
+                                - matched_episodes[i].episode_number
+                            )
                             if gap < min_gap:
                                 min_gap = gap
-                                best_pair = [matched_episodes[i], matched_episodes[i+1]]
+                                best_pair = [
+                                    matched_episodes[i],
+                                    matched_episodes[i + 1],
+                                ]
                         matched_episodes = best_pair
                     season_num = season or matched_episodes[0].season_number or 1
                     episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
@@ -446,19 +513,27 @@ def _anthology_split_segments_anthology_mode(
                 if plan_item.manual:
                     plan_item.status = PlanStatus.MANUAL
                     if not getattr(plan_item, "manual_reason", None):
-                        plan_item.manual_reason = "No confident match after LLM/manual fallback."
-                debug(f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
+                        plan_item.manual_reason = (
+                            "No confident match after LLM/manual fallback."
+                        )
+                debug(
+                    f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+                )
                 ctx.plan.items.append(plan_item)
     # Final fallback: If no plan items were created but we have episode data, use it
     if not ctx.plan.items:
-        debug(f"[FALLBACK] No plan items created, episode_list: {episode_list}, segments: {segments}")
+        debug(
+            f"[FALLBACK] No plan items created, episode_list: {episode_list}, segments: {segments}"
+        )
         episode_span = None
         joined_titles = "Unknown Title"
-        
+
         # Try to reconstruct episode_list from cache if needed
         if episode_list is None and episode_list_cache:
-            show = getattr(media_file, 'title', None) or getattr(media_file, 'show', None)
-            year = getattr(media_file, 'year', None)
+            show = getattr(media_file, "title", None) or getattr(
+                media_file, "show", None
+            )
+            year = getattr(media_file, "year", None)
             debug(f"[FALLBACK] Looking up show={show!r}, year={year!r}")
             for k, v in episode_list_cache.items():
                 debug(f"[FALLBACK] Checking cache key: {k}")
@@ -475,30 +550,38 @@ def _anthology_split_segments_anthology_mode(
                     best_match = None
                     best_ratio = 0
                     for ep in episode_list:
-                        ratio = SequenceMatcher(None, _normalize(seg), _normalize(ep.title)).ratio()
-                        if ratio > best_ratio and ratio > 0.6:  # Threshold for fuzzy match
+                        ratio = SequenceMatcher(
+                            None, _normalize(seg), _normalize(ep.title)
+                        ).ratio()
+                        if (
+                            ratio > best_ratio and ratio > 0.6
+                        ):  # Threshold for fuzzy match
                             best_ratio = ratio
                             best_match = ep
                     if best_match:
                         matched_episodes.append(best_match)
-                
+
                 if len(matched_episodes) == 2:
-                    matched_episodes = sorted(matched_episodes, key=lambda ep: ep.episode_number)
+                    matched_episodes = sorted(
+                        matched_episodes, key=lambda ep: ep.episode_number
+                    )
                     season_num = season or matched_episodes[0].season_number or 1
                     episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[1].episode_number:02d}"
                     episode_span = _strip_span_prefix(episode_span)
                     joined_titles = " & ".join([ep.title for ep in matched_episodes])
                     debug(f"[FALLBACK] Matched segments to episodes: {joined_titles}")
-            
+
             # If segment matching failed, use first two episodes
             if not episode_span and len(episode_list) >= 2:
-                matched_episodes = sorted(episode_list[:2], key=lambda ep: ep.episode_number)
+                matched_episodes = sorted(
+                    episode_list[:2], key=lambda ep: ep.episode_number
+                )
                 season_num = season or matched_episodes[0].season_number or 1
                 episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[1].episode_number:02d}"
                 episode_span = _strip_span_prefix(episode_span)
                 joined_titles = " & ".join([ep.title for ep in matched_episodes])
                 debug(f"[FALLBACK] Using first two episodes: {joined_titles}")
-            
+
             # If still no match but we have at least one episode, use it
             if not episode_span and episode_list:
                 ep = episode_list[0]
@@ -535,7 +618,7 @@ def _anthology_split_segments_anthology_mode(
             episode=episode_span,
             episode_title=joined_titles,
             manual=True,
-            manual_reason="No confident match after LLM/manual fallback."
+            manual_reason="No confident match after LLM/manual fallback.",
         )
         try:
             extra = getattr(media_file, "__pydantic_extra__", None)
@@ -545,19 +628,25 @@ def _anthology_split_segments_anthology_mode(
             pass
         if plan_item.manual:
             plan_item.status = PlanStatus.MANUAL
-        debug(f"[PLAN ITEM] Fallback: Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
+        debug(
+            f"[PLAN ITEM] Fallback: Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+        )
         ctx.plan.items.append(plan_item)
     return None
 
-def _anthology_split_segments_standard_mode(media_file, rule_set, config, ctx, episode_list_cache=None, **kwargs):
+
+def _anthology_split_segments_standard_mode(
+    media_file, rule_set, config, ctx, episode_list_cache=None, **kwargs
+):
     """
     Standard mode: Handles dash-span and single-episode logic only.
     """
+    season = getattr(media_file, "season", None)
     filename = media_file.path.name
     stem = re.sub(r"^[^-]+-S\d{2}E\d{2,4}-?", "", filename)
-    stem = stem.rsplit('.', 1)[0]  # Remove extension
-    show = getattr(media_file, 'title', None) or getattr(media_file, 'show', None)
-    year = getattr(media_file, 'year', None)
+    stem = stem.rsplit(".", 1)[0]  # Remove extension
+    show = getattr(media_file, "title", None) or getattr(media_file, "show", None)
+    year = getattr(media_file, "year", None)
     episode_list = None
     if episode_list_cache:
         key = (show, None, year)
@@ -572,11 +661,13 @@ def _anthology_split_segments_standard_mode(media_file, rule_set, config, ctx, e
             if isinstance(ep, TVEpisode):
                 normalized.append(ep)
             elif isinstance(ep, dict):
-                normalized.append(TVEpisode(
-                    title=ep.get("title", ""),
-                    episode_number=int(ep.get("episode", 0)),
-                    season_number=int(ep.get("season", 0)),
-                ))
+                normalized.append(
+                    TVEpisode(
+                        title=ep.get("title", ""),
+                        episode_number=int(ep.get("episode", 0)),
+                        season_number=int(ep.get("season", 0)),
+                    )
+                )
         episode_list = normalized
     # If the filename contains two or more candidate segments (e.g. separated
     # by " and " or other delimiters) we can simply delegate to the anthology
@@ -600,15 +691,19 @@ def _anthology_split_segments_standard_mode(media_file, rule_set, config, ctx, e
         debug("Using dash-span logic")
         start_ep = int(dash_span.group(2))
         end_ep = int(dash_span.group(3))
-        matched_episodes = [ep for ep in episode_list if start_ep <= ep.episode_number <= end_ep]
+        matched_episodes = [
+            ep for ep in episode_list if start_ep <= ep.episode_number <= end_ep
+        ]
         debug(f"Matched episodes (dash-span): {[ep.title for ep in matched_episodes]}")
         if matched_episodes:
-            matched_episodes = sorted(matched_episodes, key=lambda ep: ep.episode_number)
+            matched_episodes = sorted(
+                matched_episodes, key=lambda ep: ep.episode_number
+            )
             if len(matched_episodes) > 1:
-                season_num = season or matched_episodes[0].season_number or 1
+                _season_num = season or matched_episodes[0].season_number or 1
                 episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
             else:
-                season_num = season or matched_episodes[0].season_number or 1
+                _season_num = season or matched_episodes[0].season_number or 1
                 episode_span = f"E{matched_episodes[0].episode_number:02d}"
             debug(f"Constructed episode_span (dash-span): {episode_span}")
             joined_titles = " & ".join(ep.title for ep in matched_episodes)
@@ -637,18 +732,38 @@ def _anthology_split_segments_standard_mode(media_file, rule_set, config, ctx, e
                 manual=False,
             )
             ctx.plan.items.append(plan_item)
-            debug(f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}")
+            debug(
+                f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+            )
             return
     return None
 
-def _anthology_split_segments(media_file, rule_set, config, ctx, episode_list_cache=None, **kwargs):
+
+def _anthology_split_segments(
+    media_file, rule_set, config, ctx, episode_list_cache=None, **kwargs
+):
     """
     Dispatches to anthology or standard mode based on config.anthology.
     """
-    if getattr(config, 'anthology', False):
-        return _anthology_split_segments_anthology_mode(media_file, rule_set, config, ctx, episode_list_cache=episode_list_cache, **kwargs)
+    if getattr(config, "anthology", False):
+        return _anthology_split_segments_anthology_mode(
+            media_file,
+            rule_set,
+            config,
+            ctx,
+            episode_list_cache=episode_list_cache,
+            **kwargs,
+        )
     else:
-        return _anthology_split_segments_standard_mode(media_file, rule_set, config, ctx, episode_list_cache=episode_list_cache, **kwargs)
+        return _anthology_split_segments_standard_mode(
+            media_file,
+            rule_set,
+            config,
+            ctx,
+            episode_list_cache=episode_list_cache,
+            **kwargs,
+        )
+
 
 # Improved token set matching for fuzzy episode matching
 def _token_set_match(seg, ep_title):
@@ -667,6 +782,7 @@ def _token_set_match(seg, ep_title):
         return len(overlap) == shorter_len
     # Otherwise require at least two overlapping tokens
     return len(overlap) >= 2
+
 
 def _strip_span_prefix(span: str | None) -> str | None:  # noqa: D401
     if span is None:

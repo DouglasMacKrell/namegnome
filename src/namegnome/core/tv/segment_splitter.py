@@ -1,4 +1,5 @@
 """Stub for TV segment splitter."""
+
 import re
 
 

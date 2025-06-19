@@ -14,7 +14,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 from namegnome.core.tv import plan_orchestration as po
-from namegnome.models.core import MediaFile, MediaType, PlanStatus
+from namegnome.models.core import MediaFile, MediaType
 from namegnome.models.plan import RenamePlanItem
 
 
@@ -53,4 +53,4 @@ def test_handle_explicit_span_flag():
     assert po._handle_explicit_span(span_ctx) is True
 
     span_ctx2 = SimpleNamespace(found_match=False)
-    assert po._handle_explicit_span(span_ctx2) is False 
+    assert po._handle_explicit_span(span_ctx2) is False

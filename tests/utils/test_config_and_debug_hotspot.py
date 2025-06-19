@@ -1,10 +1,8 @@
 """Tests for utils modules that currently have low coverage (config, debug)."""
 
 import importlib
-import os
 from pathlib import Path
 
-import pytest
 
 from namegnome.utils import config as cfg
 from namegnome.utils import debug as dbg
@@ -41,4 +39,4 @@ def test_debug_prints_when_env_var_set(capfd, monkeypatch):
     # info/warn/error should not raise and utilise the logger
     dbg.info("info msg")
     dbg.warn("warn msg")
-    dbg.error("error msg") 
+    dbg.error("error msg")

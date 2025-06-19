@@ -14,7 +14,9 @@ class DummyRuleSet(RuleSet):
     def __init__(self):
         super().__init__("dummy")
 
-    def target_path(self, media_file, base_dir=None, config=None, metadata=None, **kwargs):  # type: ignore[override]
+    def target_path(
+        self, media_file, base_dir=None, config=None, metadata=None, **kwargs
+    ):  # type: ignore[override]
         # Return a predictable dummy path that does not rely on metadata fields.
         return (base_dir or Path(".")) / "dummy.mkv"
 
@@ -56,7 +58,10 @@ def test_handle_normal_plan_item_found_match(tmp_path: Path):
 
     # Monkeypatch conflict helper so that it actually appends to the plan for unit-testing purposes
     import namegnome.core.tv.plan_conflicts as pc  # noqa: WPS433
-    pc.add_plan_item_with_conflict_detection = lambda item, ctx_arg, _path: ctx_arg.plan.items.append(item)
+
+    pc.add_plan_item_with_conflict_detection = (
+        lambda item, ctx_arg, _path: ctx_arg.plan.items.append(item)
+    )
     tvp.add_plan_item_with_conflict_detection = pc.add_plan_item_with_conflict_detection
 
     # Call with found_match=True to mark item as automatic (not manual)
@@ -72,4 +77,4 @@ def test_handle_normal_plan_item_found_match(tmp_path: Path):
     item = ctx.plan.items[0]
     assert item.manual is False
     # Destination path produced by dummy rule set contains Season 01 folder
-    assert item.destination.name == "dummy.mkv" 
+    assert item.destination.name == "dummy.mkv"

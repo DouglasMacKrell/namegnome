@@ -25,7 +25,9 @@ class DummyRuleSet(RuleSet):
     def __init__(self):
         super().__init__("dummy")
 
-    def target_path(self, media_file, base_dir=None, config=None, metadata=None, **kwargs):  # type: ignore[override]
+    def target_path(
+        self, media_file, base_dir=None, config=None, metadata=None, **kwargs
+    ):  # type: ignore[override]
         return (base_dir or Path(".")) / media_file.path.name
 
     def supports_media_type(self, media_type):
@@ -53,6 +55,7 @@ def _ctx(tmp_path: Path):
 # ---------------------------------------------------------------------------
 # 1. Dash-span in *standard* mode (anthology==False)
 # ---------------------------------------------------------------------------
+
 
 def test_dash_span_standard_mode(tmp_path: Path):
     # Ensure global 'season' exists for the buggy reference inside the function
@@ -104,6 +107,7 @@ def test_dash_span_standard_mode(tmp_path: Path):
 # 2. untrusted_titles + max_duration pairing
 # ---------------------------------------------------------------------------
 
+
 def test_untrusted_titles_max_duration_pairing(tmp_path: Path):
     fpath = tmp_path / "Anthology_File.mkv"
     fpath.touch()
@@ -118,8 +122,12 @@ def test_untrusted_titles_max_duration_pairing(tmp_path: Path):
 
     # Two minimal episode-like objects that include a duration_ms attribute.
     episodes = [
-        SimpleNamespace(title="SegA", episode_number=1, season_number=1, duration_ms=9 * 60 * 1000),
-        SimpleNamespace(title="SegB", episode_number=2, season_number=1, duration_ms=10 * 60 * 1000),
+        SimpleNamespace(
+            title="SegA", episode_number=1, season_number=1, duration_ms=9 * 60 * 1000
+        ),
+        SimpleNamespace(
+            title="SegB", episode_number=2, season_number=1, duration_ms=10 * 60 * 1000
+        ),
     ]
     cache = {("Show", None, None): episodes, ("Show", 1, None): episodes}
     ctx = _ctx(tmp_path)
@@ -145,6 +153,7 @@ def test_untrusted_titles_max_duration_pairing(tmp_path: Path):
 # ---------------------------------------------------------------------------
 # 3. Manual fallback when no episodes
 # ---------------------------------------------------------------------------
+
 
 def test_anthology_manual_fallback(tmp_path: Path):
     fpath = tmp_path / "File_NoMatch.mkv"
@@ -175,6 +184,7 @@ def test_anthology_manual_fallback(tmp_path: Path):
 # ---------------------------------------------------------------------------
 # 4. Dash-span filename inside anthology mode path
 # ---------------------------------------------------------------------------
+
 
 def test_dash_span_anthology_mode(tmp_path: Path):
     # Filename with dash-span pattern triggers dedicated logic inside anthology mode
@@ -211,4 +221,4 @@ def test_dash_span_anthology_mode(tmp_path: Path):
 
     assert ctx.plan.items, "plan item should be created via dash-span"
     item = ctx.plan.items[0]
-    assert item.episode == "05-E06" and item.manual is False 
+    assert item.episode == "05-E06" and item.manual is False

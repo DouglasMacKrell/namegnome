@@ -503,10 +503,7 @@ def test_normalize_episode_list_regression() -> None:
     out1 = normalize_episode_list(dict_input)
     assert isinstance(out1, list)
     assert all(isinstance(ep, dict) for ep in out1)
-    assert (
-        out1[0]["season"] == 1
-        and out1[0]["episode"] == 1
-    )
+    assert out1[0]["season"] == 1 and out1[0]["episode"] == 1
     obj_input = [
         TVEpisode(title="Ep1", episode_number=1, season_number=1),
         TVEpisode(title="Ep2", episode_number=2, season_number=1),
@@ -514,10 +511,7 @@ def test_normalize_episode_list_regression() -> None:
     out2 = normalize_episode_list(obj_input)
     assert isinstance(out2, list)
     assert all(isinstance(ep, dict) for ep in out2)
-    assert (
-        out2[0]["season"] == 1
-        and out2[0]["episode"] == 1
-    )
+    assert out2[0]["season"] == 1 and out2[0]["episode"] == 1
 
 
 class ScanResult:
@@ -660,16 +654,18 @@ def test_anthology_untrusted_titles_duration_pairing(tmp_path: Path):
     # Simulate two files, each should pair two episodes by duration
     files = []
     for i in range(2):
-        files.append(MediaFile(
-            path=tmp_path / f"Show-S01E{1 + i*2:02d}.mp4",
-            size=1,
-            media_type=MediaType.TV,
-            modified_date=datetime.now(),
-            title="Show",
-            season=1,
-            episode=str(1 + i*2),
-            episode_title=None,
-        ))
+        files.append(
+            MediaFile(
+                path=tmp_path / f"Show-S01E{1 + i * 2:02d}.mp4",
+                size=1,
+                media_type=MediaType.TV,
+                modified_date=datetime.now(),
+                title="Show",
+                season=1,
+                episode=str(1 + i * 2),
+                episode_title=None,
+            )
+        )
     scan_result = type("ScanResult", (), {"files": files, "root_dir": tmp_path})()
     ctx = TVRenamePlanBuildContext(
         scan_result=scan_result,
@@ -680,10 +676,18 @@ def test_anthology_untrusted_titles_duration_pairing(tmp_path: Path):
     )
     # Simulate canonical episode list with durations
     episodes = [
-        TVEpisode(title="Ep1", episode_number=1, season_number=1, duration_ms=11*60*1000),
-        TVEpisode(title="Ep2", episode_number=2, season_number=1, duration_ms=11*60*1000),
-        TVEpisode(title="Ep3", episode_number=3, season_number=1, duration_ms=11*60*1000),
-        TVEpisode(title="Ep4", episode_number=4, season_number=1, duration_ms=11*60*1000),
+        TVEpisode(
+            title="Ep1", episode_number=1, season_number=1, duration_ms=11 * 60 * 1000
+        ),
+        TVEpisode(
+            title="Ep2", episode_number=2, season_number=1, duration_ms=11 * 60 * 1000
+        ),
+        TVEpisode(
+            title="Ep3", episode_number=3, season_number=1, duration_ms=11 * 60 * 1000
+        ),
+        TVEpisode(
+            title="Ep4", episode_number=4, season_number=1, duration_ms=11 * 60 * 1000
+        ),
     ]
     episode_list_cache = {("Show", 1, None): episodes}
     plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
@@ -699,16 +703,18 @@ def test_anthology_sonarr_style_untrusted_titles(tmp_path: Path):
     """SONARR-style files: Incremental numbering, single episode titles, --untrusted-titles set. Should pair by duration and use canonical titles."""
     files = []
     for i in range(2):
-        files.append(MediaFile(
-            path=tmp_path / f"Show-S01E{1 + i*2:02d}.mp4",
-            size=1,
-            media_type=MediaType.TV,
-            modified_date=datetime.now(),
-            title="Show",
-            season=1,
-            episode=str(1 + i*2),
-            episode_title=f"FakeTitle{1 + i*2}",
-        ))
+        files.append(
+            MediaFile(
+                path=tmp_path / f"Show-S01E{1 + i * 2:02d}.mp4",
+                size=1,
+                media_type=MediaType.TV,
+                modified_date=datetime.now(),
+                title="Show",
+                season=1,
+                episode=str(1 + i * 2),
+                episode_title=f"FakeTitle{1 + i * 2}",
+            )
+        )
     scan_result = type("ScanResult", (), {"files": files, "root_dir": tmp_path})()
     ctx = TVRenamePlanBuildContext(
         scan_result=scan_result,
@@ -718,10 +724,18 @@ def test_anthology_sonarr_style_untrusted_titles(tmp_path: Path):
         config=RuleSetConfig(anthology=True, untrusted_titles=True, max_duration=22),
     )
     episodes = [
-        TVEpisode(title="Ep1", episode_number=1, season_number=1, duration_ms=11*60*1000),
-        TVEpisode(title="Ep2", episode_number=2, season_number=1, duration_ms=11*60*1000),
-        TVEpisode(title="Ep3", episode_number=3, season_number=1, duration_ms=11*60*1000),
-        TVEpisode(title="Ep4", episode_number=4, season_number=1, duration_ms=11*60*1000),
+        TVEpisode(
+            title="Ep1", episode_number=1, season_number=1, duration_ms=11 * 60 * 1000
+        ),
+        TVEpisode(
+            title="Ep2", episode_number=2, season_number=1, duration_ms=11 * 60 * 1000
+        ),
+        TVEpisode(
+            title="Ep3", episode_number=3, season_number=1, duration_ms=11 * 60 * 1000
+        ),
+        TVEpisode(
+            title="Ep4", episode_number=4, season_number=1, duration_ms=11 * 60 * 1000
+        ),
     ]
     episode_list_cache = {("Show", 1, None): episodes}
     plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)
@@ -732,19 +746,23 @@ def test_anthology_sonarr_style_untrusted_titles(tmp_path: Path):
     assert plan.items[1].episode_title == "Ep3 & Ep4"
 
 
-@pytest.mark.xfail(reason="Edge case: not enough episodes to pair or durations do not match up")
+@pytest.mark.xfail(
+    reason="Edge case: not enough episodes to pair or durations do not match up"
+)
 def test_anthology_untrusted_titles_edge_case(tmp_path: Path):
     """Edge case: Not enough episodes to pair or durations do not match up (should fallback or warn)."""
-    files = [MediaFile(
-        path=tmp_path / "Show-S01E01.mp4",
-        size=1,
-        media_type=MediaType.TV,
-        modified_date=datetime.now(),
-        title="Show",
-        season=1,
-        episode="1",
-        episode_title=None,
-    )]
+    files = [
+        MediaFile(
+            path=tmp_path / "Show-S01E01.mp4",
+            size=1,
+            media_type=MediaType.TV,
+            modified_date=datetime.now(),
+            title="Show",
+            season=1,
+            episode="1",
+            episode_title=None,
+        )
+    ]
     scan_result = type("ScanResult", (), {"files": files, "root_dir": tmp_path})()
     ctx = TVRenamePlanBuildContext(
         scan_result=scan_result,
@@ -754,8 +772,12 @@ def test_anthology_untrusted_titles_edge_case(tmp_path: Path):
         config=RuleSetConfig(anthology=True, untrusted_titles=True, max_duration=22),
     )
     episodes = [
-        TVEpisode(title="Ep1", episode_number=1, season_number=1, duration_ms=22*60*1000),
-        TVEpisode(title="Ep2", episode_number=2, season_number=1, duration_ms=5*60*1000),
+        TVEpisode(
+            title="Ep1", episode_number=1, season_number=1, duration_ms=22 * 60 * 1000
+        ),
+        TVEpisode(
+            title="Ep2", episode_number=2, season_number=1, duration_ms=5 * 60 * 1000
+        ),
     ]
     episode_list_cache = {("Show", 1, None): episodes}
     plan = create_tv_rename_plan(ctx, episode_list_cache=episode_list_cache)

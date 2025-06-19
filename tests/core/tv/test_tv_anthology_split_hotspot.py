@@ -17,7 +17,9 @@ class DummyRuleSet(RuleSet):
     def __init__(self):
         super().__init__("dummy")
 
-    def target_path(self, media_file, base_dir=None, config=None, metadata=None, **kwargs):  # type: ignore[override]
+    def target_path(
+        self, media_file, base_dir=None, config=None, metadata=None, **kwargs
+    ):  # type: ignore[override]
         # For unit-tests we don't care about the real path – just echo source.
         return media_file.path
 
@@ -83,4 +85,4 @@ def test_anthology_split_early_match(tmp_path: Path):
 def test_token_set_match_cases():
     assert tas._token_set_match("Pups Save Train", "Pups Save A Train") is True
     # Very short word should need full overlap
-    assert tas._token_set_match("Go", "Going Gone") is False 
+    assert tas._token_set_match("Go", "Going Gone") is False

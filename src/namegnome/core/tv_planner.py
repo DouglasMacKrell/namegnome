@@ -246,7 +246,7 @@ def _handle_normal_matching(
     media_file: MediaFile,
     ctx: "TVRenamePlanBuildContext",
     plan_ctx: "PlanContext",
-    episode_list: list,
+    episode_list: list[dict[str, Any]],
     found_match: bool,
 ) -> bool:
     """Attempt to match a media file to an episode using fuzzy matching.

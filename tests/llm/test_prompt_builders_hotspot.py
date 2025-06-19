@@ -38,4 +38,4 @@ def test_normalize_title_with_llm_fallback(monkeypatch):
     monkeypatch.setattr(po.ollama_client, "generate", fake_generate)
     title = po.normalize_title_with_llm("Str Segment", ["Official Title"])
     # With exception, original segment is returned unchanged
-    assert title == "Str Segment" 
+    assert title == "Str Segment"

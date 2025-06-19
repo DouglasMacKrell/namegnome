@@ -279,6 +279,7 @@ class ScanCommandOptions:
     strict_directory_structure: bool = True
     untrusted_titles: bool = False
     max_duration: Optional[int] = None
+    artwork: bool = False
 
 
 @app.command()
@@ -345,9 +346,7 @@ def scan(  # noqa: PLR0913, C901, PLR0915
                 console.print("[yellow]No media files found.[/yellow]")
                 raise typer.Exit(ExitCode.ERROR)
             if hasattr(progress, "update") and task_id is not None:
-                progress.update(
-                    task_id, description="Generating rename plan..."
-                )
+                progress.update(task_id, description="Generating rename plan...")
             rule_set = PlexRuleSet()  # TODO: Make this configurable based on platform
             with console.status("[cyan]Creating rename plan...", spinner="dots"):
                 config = RuleSetConfig(
@@ -361,7 +360,9 @@ def scan(  # noqa: PLR0913, C901, PLR0915
                     untrusted_titles=untrusted_titles,
                     max_duration=max_duration,
                 )
-                plan = create_rename_plan(
+                from typing import cast, Any
+
+                plan = cast(Any, create_rename_plan)(
                     scan_result=scan_result,
                     rule_set=rule_set,
                     plan_id=str(uuid.uuid4()),
@@ -386,6 +387,7 @@ def scan(  # noqa: PLR0913, C901, PLR0915
                     strict_directory_structure=strict_directory_structure,
                     untrusted_titles=untrusted_titles,
                     max_duration=max_duration,
+                    artwork=artwork,
                 ),
                 validated_media_types,
                 scan_options,
@@ -508,7 +510,9 @@ def _scan_impl(options: ScanCommandOptions) -> int:
                             untrusted_titles=options.untrusted_titles,
                             max_duration=options.max_duration,
                         )
-                        plan = create_rename_plan(
+                        from typing import cast, Any
+
+                        plan = cast(Any, create_rename_plan)(
                             scan_result=scan_result,
                             rule_set=rule_set,
                             plan_id=str(uuid.uuid4()),
@@ -652,7 +656,9 @@ def config(
     """Show or manage NameGnome configuration (API keys, .env, etc.)."""
     if show:
         try:
-            settings = Settings()
+            # Instantiation relies on environment variables; mypy complains about
+            # required field *TMDB_API_KEY*, so we silence the static checker only.
+            settings = Settings()  # type: ignore[call-arg]
             settings.require_keys()
             _print_settings(settings)
         except (MissingAPIKeyError, ValidationError) as e:
@@ -735,7 +741,9 @@ def _run_async(coro: Coroutine[Any, Any, T]) -> T:
         result = q.get()
         if isinstance(result, Exception):
             raise result
-        return result
+        from typing import cast
+
+        return cast(T, result)
 
     # No running loop detected – safe to run normally.
     return asyncio.run(coro)
@@ -765,10 +773,8 @@ def _download_artwork_for_movies(scan_result: ScanResult, root: Path) -> None:
                 )
                 artwork_dir = root / ".namegnome" / "artwork" / tmdbid
                 poster_path = artwork_dir / "poster.jpg"
-                success = False
                 try:
                     _run_async(fetch_fanart_poster(meta, artwork_dir))
-                    success = True
                 except Exception:
                     pass  # Ignore – we'll create a stub file below
 

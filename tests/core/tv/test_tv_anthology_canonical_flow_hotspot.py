@@ -10,7 +10,6 @@ from __future__ import annotations
 from datetime import datetime
 from pathlib import Path
 
-import pytest
 
 from namegnome.core.tv.anthology import tv_anthology_split as tas
 from namegnome.core.tv.tv_plan_context import TVPlanContext
@@ -27,7 +26,9 @@ class DummyRuleSet(RuleSet):
         super().__init__("dummy")
 
     # `episode_span` is passed via **kwargs by tv_anthology_split helper.
-    def target_path(self, media_file, base_dir=None, config=None, metadata=None, **kwargs):  # type: ignore[override]
+    def target_path(
+        self, media_file, base_dir=None, config=None, metadata=None, **kwargs
+    ):  # type: ignore[override]
         span = kwargs.get("episode_span", "E??")
         # Canonical Plex pattern we expect: Show - S01E01-E02 - Title1 & Title2.ext
         titles = kwargs.get("joined_titles", "")
@@ -72,8 +73,12 @@ def test_canonical_span_naming(tmp_path: Path):
     )
 
     episodes = [
-        TVEpisode(title="SegmentA", episode_number=1, season_number=1, duration_ms=600000),
-        TVEpisode(title="SegmentB", episode_number=2, season_number=1, duration_ms=600000),
+        TVEpisode(
+            title="SegmentA", episode_number=1, season_number=1, duration_ms=600000
+        ),
+        TVEpisode(
+            title="SegmentB", episode_number=2, season_number=1, duration_ms=600000
+        ),
     ]
 
     cache = {("Show", 1, None): episodes}
@@ -111,8 +116,12 @@ def test_untrusted_titles_duration_pairing(tmp_path: Path):
     )
 
     episodes = [
-        TVEpisode(title="EpOne", episode_number=1, season_number=1, duration_ms=900000),  # 15 min
-        TVEpisode(title="EpTwo", episode_number=2, season_number=1, duration_ms=900000),  # 15 min
+        TVEpisode(
+            title="EpOne", episode_number=1, season_number=1, duration_ms=900000
+        ),  # 15 min
+        TVEpisode(
+            title="EpTwo", episode_number=2, season_number=1, duration_ms=900000
+        ),  # 15 min
     ]
     cache = {("Show", 1, None): episodes}
 
@@ -120,7 +129,9 @@ def test_untrusted_titles_duration_pairing(tmp_path: Path):
     tas._anthology_split_segments(
         media_file,
         DummyRuleSet(),
-        RuleSetConfig(anthology=True, untrusted_titles=True, max_duration=30),  # 30 min window
+        RuleSetConfig(
+            anthology=True, untrusted_titles=True, max_duration=30
+        ),  # 30 min window
         ctx,
         episode_list_cache=cache,
     )
@@ -128,4 +139,4 @@ def test_untrusted_titles_duration_pairing(tmp_path: Path):
     assert ctx.plan.items, "Expected paired plan item for untrusted titles mode"
     item = ctx.plan.items[0]
     assert item.episode == "01-E02"
-    assert item.episode_title == "EpOne & EpTwo" 
+    assert item.episode_title == "EpOne & EpTwo"

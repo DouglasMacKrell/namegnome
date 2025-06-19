@@ -23,7 +23,7 @@ class _DummySettings:
 
     def model_dump(self) -> dict[str, Any]:  # type: ignore[override]
         return {
-            "TMDB_API_KEY": "ABCD1234SECRET",  # secret-looking value to check masking
+            "TMDB_API_KEY": "ABCD1234SECRET",  # pragma: allowlist secret  # secret-looking value to check masking
             "SOME_OTHER": "value",  # normal value printed verbatim
             "EMPTY": None,  # shows as <unset>
         }
@@ -109,4 +109,4 @@ def test_download_artwork_for_movies_creates_poster(tmp_path, monkeypatch):
     cmd._download_artwork_for_movies(scan_result, tmp_path)
 
     poster = tmp_path / ".namegnome" / "artwork" / "12345" / "poster.jpg"
-    assert poster.exists() and poster.read_bytes() 
+    assert poster.exists() and poster.read_bytes()

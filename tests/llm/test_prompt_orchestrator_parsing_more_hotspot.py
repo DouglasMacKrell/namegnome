@@ -17,9 +17,9 @@ from namegnome.llm import prompt_orchestrator as po
 @pytest.mark.parametrize(
     "response, expected",
     [
-        ("[\"Title A\", \"Title B\"]", ["Title A", "Title B"]),  # list of strings
+        ('["Title A", "Title B"]', ["Title A", "Title B"]),  # list of strings
         (
-            "[{\"title\": \"Title C\"}, {\"title\": \"Title D\"}]",
+            '[{"title": "Title C"}, {"title": "Title D"}]',
             ["Title C", "Title D"],  # list of dicts
         ),
         ("{'Title E', 'Title F'}", ["Title E", "Title F"]),  # single set
@@ -45,9 +45,9 @@ def test_parse_llm_segments_with_sanitisation():
 
     raw = (
         "[\n"
-        "  {\"title\": \"Foo\", \"episode\": S01E01,}, // trailing comma & comment\n"
-        "  {\"title\": \"Bar\", \"episode\": S01E02}\n"
+        '  {"title": "Foo", "episode": S01E01,}, // trailing comma & comment\n'
+        '  {"title": "Bar", "episode": S01E02}\n'
         "]"
     )
     segments = po.parse_llm_segments(raw)
-    assert isinstance(segments, list) and segments[0]["episode"] == "S01E01" 
+    assert isinstance(segments, list) and segments[0]["episode"] == "S01E01"

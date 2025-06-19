@@ -4,17 +4,15 @@ These functions are largely pure and provide an easy way to improve test
 coverage without heavy fixtures.
 """
 
-import importlib
-from pathlib import Path
-
-import pytest
-
 # We import after potential monkeypatching in certain tests below
 import namegnome.core.tv_planner as tvp
 
 
 def test_extract_show_name_and_year():
-    assert tvp._extract_show_name_and_year("Danger Mouse 2015") == ("Danger Mouse", 2015)
+    assert tvp._extract_show_name_and_year("Danger Mouse 2015") == (
+        "Danger Mouse",
+        2015,
+    )
     assert tvp._extract_show_name_and_year("The Octonauts") == ("The Octonauts", None)
 
 
@@ -25,11 +23,15 @@ def test_extract_year_from_filename():
 
 
 def test_parse_show_season_from_filename():
-    show, season = tvp._parse_show_season_from_filename("Danger Mouse - S02E05 - Big Penfold.mkv")
+    show, season = tvp._parse_show_season_from_filename(
+        "Danger Mouse - S02E05 - Big Penfold.mkv"
+    )
     assert show == "Danger Mouse"
     assert season == 2
     # Alternate delimiter pattern
-    show2, season2 = tvp._parse_show_season_from_filename("Danger.Mouse.S01E10_Jeopardy.Mouse.mkv")
+    show2, season2 = tvp._parse_show_season_from_filename(
+        "Danger.Mouse.S01E10_Jeopardy.Mouse.mkv"
+    )
     assert show2 == "Danger.Mouse"
     assert season2 == 1
 
@@ -51,4 +53,4 @@ def test_contains_multiple_episode_keywords():
 def test_extract_shared_moniker():
     title = "Mighty Pups, Charged Up: Pups Stop a Humdinger Horde"
     assert tvp._extract_shared_moniker(title) == "Mighty Pups, Charged Up"
-    assert tvp._extract_shared_moniker("Regular Episode Title") is None 
+    assert tvp._extract_shared_moniker("Regular Episode Title") is None

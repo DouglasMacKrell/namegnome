@@ -29,4 +29,4 @@ def test_fetch_episode_list_contract(provider: str | None):
     first = eps[0]
     assert set(first).issuperset({"season", "episode", "title"})
     assert isinstance(first["season"], int) and isinstance(first["episode"], int)
-    assert isinstance(first["title"], str) 
+    assert isinstance(first["title"], str)

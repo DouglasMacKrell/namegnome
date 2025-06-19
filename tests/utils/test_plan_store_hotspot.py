@@ -1,9 +1,6 @@
 """Tests for namegnome.utils.plan_store save/load functions."""
 
-import os
-from pathlib import Path
 from datetime import datetime
-from types import SimpleNamespace
 
 import pytest
 
@@ -75,4 +72,4 @@ def test_get_latest_plan_id(isolated_home, tmp_path):
 
     # get_plan_metadata returns RunMetadata
     meta = ps.get_plan_metadata(plan_id)
-    assert meta.id == plan_id 
+    assert meta.id == plan_id

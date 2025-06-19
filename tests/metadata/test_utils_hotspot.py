@@ -13,7 +13,10 @@ def test_normalize_title():
 def test_strip_articles():
     assert mu.strip_articles("The Great Escape") == "Great Escape"
     assert mu.strip_articles("An Unexpected Journey") == "Unexpected Journey"
-    assert mu.strip_articles("A Series of Unfortunate Events") == "Series of Unfortunate Events"
+    assert (
+        mu.strip_articles("A Series of Unfortunate Events")
+        == "Series of Unfortunate Events"
+    )
     # Titles without articles remain unchanged
     assert mu.strip_articles("Escape Plan") == "Escape Plan"
 
@@ -29,4 +32,4 @@ def test_load_fixture_not_found(tmp_path, monkeypatch):
     # Monkeypatch Path.parents to use tmp path to ensure isolation
     monkeypatch.setattr(mu.Path, "exists", lambda self: False)
     with pytest.raises(FileNotFoundError):
-        mu.load_fixture("tvdb", "nonexistent_file") 
+        mu.load_fixture("tvdb", "nonexistent_file")

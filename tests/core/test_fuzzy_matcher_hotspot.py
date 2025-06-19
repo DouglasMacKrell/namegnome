@@ -50,4 +50,4 @@ def test_unique_word_fallback_matches_low_fuzzy():
     filename = "Mighty Humdinger Chaos.mkv"
     # Use a high threshold so that the fuzzy score is *not* high enough, forcing the unique-word fallback
     matches = match_episodes(filename, RARE_TITLES, threshold=90)
-    assert matches and matches[0][0] == "Humdinger Horde Havoc" 
+    assert matches and matches[0][0] == "Humdinger Horde Havoc"

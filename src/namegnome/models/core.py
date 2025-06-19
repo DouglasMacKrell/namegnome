@@ -84,6 +84,9 @@ class MediaFile(BaseModel):
     episode: Optional[int] = None
     """Episode number for TV shows (if applicable)."""
 
+    episode_title: Optional[str] = None
+    """Title of the episode (if parsed or provided by metadata)."""
+
     year: Optional[int] = None
     """Release year for movies (if available)."""
 

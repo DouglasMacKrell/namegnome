@@ -5,18 +5,17 @@ still have large uncovered regions.
 """
 
 from types import SimpleNamespace
-from pathlib import Path
-from datetime import datetime
 
 from namegnome.core import tv_planner as tvp
 from namegnome.core.planner import _extract_unique_verbs_phrases
 from namegnome.core.tv.utils import sanitize_title_tv
-from namegnome.models.core import MediaFile, MediaType
+from namegnome.models.core import MediaType
 
 
 # ---------------------------------------------------------------------------
 # _extract_unique_verbs_phrases (core.planner)
 # ---------------------------------------------------------------------------
+
 
 def test_extract_unique_verbs_phrases():
     title = "The Pups Save The Day"
@@ -29,6 +28,7 @@ def test_extract_unique_verbs_phrases():
 # ---------------------------------------------------------------------------
 # _anthology_single_segment_fallback (tv_planner)
 # ---------------------------------------------------------------------------
+
 
 def test_anthology_single_segment_fallback_match():
     segment = "Pups Save A Train"
@@ -55,6 +55,7 @@ def test_anthology_single_segment_fallback_match():
 # ---------------------------------------------------------------------------
 # _handle_normal_matching (tv_planner)
 # ---------------------------------------------------------------------------
+
 
 def test_handle_normal_matching_updates_media_file(tmp_path):
     # Prepare dummy media file and context
@@ -91,9 +92,10 @@ def test_handle_normal_matching_updates_media_file(tmp_path):
 # _extract_shared_moniker (tv_planner)
 # ---------------------------------------------------------------------------
 
+
 def test_extract_shared_moniker():
     title = "Mighty Pups, Charged Up: Pups Stop a Humdinger Horde"
     assert tvp._extract_shared_moniker(title) == "Mighty Pups, Charged Up"
 
     # No shared moniker → None
-    assert tvp._extract_shared_moniker("Generic Episode Title") is None 
+    assert tvp._extract_shared_moniker("Generic Episode Title") is None

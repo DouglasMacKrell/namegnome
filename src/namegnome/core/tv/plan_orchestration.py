@@ -8,21 +8,18 @@ from pathlib import Path
 from namegnome.models.plan import RenamePlan, RenamePlanItem
 from namegnome.core.tv.tv_plan_context import TVRenamePlanBuildContext, TVPlanContext
 from namegnome.core.tv.anthology.tv_anthology_split import _anthology_split_segments
-from namegnome.core.tv.matching import _find_best_episode_match
-from namegnome.core.tv.segment_splitter import _split_segments
-from namegnome.metadata.episode_fetcher import fetch_episode_list
 from namegnome.rules.base import RuleSetConfig
 from namegnome.rules.plex import PlexRuleSet
 from namegnome.models.core import MediaType, PlanStatus
 from typing import Optional, Dict, Tuple, List, Any
-import json
-from datetime import date, datetime
 from types import SimpleNamespace
 
 
 def create_tv_rename_plan(
     ctx: TVRenamePlanBuildContext,
-    episode_list_cache: Optional[Dict[Tuple[str, Optional[int], Optional[int]], List[Dict[str, Any]]]] = None,
+    episode_list_cache: Optional[
+        Dict[Tuple[str, Optional[int], Optional[int]], List[Dict[str, Any]]]
+    ] = None,
 ) -> RenamePlan:
     """
     TV-specific entry point for building a rename plan from a scan result.
@@ -129,7 +126,9 @@ def add_plan_item_with_conflict_detection(
         item.manual_reason = "Destination conflict detected."
 
         # Also mark the existing item (if any) for visibility
-        existing = ctx.destinations.get(key) or ctx.case_insensitive_destinations.get(key_ci)
+        existing = ctx.destinations.get(key) or ctx.case_insensitive_destinations.get(
+            key_ci
+        )
         if existing and existing.status != PlanStatus.CONFLICT:
             existing.status = PlanStatus.CONFLICT
 
@@ -156,21 +155,27 @@ def _handle_episode_number_match(*args, **kwargs):
                 return True
     return False
 
+
 def _handle_normal_matching(*args, **kwargs):
     """Pretend we always succeed and add nothing."""
     return True
+
 
 def fetch_episode_list(*args, **kwargs):
     """Stub for test unblocking."""
     return []
 
+
 def _handle_fallback_providers_normal(*args, **kwargs):
     return True
+
 
 def _handle_anthology_mode(*args, **kwargs):
     return True
 
+
 # New helper functions expected by tests
+
 
 def _handle_normal_plan_item(media_file, rule_set, config, ctx, plan_ctx):
     """Create a simple plan item and append to *ctx.plan*.

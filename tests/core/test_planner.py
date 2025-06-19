@@ -162,10 +162,7 @@ class TestCreateRenamePlan:
         item = ctx.plan.items[0]
         assert item.media_file.season == 6
         assert item.episode == "09-E10"
-        assert (
-            item.episode_title
-            and "Martha Questions" in item.episode_title
-        )
+        assert item.episode_title and "Martha Questions" in item.episode_title
         assert item.manual is False
         # Unreachable code after return removed
 
@@ -276,14 +273,8 @@ class TestCreateRenamePlan:
         item = ctx.plan.items[0]
         assert item.media_file.season == 1
         assert item.episode == "01-E02"
-        assert (
-            item.episode_title
-            and "The Beginning" in item.episode_title
-        )
-        assert (
-            item.episode_title
-            and "The Continuation" in item.episode_title
-        )
+        assert item.episode_title and "The Beginning" in item.episode_title
+        assert item.episode_title and "The Continuation" in item.episode_title
         assert item.manual is False
 
     def test_tv_missing_episode_number_or_title(
@@ -735,14 +726,8 @@ class TestCreateRenamePlan:
         item = ctx.plan.items[0]
         assert item.media_file.season == 1
         assert item.episode == "05-E06"
-        assert (
-            item.episode_title
-            and "Kitty" in item.episode_title
-        )
-        assert (
-            item.episode_title
-            and "Train" in item.episode_title
-        )
+        assert item.episode_title and "Kitty" in item.episode_title
+        assert item.episode_title and "Train" in item.episode_title
         assert item.manual is False
 
     def test_anthology_splitter_paw_patrol_double_episode_cookoff(
@@ -803,10 +788,7 @@ class TestCreateRenamePlan:
         item = ctx.plan.items[0]
         assert item.media_file.season == 4
         assert item.episode == "01-E02"
-        assert (
-            item.episode_title
-            and "Cook" in item.episode_title
-        )
+        assert item.episode_title and "Cook" in item.episode_title
         assert not item.manual
 
     def test_anthology_splitter_martha_speaks_double_episode_powerless(
@@ -867,10 +849,7 @@ class TestCreateRenamePlan:
         item = ctx.plan.items[0]
         assert item.media_file.season == 6
         assert item.episode == "13-E14"
-        assert (
-            item.episode_title
-            and "Powerless" in item.episode_title
-        )
+        assert item.episode_title and "Powerless" in item.episode_title
         assert not item.manual
 
     def test_detect_conflicts(self, temp_dir: Path, monkeypatch: MonkeyPatch) -> None:

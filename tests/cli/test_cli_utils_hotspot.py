@@ -1,7 +1,6 @@
 """Unit tests for small helper functions in namegnome.cli.commands."""
 
 import asyncio
-from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -40,4 +39,4 @@ def test_convert_to_model_options(tmp_path):
     model_opts = cmd._convert_to_model_options(opts, media_types, scan_opts)
     assert model_opts.root == tmp_path
     assert model_opts.platform == "plex"
-    assert model_opts.media_types == media_types 
+    assert model_opts.media_types == media_types

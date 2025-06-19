@@ -16,5 +16,7 @@ def test_token_set_match_short_title_requires_full_overlap():
 
 def test_token_set_match_long_titles():
     # Needs at least two overlapping tokens for longer strings
-    assert tas._token_set_match("Pups Save A Train", "Pups Save The Sea Turtles") is True
-    assert tas._token_set_match("Pups Save A Train", "Penguin Patrol") is False 
+    assert (
+        tas._token_set_match("Pups Save A Train", "Pups Save The Sea Turtles") is True
+    )
+    assert tas._token_set_match("Pups Save A Train", "Penguin Patrol") is False

@@ -7,7 +7,6 @@ fallback/error paths when the LLM output is malformed or an exception occurs.
 
 from __future__ import annotations
 
-import asyncio
 from typing import Any
 
 import pytest
@@ -23,7 +22,7 @@ def _patch_generate(monkeypatch):
     async def _fake_generate(model: str, prompt: str, stream: bool = True) -> str:  # noqa: D401, ANN001
         # Route the response based on a simple heuristic of the prompt content
         if "Generate a list of plausible filename variants" in prompt:
-            return "[\"Foo\", \"Foo (alt)\"]"
+            return '["Foo", "Foo (alt)"]'
         if "Return the single official episode title" in prompt:
             return '"Canonical Foo"'
         if "Extract all episode titles" in prompt:
@@ -73,4 +72,4 @@ async def test_run_async_nested_loop(monkeypatch):  # noqa: D401
     async def _wrapper():  # noqa: D401
         return cmd._run_async(_coro())
 
-    assert await _wrapper() == 99 
+    assert await _wrapper() == 99

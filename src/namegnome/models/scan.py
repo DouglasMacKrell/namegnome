@@ -83,4 +83,14 @@ class ScanOptions(BaseModel):
     """Set of file extensions to include in the scan (empty means all supported
     types)."""
 
+    # ---------------------------------------------------------------------
+    # Additional CLI flags (added in Sprint 0.4)
+    # ---------------------------------------------------------------------
+
+    untrusted_titles: bool = False
+    """Allow title extraction from untrusted sources (filename heuristics)."""
+
+    max_duration: Optional[int] = None
+    """Maximum media duration in minutes; used to skip oversized matches."""
+
     model_config = ConfigDict(arbitrary_types_allowed=True)

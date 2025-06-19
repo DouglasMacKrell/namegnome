@@ -35,7 +35,12 @@ def test_parse_llm_case_mixed_list():
         {"Nested", "Set"},
     ]
     result = po._parse_llm_case_mixed_list(data)
-    assert "Solo" in result and "DictTitle" in result and "Nested" in result and "Set" in result
+    assert (
+        "Solo" in result
+        and "DictTitle" in result
+        and "Nested" in result
+        and "Set" in result
+    )
 
     # Should return [] when nothing matches
     assert po._parse_llm_case_mixed_list([42, {}]) == []
@@ -59,4 +64,4 @@ def test_llm_generate_variants_and_disambiguate(monkeypatch):
     assert "Foo" in variants and "Foo Variant" in variants
 
     chosen = po.llm_disambiguate_candidates("foo_file.mkv", ["Foo", "Bar"])
-    assert chosen == ["Foo"] 
+    assert chosen == ["Foo"]

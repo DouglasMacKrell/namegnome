@@ -1,6 +1,5 @@
 """Tests conflict detection helper in planner.add_plan_item_with_conflict_detection."""
 
-from pathlib import Path
 from datetime import datetime
 
 from namegnome.core.planner import (
@@ -59,4 +58,4 @@ def test_add_plan_item_conflict_marks_both(tmp_path):
     )
     add_conflict(item2, ctx, dest)
 
-    assert item1.status == PlanStatus.CONFLICT and item2.status == PlanStatus.CONFLICT 
+    assert item1.status == PlanStatus.CONFLICT and item2.status == PlanStatus.CONFLICT

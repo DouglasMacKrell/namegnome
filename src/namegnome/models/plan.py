@@ -23,6 +23,13 @@ from pydantic import BaseModel, Field, model_validator
 
 from namegnome.models.core import MediaFile, MediaType, PlanStatus
 
+# Re-export PlanStatus for external callers (deprecated import path)
+__all__: list[str] = [
+    "RenamePlanItem",
+    "RenamePlan",
+    "PlanStatus",
+]
+
 
 class RenamePlanItem(BaseModel):
     """A single file rename/move operation in a plan.
@@ -54,7 +61,7 @@ class RenamePlanItem(BaseModel):
     """Reason why manual confirmation is required (e.g., fuzzy match, user
     override)."""
 
-    episode_title: Optional[str] = 'Unknown Title'
+    episode_title: Optional[str] = "Unknown Title"
     episode: Optional[str] = None
 
     @model_validator(mode="after")
@@ -106,3 +113,14 @@ class RenamePlan(BaseModel):
 
     llm_model: Optional[str] = None
     """LLM model used for fuzzy matching or disambiguation, if applicable."""
+
+
+# ---------------------------------------------------------------------------
+# Backwards-compatibility exports (tests still import PlanStatus from this module)
+# ---------------------------------------------------------------------------
+
+__all__: list[str] = [
+    "RenamePlanItem",
+    "RenamePlan",
+    "PlanStatus",
+]

@@ -21,4 +21,4 @@ def test_fuzzy_match_returns_best_match():
     title, score, ep = _find_best_episode_match(seg, EPISODES)
     assert title == "Pups Save A Train"
     assert score > 60  # fuzzy ratio should be decent
-    assert ep == EPISODES[0] 
+    assert ep == EPISODES[0]
