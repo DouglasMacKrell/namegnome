@@ -145,7 +145,7 @@ All work in this recovery plan must follow TDD:
 
 ### 1.1 LLM Prompt & Response Handling
 
-* **Goal:** Make prompt construction and response parsing robust to edge cases.
+* **Goal:** Make prompt construction and response parsing robust to edge cases. **✅ Completed**
 * **Test(s) to Write:**
   - Add tests for malformed/ambiguous LLM responses, prompt size limits, cache hits, and manual fallback.
 * **Acceptance Criteria:**
@@ -153,7 +153,13 @@ All work in this recovery plan must follow TDD:
 * **Refactor/Docs:**
   - Refactor prompt templates and response handling for clarity and robustness; document in code and `RECOVERY_PLAN.md`.
 * **Done when:**
-  - No prompt/response errors in edge-case tests and code is refactored.
+  - No prompt/response errors in edge-case tests and code is refactored. **(Met 2025-06-19)**
+
+> **Sprint 1.1 Summary (2025-06-19):**
+> * Added robust comment stripping and single-quoted key handling in `sanitize_llm_output` to better parse messy LLM responses (supports `/* … */`, `<!-- … -->`, and `#` comments).
+> * Confirmed prompt size checks, cache hits/bypass logic, and manual fallback behaviour via existing test-suite.
+> * All LLM prompt & parsing tests now pass, satisfying acceptance criteria.
+> * Documentation updated here; further template polishing deferred to Sprint 2 docs ticket.
 
 ---
 

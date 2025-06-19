@@ -103,11 +103,17 @@ def build_id_hint_prompt(
 
 def sanitize_llm_output(raw: str) -> str:
     """Sanitize LLM output to make it more parseable as JSON or Python."""
-    # Remove comments (// or #)
-    raw = re.sub(r"//.*", "", raw)
-    raw = re.sub(r"#.*", "", raw)
+    # Remove comments (// or #) and C-style / multi-line comments
+    raw = re.sub(r"//.*", "", raw)  # Single-line // comments
+    raw = re.sub(r"#.*", "", raw)  # Single-line # comments
+    raw = re.sub(r"/\*.*?\*/", "", raw, flags=re.DOTALL)  # /* multi-line */ comments
+    raw = re.sub(
+        r"<!--.*?-->", "", raw, flags=re.DOTALL
+    )  # <!-- HTML-style --> comments
     # Replace unquoted episode values (e.g., S01E02) with quoted strings
-    raw = re.sub(r"(\"episode\"\s*:\s*)(S\d+E\d+(\.\d+)?)([\,\s}])", r'\1"\2"\4', raw)
+    raw = re.sub(
+        r"([\"']episode[\"']\s*:\s*)(S\d+E\d+(\.\d+)?)([\,\s}])", r'\1"\2"\4', raw
+    )
     # Replace null with None for Python, or vice versa for JSON
     raw = raw.replace("null", "None")
     # Remove only trailing commas before } or ]
