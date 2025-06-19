@@ -21,12 +21,16 @@ namegnome scan <root> [OPTIONS]
 - `--platform, -p <platform>`: Target platform (plex, jellyfin, emby, navidrome, etc.)
   (default: plex)
 - `--media-type, -t <type>`: Media types to scan for (tv, movie, music). Can be
-  specified multiple times.
+  specified multiple times **(required—specify at least one)**.
 - `--show-name <name>`: Override detected show name (TV only)
 - `--movie-year <year>`: Specify release year for movie files
 - `--anthology`: Handle multi-segment episodes (e.g., Paw Patrol)
 - `--adjust-episodes`: Fix episode numbering if files are in correct order but
   misnumbered
+- `--untrusted-titles`: Ignore filename titles and rely solely on canonical metadata (useful for low-quality rips)
+- `--max-duration <minutes>`: Maximum episode duration when pairing anthology spans (pairs episodes whose combined duration ≤ limit)
+- `--artwork`: Download and cache high-quality posters for movies during scan
+- `--no-cache`: Bypass the SQLite metadata cache and force fresh provider look-ups
 - `--verify`: Compute and store SHA-256 checksums for file integrity
 - `--json`: Output results as JSON
 - `--no-color`: Disable colored output (for logs/CI)
@@ -38,9 +42,14 @@ namegnome scan <root> [OPTIONS]
 ### Examples
 
 ```sh
-namegnome scan /media/TV/PawPatrol --show-name "Paw Patrol" --anthology
-namegnome scan /media/Movies --media-type movie --movie-year 2023
-namegnome scan /media/Library --platform plex --media-type tv --media-type movie --json
+# Scan a TV directory with anthology pairing and custom show name
+namegnome scan /media/TV/PawPatrol --media-type tv --show-name "Paw Patrol" --anthology
+
+# Scan movies, download artwork, and output JSON
+namegnome scan /media/Movies --media-type movie --movie-year 2023 --artwork --json
+
+# Mixed library scan with two media types and no-color (CI-friendly)
+namegnome scan /media/Library --platform plex --media-type tv --media-type movie --no-color
 ```
 
 ### Exit Codes
@@ -175,6 +184,50 @@ namegnome plans --show-paths   # Show full file paths
 namegnome plans <PLAN_ID>      # Show details for a specific plan
 namegnome plans --json         # Output as JSON for scripting
 namegnome plans --latest       # Show the most recent plan
+```
+
+## version
+
+Show the installed NameGnome version.
+
+### Usage
+
+```sh
+namegnome version
+```
+
+## config
+
+Inspect resolved configuration settings (API keys, cache paths, etc.).
+
+### Usage
+
+```sh
+namegnome config --show
+```
+
+### Options
+
+- `--show`: Pretty-print all resolved settings.
+
+## llm
+
+Manage available LLM models for fuzzy matching. (Sub-commands)
+
+### list
+
+List models discovered by the local Ollama server.
+
+```sh
+namegnome llm list
+```
+
+### set-default
+
+Set the default model used when `--llm-model` is omitted.
+
+```sh
+namegnome llm set-default llama3:8b
 ```
 
 ## Advanced Usage
