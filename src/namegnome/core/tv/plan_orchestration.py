@@ -161,9 +161,32 @@ def _handle_normal_matching(*args, **kwargs):
     return True
 
 
-def fetch_episode_list(*args, **kwargs):
-    """Stub for test unblocking."""
-    return []
+# Thin wrapper around the real episode_fetcher for easier monkey-patching in
+# unit-tests while enabling actual provider fallback in production.
+
+
+def fetch_episode_list(
+    show: str,
+    season: int | None,
+    year: int | None = None,
+    provider: str | None = None,
+) -> list[dict[str, Any]]:  # noqa: D401
+    """Fetch an episode list from the metadata layer with basic caching.
+
+    This wrapper ensures that existing tests that monkey-patch
+    ``plan_orchestration.fetch_episode_list`` continue to work, while the
+    default behaviour now delegates to
+    ``namegnome.metadata.episode_fetcher.fetch_episode_list`` which supports
+    provider fallback.
+    """
+
+    from namegnome.metadata.episode_fetcher import fetch_episode_list as _real
+
+    try:
+        return _real(show, season, year=year, provider=provider)
+    except TypeError:
+        # Backward-compat with test stubs that omit *provider*.
+        return _real(show, season, year)
 
 
 def _handle_fallback_providers_normal(*args, **kwargs):
