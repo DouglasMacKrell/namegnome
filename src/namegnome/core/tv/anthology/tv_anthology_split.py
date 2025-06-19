@@ -201,25 +201,83 @@ def _anthology_split_segments_anthology_mode(
         config, "max_duration", None
     ):
         max_dur_ms = int(config.max_duration) * 60 * 1000
+
+        # Determine the starting episode based on the filename/metadata so that
+        # sequentially-numbered input files (e.g. S01E01.mp4, S01E03.mp4, …)
+        # each consume their own consecutive window of *episode_list* rather
+        # than all starting from the first element.  This matches the
+        # expectations of the unit-tests that exercise SONARR-style input.
+
+        start_ep_num: Optional[int] = None
+        if getattr(media_file, "episode", None):
+            try:
+                start_ep_num = int(str(media_file.episode))
+            except (TypeError, ValueError):
+                start_ep_num = None
+
+        # If we couldn't parse an explicit starting episode, fall back to the
+        # first episode in the list.  Otherwise, locate the corresponding
+        # TVEpisode object so that pairing starts from there.
         i = 0
-        n = len(episode_list) if episode_list else 0
-        while i < n:
+        if start_ep_num is not None:
+            for idx, _ep in enumerate(episode_list):
+                if _ep.episode_number == start_ep_num:
+                    i = idx
+                    break
+
+        n = len(episode_list)
+        if i < n:
             ep1 = episode_list[i]
+
+            # If single episode matches (or nearly matches) max duration, treat as single first.
+            def _dur(e):
+                val = getattr(e, "duration_ms", None)
+                if val is None:
+                    # Pydantic v2 stores unknown fields in __pydantic_extra__.
+                    extra = getattr(e, "__pydantic_extra__", {}) or {}
+                    val = extra.get("duration_ms")
+                if val is None:
+                    runtime = getattr(e, "runtime", None)
+                    if runtime is not None:
+                        val = runtime * 60 * 1000
+                return val or 0
+
+            dur1 = _dur(ep1)
+            if dur1 >= max_dur_ms * 0.95:
+                # Single long episode – no pairing.
+                episode_span = f"E{ep1.episode_number:02d}"
+                episode_span = _strip_span_prefix(episode_span)
+                joined_titles = ep1.title
+                plan_item = RenamePlanItem(
+                    source=media_file.path,
+                    destination=rule_set.target_path(
+                        media_file,
+                        base_dir=ctx.plan.root_dir,
+                        config=config,
+                        episode_span=episode_span,
+                        joined_titles=joined_titles,
+                    ),
+                    media_file=media_file,
+                    season=season,
+                    episode=episode_span,
+                    episode_title=joined_titles,
+                    manual=False,
+                )
+                try:
+                    extra = getattr(media_file, "__pydantic_extra__", None)
+                    if extra is not None:
+                        extra["episode_title"] = joined_titles
+                except Exception:
+                    pass
+                ctx.plan.items.append(plan_item)
+                debug(
+                    f"[PLAN ITEM] Creating single-episode plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+                )
+                return
+
             # Try to pair with next episode if possible
             if i + 1 < n:
                 ep2 = episode_list[i + 1]
-
-                def _dur(e):
-                    return (
-                        getattr(e, "duration_ms", None)
-                        or (
-                            getattr(e, "runtime", None)
-                            and getattr(e, "runtime") * 60 * 1000
-                        )
-                        or 0
-                    )
-
-                dur1 = _dur(ep1)
                 dur2 = _dur(ep2)
                 if dur1 + dur2 <= max_dur_ms:
                     season_num = season or ep1.season_number or 1
@@ -252,7 +310,7 @@ def _anthology_split_segments_anthology_mode(
                     debug(
                         f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
                     )
-                    continue
+                    return
             # If single episode matches max duration, treat as single
             dur1 = _dur(ep1)
             if dur1 >= max_dur_ms * 0.95:  # allow small margin
@@ -286,7 +344,7 @@ def _anthology_split_segments_anthology_mode(
                 debug(
                     f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
                 )
-                continue
+                return
             # Fallback: treat as single episode
             season_num = season or ep1.season_number or 1
             episode_span = f"E{ep1.episode_number:02d}"
@@ -318,7 +376,7 @@ def _anthology_split_segments_anthology_mode(
             debug(
                 f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
             )
-        return
+            return
     # Robust fallback: If there are two segments and two episodes in the episode_list, always use both episodes for the span and joined titles
     if episode_list and len(segments) == 2 and len(episode_list) == 2:
         matched_episodes = sorted(episode_list, key=lambda ep: ep.episode_number)
