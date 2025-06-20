@@ -99,6 +99,25 @@ def create_tv_rename_plan(
     # Ensure the outer *plan* has the accumulated items
     plan.items = plan_ctx.plan.items
 
+    # ------------------------------------------------------------------
+    # Final pass: ensure duplicate destinations are marked as conflicts
+    # ------------------------------------------------------------------
+    seen: dict[str, RenamePlanItem] = {}
+    for pi in plan.items:
+        try:
+            rel = pi.destination.relative_to(plan.root_dir)
+        except Exception:
+            rel = pi.destination
+
+        key_ci = rel.as_posix().lower()
+        if key_ci in seen:
+            # Mark both the current and existing items as conflict if not already
+            pi.status = PlanStatus.CONFLICT
+            if seen[key_ci].status != PlanStatus.CONFLICT:
+                seen[key_ci].status = PlanStatus.CONFLICT
+        else:
+            seen[key_ci] = pi
+
     return plan
 
 
