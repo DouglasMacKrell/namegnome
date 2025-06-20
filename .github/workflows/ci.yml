@@ -35,7 +35,7 @@ jobs:
         python -m pip install -e .
         # Explicitly install dev-only tools that are required by scripts/ci_checks.sh
         python -m pip install ruff mypy pytest-cov pre-commit pytest-mock types-PyYAML tomli tomli-w \
-            typer rich pydantic httpx jinja2 respx click pyyaml
+            typer rich pydantic httpx jinja2 respx click pyyaml pytest-asyncio
         
     - name: Debug Windows environment
       if: matrix.os == 'windows-latest'
