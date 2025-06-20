@@ -107,8 +107,8 @@ def create_rename_plan(  # noqa: C901, PLR0912
                     ),
                 )
             )
+        _mark_duplicate_destination_conflicts(plan)
         return plan
-        # Unreachable code after return removed
     config = ctx.config
     progress_callback = ctx.progress_callback
     # TV delegation: if any TV files, always delegate to create_tv_rename_plan
@@ -154,6 +154,7 @@ def create_rename_plan(  # noqa: C901, PLR0912
                 ),
             )
             plan.items.append(item)
+        _mark_duplicate_destination_conflicts(plan)
         return plan
     files = scan_result.files
     episode_cache: dict[tuple[str, int | None, int | None], list[Any]] = {}
@@ -201,6 +202,13 @@ def create_rename_plan(  # noqa: C901, PLR0912
         f"Total planned items: {len(plan_ctx.plan.items)}, unique destinations: "
         f"{len(plan_ctx.destinations)}"
     )
+
+    # ------------------------------------------------------------------
+    # Global duplicate-destination safeguard (platform-agnostic)
+    # ------------------------------------------------------------------
+
+    _mark_duplicate_destination_conflicts(plan)
+
     return plan
 
 
@@ -468,3 +476,33 @@ def add_plan_item_with_conflict_detection(
     ctx.plan.items.append(item)
     ctx.destinations[key] = item
     ctx.case_insensitive_destinations[key_norm] = item
+
+
+# ---------------------------------------------------------------------------
+# Helper: mark duplicate destination conflicts (shared across planners)
+# ---------------------------------------------------------------------------
+
+
+def _mark_duplicate_destination_conflicts(plan: RenamePlan) -> None:  # noqa: D401
+    """Ensure any items sharing the same destination are flagged as conflicts.
+
+    Runs a deterministic, case-insensitive check over *plan.items* so that
+    duplicate destinations never slip through—regardless of which sub-planner
+    produced the items or of OS-specific path quirks (8.3 short paths, drive-
+    letter casing, etc.).
+    """
+
+    seen: dict[str, RenamePlanItem] = {}
+    for item in plan.items:
+        try:
+            rel = item.destination.relative_to(plan.root_dir)
+        except Exception:
+            rel = item.destination
+
+        key_ci = rel.as_posix().lower()
+        if key_ci in seen:
+            item.status = PlanStatus.CONFLICT
+            if seen[key_ci].status != PlanStatus.CONFLICT:
+                seen[key_ci].status = PlanStatus.CONFLICT
+        else:
+            seen[key_ci] = item
