@@ -119,7 +119,15 @@ def add_plan_item_with_conflict_detection(
         ctx.case_insensitive_destinations = {}
 
     key = target_path
-    key_ci = str(target_path).lower()
+    # Build a canonical key relative to the scan root directory to avoid short-path
+    # vs. long-path discrepancies on Windows.
+    root_dir = getattr(ctx.plan, "root_dir", None)
+    try:
+        rel_path = target_path.relative_to(root_dir) if root_dir else target_path
+    except Exception:
+        rel_path = target_path
+
+    key_ci = rel_path.as_posix().lower()
     if key in ctx.destinations or key_ci in ctx.case_insensitive_destinations:
         # Mark the new item as conflict
         item.status = PlanStatus.CONFLICT

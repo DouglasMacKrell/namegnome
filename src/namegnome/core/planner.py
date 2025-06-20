@@ -440,22 +440,28 @@ def add_plan_item_with_conflict_detection(
     and the new one are marked as `CONFLICT`.
     """
 
-    key = target_path  # exact Path for reference/debug
+    key = target_path  # Store absolute path for reference tracking
 
-    # Build a canonical, case-insensitive string key. On Windows lower-case and
-    # use forward slashes via Path.as_posix(); on POSIX keep the path as-is.
+    # Determine the path relative to the scan root directory when possible – this
+    # neutralises differences between 8.3 short paths and their long versions on
+    # Windows while still producing deterministic keys on POSIX.  Falling back
+    # to the absolute path if *target_path* sits outside the root directory.
+    root_dir = getattr(ctx.plan, "root_dir", None)
+    try:
+        relative_path = target_path.relative_to(root_dir) if root_dir else target_path
+    except Exception:  # pragma: no cover – different drive or unrelated path
+        relative_path = target_path
+
     if sys.platform.startswith("win"):
-        key_norm = target_path.as_posix().lower()
+        key_norm = relative_path.as_posix().lower()
     else:
-        key_norm = str(target_path)
+        key_norm = str(relative_path)
 
-    if key in ctx.destinations or key_norm in ctx.case_insensitive_destinations:
+    if key_norm in ctx.case_insensitive_destinations:
         # Mark conflict on the new item
         item.status = PlanStatus.CONFLICT
         # Mark conflict on the existing item for visibility
-        existing = ctx.destinations.get(key) or ctx.case_insensitive_destinations.get(
-            key_norm
-        )
+        existing = ctx.case_insensitive_destinations.get(key_norm)
         if existing:
             existing.status = PlanStatus.CONFLICT
     # Track destinations
