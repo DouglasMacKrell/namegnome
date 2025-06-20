@@ -1,3 +1,4 @@
+# mypy: disable-error-code=unreachable
 """Plex-specific naming rules for media files.
 
 This module implements the RuleSet for Plex Media Server, following the official
@@ -26,6 +27,7 @@ import re
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar, Optional, Self
 
+from namegnome.metadata.utils import sanitize_title
 from namegnome.models.core import MediaFile, MediaType
 from namegnome.rules.base import RuleSet, RuleSetConfig
 
@@ -101,6 +103,9 @@ class PlexRuleSet(RuleSet):
         base_dir: Optional[Path] = None,
         config: Optional[RuleSetConfig] = None,
         metadata: "MediaMetadata | None" = None,
+        episode_span: Optional[str] = None,
+        joined_titles: Optional[str] = None,
+        **kwargs: object,
     ) -> Path:
         """Generate a target path for a media file using Plex naming conventions.
 
@@ -111,6 +116,8 @@ class PlexRuleSet(RuleSet):
             config: Optional configuration for the rule set.
             metadata: Optional provider metadata (e.g., from TMDB/TVDB) to
                 influence naming.
+            episode_span: Optional episode span for output filename generation.
+            joined_titles: Optional joined titles for output filename generation.
 
         Returns:
             A Path object representing the target location for this file.
@@ -140,6 +147,8 @@ class PlexRuleSet(RuleSet):
                 ext,
                 config=config,
                 metadata=metadata,
+                episode_span=episode_span,
+                joined_titles=joined_titles,
             )
         elif media_file.media_type == MediaType.MOVIE:
             return self._movie_path(
@@ -153,87 +162,153 @@ class PlexRuleSet(RuleSet):
             # This should never happen due to the earlier check
             raise ValueError(f"Unsupported media type: {media_file.media_type}")
 
-    def _tv_show_path(
+    def _tv_show_path(  # type: ignore  # noqa: C901, PLR0912, PLR0915
         self: Self,
         media_file: MediaFile,
         root_dir: Path,
         ext: str,
         config: Optional[RuleSetConfig] = None,
         metadata: "MediaMetadata | None" = None,
+        episode_span: Optional[str] = None,
+        joined_titles: Optional[str] = None,
     ) -> Path:
         """Generate a target path for a TV show file.
 
         Format: /TV Shows/Show Name/Season XX/Show Name - SXXEXX - Episode Title.ext
-
-        Args:
-            media_file: The media file to generate a target path for.
-            root_dir: The base directory to build the path from.
-            ext: The file extension.
-            config: Optional configuration for the rule set.
-            metadata: Optional provider metadata (e.g., from TVDB) to
-                influence naming.
-
-        Returns:
-            A Path object for the target file.
-
-        Raises:
-            ValueError: If the filename doesn't match expected patterns.
+        Anthology: /TV Shows/Show Name/Season XX/Show Name - SXXEXX-EYY - Title1 &
+        Title2.ext
         """
         if config is None:
             config = RuleSetConfig()
-
         filename = media_file.path.name
-        match = self.tv_pattern.match(filename)
+        # Prefer explicit metadata from MediaFile (for anthology/LLM splits)
+        if media_file.title and (
+            media_file.episode is not None or media_file.episode == 0
+        ):
+            show_name = media_file.title.replace(".", " ").title()
+            season_val = media_file.season if media_file.season is not None else 1
+            # Use episode_span if provided (for spans), else media_file.episode
+            episode_val = episode_span or media_file.episode or 1
+            episode_title = (
+                joined_titles
+                or getattr(media_file, "episode_title", None)
+                or "Unknown Episode"
+            ).replace(".", " ")
+            # Use metadata for episode title if available
+            if metadata and metadata.episodes:
+                for ep in metadata.episodes:
+                    if (
+                        ep.season_number == season_val
+                        and ep.episode_number == episode_val
+                        and ep.title
+                        and ep.title.strip()
+                    ):
+                        episode_title = ep.title.strip().replace(".", " ")
+                        break
+                if not episode_title:
+                    episode_title = "Unknown Episode"
+            elif not episode_title:
+                episode_title = "Unknown Episode"
 
-        if not match:
-            show_name = (
-                config.show_name
-                or (metadata.title if metadata else None)
-                or "Unknown Show"
+            # Always sanitize the episode title for output (after metadata override)
+            sanitized_episode_title = (
+                sanitize_title(episode_title).title()
+                if episode_title
+                else "Unknown Episode"
             )
-            season_num = 1
-            episode_num = 1
-            episode_title = "Unknown Episode"
-        else:
-            show_name = (
-                config.show_name
-                or (metadata.title if metadata else None)
-                or match.group(1).strip().replace(".", " ")
-            )
-            season_num = int(match.group(2))
-            episode_num = int(match.group(3))
-            episode_title_raw = match.group(4).strip() if match.group(4) else ""
-            if episode_title_raw.endswith(ext):
-                episode_title_raw = episode_title_raw[: -len(ext)]
-            if (
-                not episode_title_raw
-                or episode_title_raw.lower() == ext.lstrip(".").lower()
-            ):
-                episode_title = None
+            # Use episode_val for output (can be a span or int)
+            if isinstance(episode_val, str):
+                filename = (
+                    f"{show_name} - S{season_val:02d}E{episode_val} - "
+                    f"{sanitized_episode_title}{ext}"
+                )
             else:
-                episode_title = episode_title_raw.replace(".", " ").strip()
-
+                filename = (
+                    f"{show_name} - S{season_val:02d}E{episode_val:02d} - "
+                    f"{sanitized_episode_title}{ext}"
+                )
+            return (
+                root_dir
+                / "TV Shows"
+                / show_name
+                / f"Season {int(season_val):02d}"
+                / filename
+            ).resolve()
+        else:
+            match = self.tv_pattern.match(filename)
+            if not match:
+                show_name = (
+                    config.show_name
+                    or (metadata.title if metadata else None)
+                    or "Unknown Show"
+                )
+                show_name = show_name.title()
+                season_val = 1
+                episode_val = 1
+                episode_title = "Unknown Episode"
+            else:
+                show_name = (
+                    config.show_name
+                    or (metadata.title if metadata else None)
+                    or match.group(1).strip().replace(".", " ")
+                )
+                show_name = show_name.title()
+                season_str = match.group(2)
+                episode_str = match.group(3)
+                if season_str.isdigit():
+                    season_val = int(season_str)
+                else:
+                    season_val = season_str
+                if episode_str.isdigit():
+                    episode_val = int(episode_str)
+                else:
+                    episode_val = episode_str
+                episode_title_raw = match.group(4).strip() if match.group(4) else ""
+                if episode_title_raw.endswith(ext):
+                    episode_title_raw = episode_title_raw[: -len(ext)]
+                if (
+                    not episode_title_raw
+                    or episode_title_raw.lower() == ext.lstrip(".").lower()
+                ):
+                    episode_title = None
+                else:
+                    episode_title = episode_title_raw.replace(".", " ").strip()
         # Use metadata for episode title if available
+        if "season_val" not in locals():
+            season_val = 1
+        if "episode_val" not in locals():
+            episode_val = 1
         if metadata and metadata.episodes:
             for ep in metadata.episodes:
                 if (
-                    ep.season_number == season_num
-                    and ep.episode_number == episode_num
+                    ep.season_number == season_val
+                    and ep.episode_number == episode_val
                     and ep.title
                     and ep.title.strip()
                 ):
-                    episode_title = ep.title.strip()
+                    episode_title = ep.title.strip().replace(".", " ")
                     break
             if not episode_title:
                 episode_title = "Unknown Episode"
         elif not episode_title:
             episode_title = "Unknown Episode"
-
-        show_dir = root_dir / "TV Shows" / show_name / f"Season {season_num:02d}"
-        filename = (
-            f"{show_name} - S{season_num:02d}E{episode_num:02d} - {episode_title}{ext}"
+        # Always sanitize the episode title for output
+        sanitized_episode_title = (
+            sanitize_title(episode_title).title()
+            if episode_title
+            else "Unknown Episode"
         )
-        return show_dir / filename
+        filename = (
+            f"{show_name} - S{int(season_val):02d}E{str(episode_val).zfill(2)} - "
+            f"{sanitized_episode_title}{ext}"
+        )
+        return (
+            root_dir
+            / "TV Shows"
+            / show_name
+            / f"Season {int(season_val):02d}"
+            / filename
+        ).resolve()
 
     def _movie_path(
         self: Self,

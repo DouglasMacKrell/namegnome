@@ -48,6 +48,12 @@ class RuleSetConfig:
     verify: bool = False
     llm_model: Optional[str] = None
     strict_directory_structure: bool = True
+    untrusted_titles: bool = (
+        False  # If true, ignore input titles and use only canonical data
+    )
+    max_duration: int | None = (
+        None  # Max allowed duration (minutes) for pairing episodes in anthology mode
+    )
 
 
 # Reason: RuleSet is an abstract base class (ABC) to enforce a consistent
@@ -74,6 +80,9 @@ class RuleSet(ABC):
         base_dir: Optional[Path] = None,
         config: Optional[RuleSetConfig] = None,
         metadata: "MediaMetadata | None" = None,
+        episode_span: str | None = None,
+        joined_titles: str | None = None,
+        **kwargs: object,
     ) -> Path:
         """Generate a target path for the given media file.
 
@@ -87,6 +96,9 @@ class RuleSet(ABC):
             config: Optional configuration for the rule set.
             metadata: Optional provider metadata (e.g., from TMDB/TVDB) to
                 influence naming.
+            episode_span: Optional episode span for the media file.
+            joined_titles: Optional joined titles for the media file.
+            **kwargs: Additional keyword arguments.
 
         Returns:
             A Path object representing the target location for this file.

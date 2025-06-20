@@ -1,195 +1,46 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[project]
+[tool.poetry]
 name = "namegnome"
-dynamic = ["version"]
-description = 'A tool to analyze, rename and reorganize media files for media servers'
-readme = "README.md"
-requires-python = ">=3.12"
+version = "0.1.0"
+description = "A tool to analyze, rename and reorganize media files for media servers"
+authors = ["DouglasMacKrell <d.mackrell@gmail.com>"]
 license = "MIT"
+readme = "README.md"
+repository = "https://github.com/DouglasMacKrell/namegnome"
 keywords = ["media", "rename", "organize", "plex", "jellyfin", "emby"]
-authors = [
-  { name = "DouglasMacKrell", email = "d.mackrell@gmail.com" },
-]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: Implementation :: CPython",
 ]
-dependencies = [
-  "click==8.1.8",
-  "httpx>=0.24.1",
-  "jinja2>=3.1.0",
-  "pydantic>=2.0.0",
-  "pydantic-settings",
-  "rich>=13.3.5",
-  "typer==0.15.3",
-  "types-requests",
-  "deptry",
-  "mypy",
-  "tomli",
-  "tomli-w",
-]
 
-[project.optional-dependencies]
-dev = [
-  "black",
-  "ruff",
-  "mypy",
-  "pytest",
-  "pytest-cov",
-  "pre-commit",
-  "pytest-asyncio",
-  "pytest-mock",
-  "respx",
-  "types-requests",
-  "types-PyYAML",
-]
+[tool.poetry.dependencies]
+python = ">=3.12,<4.0"
+click = "8.1.8"
+httpx = "0.28.1"
+jinja2 = ">=3.1.0"
+pydantic = ">=2.0.0"
+pydantic-settings = "*"
+rich = ">=13.3.5"
+typer = "0.15.3"
+types-requests = "*"
+deptry = "*"
+mypy = "*"
+tomli = "*"
+tomli-w = "*"
+python-dotenv = ">=1.0.0,<2.0.0"
+rapidfuzz = ">=3.13.0"
+respx = "0.22.0"
+nltk = "*"
 
-[project.urls]
-Documentation = "https://github.com/DouglasMacKrell/namegnome#readme"
-Issues = "https://github.com/DouglasMacKrell/namegnome/issues"
-Source = "https://github.com/DouglasMacKrell/namegnome"
-
-[project.scripts]
-namegnome = "namegnome.cli:app"
-
-[tool.hatch.version]
-path = "src/namegnome/__about__.py"
-
-[tool.hatch.envs.default]
-dependencies = [
-  "pytest",
-  "pytest-cov",
-  "pytest-mock",
-  "types-PyYAML",
-]
-[tool.hatch.envs.default.scripts]
-test = "pytest {args:tests}"
-test-cov = "pytest --cov=namegnome {args:tests} --cov-report=xml --cov-report=term"
-
-[tool.hatch.envs.lint]
-dependencies = [
-  "black>=23.1.0",
-  "ruff>=0.0.243",
-  "mypy>=1.0.0",
-]
-[tool.hatch.envs.lint.scripts]
-fmt = "black {args:.}"
-check = "black --check {args:.}"
-lint = "ruff check {args:.}"
-typing = "mypy --strict {args:src/namegnome tests}"
-all = ["fmt", "lint", "typing"]
-
-[tool.black]
-target-version = ["py312"]
-line-length = 88
-preview = true
-
-[tool.mypy]
-python_version = "3.12"
-disallow_untyped_defs = true
-warn_redundant_casts = true
-warn_unreachable = true
-warn_unused_ignores = true
-disallow_any_generics = true
-
-[[tool.mypy.overrides]]
-module = "tests.*"
-disallow_any_generics = false
-disallow_untyped_defs = false
-warn_return_any = false
-
-[tool.coverage.run]
-source_pkgs = ["namegnome", "tests"]
-branch = true
-parallel = true
-omit = [
-  "src/namegnome/__about__.py",
-]
-
-[tool.coverage.paths]
-namegnome = ["src/namegnome", "*/namegnome/src/namegnome"]
-tests = ["tests", "*/namegnome/tests"]
-
-[tool.coverage.report]
-exclude_lines = [
-  "no cov",
-  "if __name__ == .__main__.:",
-  "if TYPE_CHECKING:",
-]
-fail_under = 80
-
-[tool.ruff]
-line-length = 88
-target-version = "py312"
-exclude = ["*.sh", ".git", ".mypy_cache", ".ruff_cache", ".venv", "__pycache__", "build", "dist", "scripts/**/*"]
-
-[tool.ruff.format]
-# Use double quotes for strings
-quote-style = "double"
-# Use parentheses for line continuation
-line-ending = "auto"
-# Ensure a trailing comma in multiline sequences
-skip-magic-trailing-comma = false
-
-[tool.ruff.lint]
-select = [
-    "E",  # pycodestyle errors
-    "F",  # pyflakes
-    "W",  # pycodestyle warnings
-    "I",  # isort
-    "D",  # pydocstyle
-    "ANN",  # flake8-annotations
-    "PL",  # pylint
-    "TID",  # flake8-tidy-imports
-    "T20",  # flake8-todos
-    "C90",  # mccabe
-]
-ignore = ["D203", "D213"]  # Disable potentially conflicting rules that can cause infinite autofix loops
-
-[tool.ruff.lint.pydocstyle]
-convention = "google"
-
-[tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["PLR2004", "ANN101", "ANN401", "E501"]  # Ignore missing type annotations, Any, and long lines in tests
-"**/*.py" = ["ANN101"]  # Ignore missing self parameter annotations in all Python files
-
-[tool.ruff.lint.pylint]
-max-args = 5
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/namegnome"]
-
-[tool.hatch.build.targets.sdist]
-include = [
-  "src/namegnome/py.typed",
-]
-
-[tool.deptry]
-# No ignore_unused_dependencies or ignore_transitive_dependencies; use per_rule_ignores below.
-
-[tool.deptry.per_rule_ignores]
-DEP002 = [
-  "black",
-  "ruff",
-  "mypy",
-  "pytest",
-  "pytest-cov",
-  "pre-commit",
-  "pytest-asyncio",
-  "pytest-mock",
-  "respx",
-  "deptry",
-  "types-requests",
-  "types-PyYAML",
-  "pydantic-settings",
-  "click"
-]
-DEP003 = [
-  "namegnome",
-  "yaml"
-]
+[tool.poetry.group.dev.dependencies]
+black = "*"
+ruff = "*"
+pytest = "*"
+pytest-cov = "*"
+pre-commit = "*"
+pytest-asyncio = "*"
+pytest-mock = "*"
+respx = "*"
+types-requests = "*"
+types-PyYAML = "*"

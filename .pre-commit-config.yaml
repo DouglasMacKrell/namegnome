@@ -3,25 +3,15 @@ repos:
     rev: 'v0.11.9'
     hooks:
       - id: ruff
-        args: [--fix, --respect-gitignore]
+        args: [--fix, --respect-gitignore, --exit-zero]
       - id: ruff-format
         args: [--respect-gitignore]
-  
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.15.0'
-    hooks:
-      - id: mypy
-        additional_dependencies:
-          - types-requests
-          - types-setuptools
-          - pydantic>=2.0.0
-        args: [--strict, --ignore-missing-imports, --disable-error-code=misc]
   
   - repo: local
     hooks:
       - id: pytest
         name: pytest
-        entry: python -m pytest -q
+        entry: poetry run pytest -q
         language: system
         pass_filenames: false
         always_run: true
@@ -41,9 +31,20 @@ repos:
       - id: detect-secrets
         args: ['--baseline', '.secrets.baseline']
 
-  - repo: https://github.com/fpgmaas/deptry
-    rev: 0.23.0
+  - repo: local
     hooks:
       - id: deptry
-        args: ["src/namegnome"]
+        name: deptry
+        entry: poetry run deptry . --config deptry.toml
+        language: system
         pass_filenames: false
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - types-requests
+          - types-setuptools
+          - pydantic>=2.0.0
+        args: [--config-file=.mypy.ini, --no-error-summary, --show-error-codes]

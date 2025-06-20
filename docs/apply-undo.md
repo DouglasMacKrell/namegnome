@@ -62,14 +62,16 @@ else:
 
 ## Undo Engine
 
-The Undo engine restores all files in a plan to their original locations:
+The Undo engine restores all files in a plan to their original locations **and, as of June 2025, also removes any empty directories created by apply**:
 
 1. Loads the plan file and reverses the source/destination for each item.
 2. Prompts for confirmation (unless `--yes` is passed).
 3. Iterates over each item, calling `atomic_move` to restore the file.
-4. Logs each operation and shows a progress spinner.
-5. Handles errors (e.g., source already exists, destination missing) with
-   clear messages and does not overwrite existing files.
+4. **After all files are restored, recursively removes any empty destination directories created by apply, up to the plan root.**
+5. Logs each operation and shows a progress spinner.
+6. Handles errors (e.g., source already exists, destination missing) with clear messages and does not overwrite existing files.
+
+**This cleanup is always enabled by default, is safe, and never removes non-empty directories or the plan root.**
 
 ### Example: CLI Usage
 

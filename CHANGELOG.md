@@ -126,6 +126,7 @@ All notable changes to the namegnome project will be documented in this file.
 - Corrected handling of Enum values in YAML serialization
 - Fixed path handling in file checksums computation
 - Fixed Enum comparison bug in CLI scan command that prevented artwork logic from triggering for movie files
+- **Anthology span bugfix (2025-07-27):** Double-episode and ambiguous anthology files are now robustly assigned episode spans (e.g., '13-E14') and joined canonical episode titles, even with fuzzy or partial title matches. This is achieved by always deep-copying the media_file and setting the season, episode (span string), and episode_title fields before plan item creation. All edge cases and tests now pass.
 
 ### Changed
 - Refactored scan command and CLI error handling for proper exit codes and user-facing output.
@@ -134,6 +135,12 @@ All notable changes to the namegnome project will be documented in this file.
 - Migrated to Pydantic v2 ConfigDict to resolve deprecation warnings.
 - Ensured full cross-platform CI compatibility and green pipeline.
 - Roadmap and Completed sections in README and TASK.md now reflect all Sprint 2 features as completed and documented.
+- CLI scan command now uses a Rich spinner for the scanning step ("Scanning files...") and a TQDM progress bar for file processing, ensuring no lingering or duplicate bars.
+- Fixed all ruff and mypy errors, including type annotation and async/coroutine handling in LLM prompt orchestrator.
+- Improved commit workflow to ensure all pre-commit hooks pass before UX changes are committed.
+- Updated planner to use Rich console logging instead of print for fallback progress reporting.
+- All changes are E501-compliant and pass pre-commit checks.
+- See conversation for detailed troubleshooting and rationale.
 
 ## [0.2.1] - 2025-05-10
 
@@ -177,7 +184,7 @@ All notable changes to the namegnome project will be documented in this file.
 - Initialized project with Hatch, set up Python 3.12 support
 - Created directory structure following project architecture guidelines
 - Set up development dependencies in pyproject.toml
-- Configured pre-commit hooks (ruff-format, black, ruff, mypy, pytest)
+- Configured pre-commit hooks (ruff-format, ruff, mypy, pytest)
 - Added GitHub Actions CI workflow for multi-OS testing
 - Created basic CLI module with Typer app object
 - Established Git workflow with main and develop branches

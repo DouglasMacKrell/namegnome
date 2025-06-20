@@ -99,7 +99,7 @@ ipython_config.py
 #   This is especially recommended for binary packages to ensure reproducibility, and is more
 #   commonly ignored for libraries.
 #   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
-#poetry.lock
+poetry.lock
 
 # pdm
 #   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.
@@ -184,4 +184,23 @@ dist/          # (build output, if you compiled any MCP server code locally)
 .cursor/
 
 # Project specific
-.namegnome/ 
+.namegnome/
+
+# Ignore anthology test output logs
+anthology_test_output*.txt
+
+# Ignore debug and test output files
+files_debug_*.txt
+*_debug_*.txt
+*.log
+test_full*.log
+test_final_patch.log
+mypy*.txt
+paw_patrol_*.txt
+segment_debug_*.txt
+forced_anthology_test_output.txt
+trace_debug_test_output.txt
+
+# Poetry
+.venv/
+poetry.lock 
