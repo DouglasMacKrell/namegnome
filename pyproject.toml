@@ -44,3 +44,21 @@ pytest-mock = "*"
 respx = "*"
 types-requests = "*"
 types-PyYAML = "*"
+
+# Expose the same developer dependencies as an installable "dev" extra so
+# that installation via classic `pip install -e ".[dev]"` (used by CI)
+# pulls them in even outside of Poetry. This keeps CI lightweight without
+# requiring a Poetry runtime while ensuring the right tooling is present.
+[tool.poetry.extras]
+dev = [
+  "black",
+  "ruff",
+  "pytest",
+  "pytest-cov",
+  "pre-commit",
+  "pytest-asyncio",
+  "pytest-mock",
+  "respx",
+  "types-requests",
+  "types-PyYAML",
+]
