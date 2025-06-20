@@ -116,13 +116,21 @@ def _ensure_plan_dir() -> Path:
     # Convert to Path object for proper handling
     home_path = Path(home_dir)
 
-    # Create .namegnome/plans directory
-    plans_dir = home_path / ".namegnome" / "plans"
+    # If the resolved home directory *itself* does not exist (which can be the
+    # case on ephemeral CI runners where HOME is manually set), fall back to
+    # the system temporary directory so that we always have a writable base
+    # path.  This prevents failures like ``FileNotFoundError: /Users/runner``
+    # on Linux/macOS GitHub runners when the ``/Users`` hierarchy is absent.
+    if not home_path.exists():
+        import tempfile
 
-    # Ensure directory exists
-    if not plans_dir.exists():
-        plans_dir.parent.mkdir(exist_ok=True)
-        plans_dir.mkdir(exist_ok=True)
+        home_path = Path(tempfile.gettempdir())
+
+    # Create $HOME/.namegnome/plans directory, ensuring that all intermediate
+    # parents are created. ``parents=True`` avoids the need for separate
+    # creation of the ``.namegnome`` folder and works cross-platform.
+    plans_dir = home_path / ".namegnome" / "plans"
+    plans_dir.mkdir(parents=True, exist_ok=True)
 
     return plans_dir
 
