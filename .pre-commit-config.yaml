@@ -48,3 +48,15 @@ repos:
           - types-setuptools
           - pydantic>=2.0.0
         args: [--config-file=.mypy.ini, --no-error-summary, --show-error-codes]
+
+  # ------------------------------------------------------------------
+  # Windows-compatibility smoke-test
+  # ------------------------------------------------------------------
+  - repo: local
+    hooks:
+      - id: windows-smoke-test
+        name: "Windows smoke-test (simulate os.name='nt')"
+        entry: pytest tests/windows --quiet
+        language: system
+        types: [python]
+        stages: [push]
