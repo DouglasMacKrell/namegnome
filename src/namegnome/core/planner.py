@@ -500,9 +500,11 @@ def _mark_duplicate_destination_conflicts(plan: RenamePlan) -> None:  # noqa: D4
             rel = item.destination
 
         key_ci = rel.as_posix().lower()
-        if key_ci in seen:
-            item.status = PlanStatus.CONFLICT
-            if seen[key_ci].status != PlanStatus.CONFLICT:
-                seen[key_ci].status = PlanStatus.CONFLICT
-        else:
-            seen[key_ci] = item
+        alt_key_ci = item.destination.as_posix().lower()
+        for k in (key_ci, alt_key_ci):
+            if k in seen:
+                item.status = PlanStatus.CONFLICT
+                if seen[k].status != PlanStatus.CONFLICT:
+                    seen[k].status = PlanStatus.CONFLICT
+            else:
+                seen[k] = item

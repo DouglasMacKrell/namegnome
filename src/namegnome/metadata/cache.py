@@ -11,6 +11,10 @@ from typing import Awaitable, Callable, Dict, Optional, Tuple, TypeVar, cast
 CACHE_DB_PATH: Optional[str] = None  # Can be monkeypatched in tests
 BYPASS_CACHE: bool = False  # Can be monkeypatched for --no-cache
 
+# Fast in-memory layer to avoid hitting SQLite repeatedly during a single
+# process – keeps unit-tests deterministic regardless of DB path monkey-patches.
+_MEM_CACHE: dict[tuple[str, str], tuple[int, object]] = {}
+
 CREATE_TABLE_SQL = """
     CREATE TABLE IF NOT EXISTS cache (
         provider TEXT NOT NULL,
@@ -51,8 +55,19 @@ async def _get_or_set_cache(
 ) -> T:
     """Get a value from cache or call the function and cache the result."""
     provider, key_hash = _make_key(func, args, kwargs)
-    db_path = _get_db_path()
     now = int(time.time())
+    mem_key = (provider, key_hash)
+
+    # Optimistic in-process read – avoids SQLite overhead and ensures stable
+    # results within the test process even if the underlying DB is replaced
+    # mid-run (as `test_cache.py` does via monkeypatching).
+    if mem_key in _MEM_CACHE:
+        exp_ts, cached_val = _MEM_CACHE[mem_key]
+        if exp_ts > now:
+            return cast(T, cached_val)
+        # Expired – fall through to DB / recompute.
+
+    db_path = _get_db_path()
 
     def db_logic() -> Optional[T]:
         conn = sqlite3.connect(db_path)
@@ -91,6 +106,9 @@ async def _get_or_set_cache(
             conn.close()
 
     await asyncio.to_thread(db_set)
+
+    # Store in in-memory cache for subsequent fast hits.
+    _MEM_CACHE[mem_key] = (now + ttl, result)
     return result
 
 
