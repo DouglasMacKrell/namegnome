@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Callable, Optional
+import sys
 
 from namegnome.cli import console
 from namegnome.core.episode_parser import _extract_show_season_year
@@ -439,19 +440,25 @@ def add_plan_item_with_conflict_detection(
     and the new one are marked as `CONFLICT`.
     """
 
-    key = target_path
-    key_ci = str(target_path).lower()
+    key = target_path  # exact Path for reference/debug
 
-    if key in ctx.destinations or key_ci in ctx.case_insensitive_destinations:
+    # Build a canonical, case-insensitive string key. On Windows lower-case and
+    # use forward slashes via Path.as_posix(); on POSIX keep the path as-is.
+    if sys.platform.startswith("win"):
+        key_norm = target_path.as_posix().lower()
+    else:
+        key_norm = str(target_path)
+
+    if key in ctx.destinations or key_norm in ctx.case_insensitive_destinations:
         # Mark conflict on the new item
         item.status = PlanStatus.CONFLICT
         # Mark conflict on the existing item for visibility
         existing = ctx.destinations.get(key) or ctx.case_insensitive_destinations.get(
-            key_ci
+            key_norm
         )
         if existing:
             existing.status = PlanStatus.CONFLICT
     # Track destinations
     ctx.plan.items.append(item)
     ctx.destinations[key] = item
-    ctx.case_insensitive_destinations[key_ci] = item
+    ctx.case_insensitive_destinations[key_norm] = item
