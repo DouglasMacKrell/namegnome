@@ -107,7 +107,7 @@ DEP003 = ["requests"]
 
 # pyyaml provides "yaml" top-level; despite the module map deptry still
 # reports DEP001. Ignore it explicitly to unblock CI.
-DEP001 = ["yaml"]
+DEP001 = ["yaml", "pyyaml"]
 
 [tool.deptry.package_module_name_map]
 pyyaml = "yaml"

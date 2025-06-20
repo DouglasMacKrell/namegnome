@@ -5,10 +5,13 @@
 # Disable transitive dependency rule for now – we'll revisit later
 ignore = ["DEP003"]
 
+# Mark internal package so DEP003 ignores self-imports automatically.
+known_first_party = ["namegnome"]
+
 # Specific rule fine-tuning
 [tool.deptry.per_rule_ignores]
 # Ignore known intentional missing runtime dependency
-DEP001 = ["requests"]
+DEP001 = ["requests", "yaml", "pyyaml"]
 
 # Treat the following packages as intentionally unused (dev-only)
 DEP002 = [
@@ -30,4 +33,7 @@ DEP002 = [
 ]
 
 # Silence transitive dependency complaints for these internal modules
-DEP003 = ["namegnome", "yaml"] 
+DEP003 = ["namegnome", "yaml", "requests"]
+
+[tool.deptry.package_module_name_map]
+pyyaml = "yaml" 
