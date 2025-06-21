@@ -166,13 +166,13 @@ def _anthology_split_segments_anthology_mode(
                     config=config,
                     episode_span=episode_span,
                     joined_titles=joined_titles,
-                )
+                ).resolve()
             except TypeError:
                 dest = rule_set.target_path(
                     media_file,
                     base_dir=ctx.plan.root_dir,
                     config=config,
-                )
+                ).resolve()
 
             plan_item = RenamePlanItem(
                 source=media_file.path,
@@ -256,7 +256,7 @@ def _anthology_split_segments_anthology_mode(
                         config=config,
                         episode_span=episode_span,
                         joined_titles=joined_titles,
-                    ),
+                    ).resolve(),
                     media_file=media_file,
                     season=season,
                     episode=episode_span,
@@ -292,7 +292,7 @@ def _anthology_split_segments_anthology_mode(
                             config=config,
                             episode_span=episode_span,
                             joined_titles=joined_titles,
-                        ),
+                        ).resolve(),
                         media_file=media_file,
                         season=season,
                         episode=episode_span,
@@ -326,7 +326,7 @@ def _anthology_split_segments_anthology_mode(
                         config=config,
                         episode_span=episode_span,
                         joined_titles=joined_titles,
-                    ),
+                    ).resolve(),
                     media_file=media_file,
                     season=season,
                     episode=episode_span,
@@ -358,7 +358,7 @@ def _anthology_split_segments_anthology_mode(
                     config=config,
                     episode_span=episode_span,
                     joined_titles=joined_titles,
-                ),
+                ).resolve(),
                 media_file=media_file,
                 season=season,
                 episode=episode_span,
@@ -392,7 +392,7 @@ def _anthology_split_segments_anthology_mode(
                 config=config,
                 episode_span=episode_span,
                 joined_titles=joined_titles,
-            ),
+            ).resolve(),
             media_file=media_file,
             season=season,
             episode=episode_span,
@@ -658,13 +658,13 @@ def _anthology_split_segments_anthology_mode(
                     config=config,
                     episode_span=episode_span,
                     joined_titles=joined_titles,
-                )
+                ).resolve()
             except TypeError:
                 dest_fallback = rule_set.target_path(
                     media_file,
                     base_dir=ctx.plan.root_dir,
                     config=config,
-                )
+                ).resolve()
         else:
             dest_fallback = media_file.path
 
@@ -772,13 +772,13 @@ def _anthology_split_segments_standard_mode(
                     config=config,
                     episode_span=episode_span,
                     joined_titles=joined_titles,
-                )
+                ).resolve()
             except TypeError:
                 dest_dash = rule_set.target_path(
                     media_file,
                     base_dir=ctx.plan.root_dir,
                     config=config,
-                )
+                ).resolve()
 
             plan_item = RenamePlanItem(
                 source=media_file.path,
