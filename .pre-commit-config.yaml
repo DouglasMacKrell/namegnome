@@ -60,3 +60,9 @@ repos:
         language: system
         types: [python]
         stages: [push]
+      - id: regression-tests
+        name: "Fast regression test suite"
+        entry: pytest tests/regression --quiet
+        language: system
+        types: [python]
+        stages: [push]
