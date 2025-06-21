@@ -233,7 +233,7 @@ class PlexRuleSet(RuleSet):
                 / show_name
                 / f"Season {int(season_val):02d}"
                 / filename
-            ).resolve()
+            )
         else:
             match = self.tv_pattern.match(filename)
             if not match:
@@ -308,7 +308,7 @@ class PlexRuleSet(RuleSet):
             / show_name
             / f"Season {int(season_val):02d}"
             / filename
-        ).resolve()
+        )
 
     def _movie_path(
         self: Self,
@@ -365,4 +365,4 @@ class PlexRuleSet(RuleSet):
         else:
             movie_dir = root_dir / "Movies" / movie_name
             filename = f"{movie_name}{ext}"
-        return movie_dir / filename
+        return root_dir / "Movies" / movie_dir / filename
