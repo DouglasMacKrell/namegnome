@@ -55,7 +55,7 @@ async def _get_or_set_cache(
 ) -> T:
     """Get a value from cache or call the function and cache the result."""
     provider, key_hash = _make_key(func, args, kwargs)
-    now = int(time.time())
+    now = time.time()
     mem_key = (provider, key_hash)
 
     # Optimistic in-process read – avoids SQLite overhead and ensures stable
@@ -80,7 +80,7 @@ async def _get_or_set_cache(
             ).fetchone()
             if row:
                 json_blob, expires_ts = row
-                if expires_ts > now:
+                if float(expires_ts) >= now:
                     return cast(T, json.loads(json_blob))
             return None
         finally:
