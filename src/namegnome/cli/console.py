@@ -132,12 +132,14 @@ def create_default_progress() -> Progress:  # noqa: D401
 
     Columns:
     1. Spinner emoji column
-    2. Elapsed time
-    3. Current filename (custom column)
+    2. Task description
+    3. Elapsed time
+    4. Current filename (custom column)
     """
 
     return Progress(
         SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
         TimeElapsedColumn(),
         FilenameColumn(),
         console=rich.get_console(),
