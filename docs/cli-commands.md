@@ -248,4 +248,38 @@ namegnome llm set-default llama3:8b
 - [integration-testing.md](integration-testing.md): End-to-end test philosophy
 - [README.md](../README.md): CLI usage and quick start
 
-- When episode titles are missing, the planner uses file duration and canonical episode runtimes to assign episode spans (or singles) to files. This duration-based assignment is robust for anthology and non-anthology shows, and is attempted before manual fallback. (Sprint 2) 
+- When episode titles are missing, the planner uses file duration and canonical episode runtimes to assign episode spans (or singles) to files. This duration-based assignment is robust for anthology and non-anthology shows, and is attempted before manual fallback. (Sprint 2)
+
+## completion
+
+Generate a shell-completion script for a supported shell.
+
+### Usage
+```sh
+namegnome completion <shell>
+```
+`<shell>` must be one of `bash`, `zsh`, `fish`, or `powershell`.
+
+The script is printed to **stdout** so you can pipe it anywhere:
+```sh
+namegnome completion zsh > ~/.config/zsh/completions/_namegnome
+```
+
+### Exit Codes
+* `0` – script printed successfully.
+* `1` – unsupported shell or internal error.
+
+## init
+
+Install the completion script in an XDG-compliant location and add a `source` line to your shell's RC file (idempotent).
+
+### Usage
+```sh
+namegnome init <shell>
+```
+
+After running, reload your shell or start a new session and tab-completion will be active.
+
+### Exit Codes
+* `0` – installation successful.
+* `1` – unsupported shell or I/O error. 
