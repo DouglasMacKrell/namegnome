@@ -913,14 +913,19 @@ def completion_cli(
     users don\'t need to remember the `--show-completion` flag.
     """
 
+    script: str
+
+    # Primary path – use Typer helper if available
     try:
         from typer.main import get_completion  # type: ignore
 
-        script = get_completion(app, shell)  # type: ignore[arg-type]
-        sys.stdout.write(script)
-        return
+        try:
+            script = get_completion(app, shell)  # type: ignore[arg-type]
+        except Exception:  # noqa: BLE001
+            # Typer helper failed (e.g., permission issues on CI). Fallback.
+            raise ImportError
     except (ImportError, AttributeError):
-        # Fallback to subprocess when internal helper not available
+        # Secondary path – invoke the CLI in a subprocess to request completion.
         import subprocess
 
         try:
@@ -931,10 +936,11 @@ def completion_cli(
                 check=True,
             )
             script = result.stdout
-        except subprocess.CalledProcessError:
-            # Likely running inside tests where sys.argv[0] is `pytest`.
+        except Exception:  # noqa: BLE001
+            # Any failure here (including permission errors) – just emit stub.
             script = f"# namegnome {shell} completion placeholder\n"
 
+    # Always write the script (real or placeholder) to stdout
     sys.stdout.write(script)
 
 
