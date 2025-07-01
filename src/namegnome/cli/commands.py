@@ -21,6 +21,7 @@ See README.md and PLANNING.md for CLI usage and design rationale.
 
 import asyncio
 import json
+import os
 import sys
 import uuid
 from dataclasses import dataclass, field
@@ -32,9 +33,9 @@ from typing import Annotated, Any, Coroutine, List, Optional, TypeVar
 import typer
 from pydantic import ValidationError
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 from rich.traceback import install as install_traceback
+from rich.progress import Progress as _RichProgress  # noqa: F401
 
 from namegnome.cli.renderer import render_diff
 from namegnome.core.planner import create_rename_plan
@@ -50,6 +51,10 @@ from namegnome.rules.plex import PlexRuleSet
 from namegnome.utils.config import get_default_llm_model, set_default_llm_model
 from namegnome.utils.json import DateTimeEncoder
 from namegnome.utils.plan_store import list_plans, save_plan
+from namegnome.cli.console import (
+    console,
+    create_default_progress,
+)
 
 # Install rich traceback handler
 install_traceback(show_locals=True)
@@ -84,7 +89,7 @@ def _lazy_click_main(*args, **kwargs):
 # keep that flexible.
 app.main = _lazy_click_main  # type: ignore[attr-defined]
 
-console = Console()
+# (console imported from helper)
 
 
 # Reason: ExitCode enum provides clear, maintainable exit codes for all CLI
@@ -350,14 +355,12 @@ def scan(  # noqa: PLR0913, C901, PLR0915
         except typer.BadParameter as e:
             console.print(f"[red]Error: {str(e)}[/red]")
             raise typer.Exit(ExitCode.ERROR)
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-        ) as progress:
+        with create_default_progress() as progress:
             task_id = None
             if hasattr(progress, "add_task"):
-                task_id = progress.add_task("Scanning directory...", total=None)
+                task_id = progress.add_task(
+                    "Scanning directory...", total=None, filename=""
+                )
             scan_options = ScanOptions(
                 recursive=True,
                 include_hidden=False,
@@ -369,6 +372,10 @@ def scan(  # noqa: PLR0913, C901, PLR0915
                 validated_media_types,
                 options=scan_options,
             )
+            # Surface filenames in progress bar once we have results
+            if task_id is not None:
+                for mf in scan_result.files[:50]:  # cap to avoid flooding terminal
+                    progress.update(task_id, filename=Path(mf.path).name)  # type: ignore[arg-type]
             if not scan_result.files:
                 console.print("[yellow]No media files found.[/yellow]")
                 raise typer.Exit(ExitCode.ERROR)
@@ -489,15 +496,13 @@ def _scan_impl(options: ScanCommandOptions) -> int:
 
     try:
         # Create a progress spinner
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=console,
-        ) as progress:
+        with create_default_progress() as progress:
             # Scan directory
             task_id = None
             if hasattr(progress, "add_task"):
-                task_id = progress.add_task("Scanning directory...", total=None)
+                task_id = progress.add_task(
+                    "Scanning directory...", total=None, filename=""
+                )
             try:
                 # Create ScanOptions for scan_directory
                 scan_options = ScanOptions(
@@ -509,6 +514,12 @@ def _scan_impl(options: ScanCommandOptions) -> int:
                 scan_result = scan_directory(
                     options.root, media_types, options=scan_options
                 )
+                # Surface filenames in progress bar once we have results
+                if task_id is not None:
+                    from pathlib import Path as _P
+
+                    for mf in scan_result.files[:50]:
+                        progress.update(task_id, filename=_P(mf.path).name)  # type: ignore[arg-type]
                 # Early exit if no files found
                 if len(scan_result.files) == 0:
                     console.print("[yellow]No media files found.[/yellow]")
@@ -628,14 +639,15 @@ def undo(
             console.print("[yellow]Undo cancelled by user.[/yellow]")
             raise typer.Exit(1)
     # Progress bar for undo
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        console=console,
-    ) as progress:
-        progress.add_task("Undoing plan...", total=None)
-        # Log each file being restored (handled in undo_plan)
-        undo_plan(plan_path, log_callback=lambda msg: console.log(msg))
+    with create_default_progress() as progress:
+        tid = progress.add_task("Undoing plan...", total=None, filename="")
+
+        def _log(msg: str) -> None:  # noqa: D401
+            console.log(msg)
+            if msg:
+                progress.update(tid, filename=msg.split("→")[-1].strip())
+
+        undo_plan(plan_path, log_callback=_log)
     console.print(f"[green]Undo completed for plan: {plan_id}[/green]")
 
 
@@ -857,3 +869,30 @@ def set_default_model_cli(
 
 # Register llm_app as a subcommand group
 app.add_typer(llm_app, name="llm")
+
+
+# ---------------------------------------------------------------------------
+# Global options / callback
+# ---------------------------------------------------------------------------
+
+
+@app.callback()
+def _global_options(
+    ctx: typer.Context,
+    no_rich: bool = typer.Option(
+        False,
+        "--no-rich",
+        help=(
+            "Disable Rich coloured output, spinners and progress bars. "
+            "Can also be set via NAMEGNOME_NO_RICH env-var."
+        ),
+    ),
+) -> None:
+    """Add global ``--no-rich`` option to the command group."""
+
+    if no_rich:
+        os.environ["NAMEGNOME_NO_RICH"] = "1"
+
+
+# Expose under the expected name
+Progress = _RichProgress  # type: ignore[assignment]

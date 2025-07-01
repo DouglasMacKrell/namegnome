@@ -34,6 +34,7 @@ namegnome scan <root> [OPTIONS]
 - `--verify`: Compute and store SHA-256 checksums for file integrity
 - `--json`: Output results as JSON
 - `--no-color`: Disable colored output (for logs/CI)
+- `--no-rich`: Disable Rich spinners/progress bars and pretty tracebacks (falls back to plain `print`). Ideal for piping output or minimal terminals.
 - `--llm-model <model>`: Use a specific LLM for fuzzy matching
 - `--strict-directory-structure/--no-strict-directory-structure`: Enforce or
   relax platform directory structure (default: strict)
@@ -111,6 +112,7 @@ namegnome undo <plan-id> [OPTIONS]
 - `--no-progress`: Disable progress bar
 - `--json`: Output results as JSON
 - `--no-color`: Disable colored output
+- `--no-rich`: Disable Rich spinners/progress bars (falls back to plain `print`)
 
 > **Note:** After restoring files, undo will automatically remove any empty directories created by apply, restoring your library's directory structure to its pre-apply state. This is always enabled and safe.
 
