@@ -16,6 +16,7 @@ CASES: dict[str, tuple[list[str], list[str]]] = {
             "version",
             "config",
             "llm",
+            "--no-rich",
         ],
     ),
     "scan": (

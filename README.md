@@ -44,6 +44,7 @@ A command-line tool for organizing and renaming media files according to platfor
 - **Anthology episode splitting**: Robust, user-driven LLM-based splitting of multi-episode TV files. Supports S01E01E02, E01-E02, 1x01-1x02, and real-world anthology filenames. Only triggers with --anthology flag.
 - **LLM confidence/manual flag**: Prevents low-confidence AI guesses from auto-renaming. Items below threshold are flagged manual, highlighted in bright red, and require user review. CLI exits with code 2 if manual items are present.
 - **LLM model selection**: Supports Llama 3 8B (Meta) as default, Mistral 7B as lightweight fallback. See [LLM Features & Usage Guide](docs/llm.md) for install, usage, and troubleshooting.
+- **Rich CLI UX**: Colorful tables, progress bars, and spinners powered by Rich (disable with `--no-rich` or `NAMEGNOME_NO_RICH`)
 
 ## Project Structure
 
@@ -183,7 +184,7 @@ To get started:
 - **Platform presets**: Out-of-the-box support for Plex, Jellyfin, Emby, Navidrome, and more
 - **Fuzzy LLM assist**: Handles anthology episodes, ambiguous titles, and edge cases using local LLMs (Ollama)
 - **Safe by default**: Dry-run planning, conflict detection, and one-command rollback
-- **Rich CLI UX**: Colorful tables, progress bars, and spinners powered by Rich
+- **Rich CLI UX**: Colorful tables, progress bars, and spinners powered by Rich (disable with `--no-rich` or `NAMEGNOME_NO_RICH`)
 - **Extensible**: Pluggable metadata providers and naming rules
 - **Cross-platform**: Works on Windows, macOS, and Linux
 

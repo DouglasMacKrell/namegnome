@@ -38,13 +38,31 @@ F = TypeVar("F", bound=Callable[..., Any])
 
 
 @app.callback()
-def callback() -> None:
-    """NameGnome - Media File Organizer and Renamer.
+def callback(
+    ctx: typer.Context,  # noqa: D401 – Typer requires ctx param first
+    no_rich: bool = typer.Option(
+        False,
+        "--no-rich",
+        help=(
+            "Disable Rich coloured output, spinners and progress bars. "
+            "Can also be set with the NAMEGNOME_NO_RICH environment variable."
+        ),
+    ),
+) -> None:
+    """Top-level CLI callback adding global options.
 
-    Analyzes, renames and reorganizes media files for Plex, Jellyfin, Emby and other
-    media servers.
+    The *--no-rich* flag allows users to disable Rich output entirely. We
+    implement it by setting the ``NAMEGNOME_NO_RICH`` environment variable so
+    that downstream utilities (e.g. :pyclass:`~namegnome.cli.console.ConsoleManager`)
+    can respond uniformly whether the flag is passed or the variable is set
+    externally.
     """
-    pass
+
+    if no_rich:
+        # Defer import to avoid cycles.
+        import os
+
+        os.environ["NAMEGNOME_NO_RICH"] = "1"
 
 
 @app.command()
