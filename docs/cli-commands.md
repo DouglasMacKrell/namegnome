@@ -200,17 +200,36 @@ namegnome version
 
 ## config
 
-Inspect resolved configuration settings (API keys, cache paths, etc.).
+Inspect, document, and manage NameGnome configuration settings.
 
-### Usage
+NameGnome supports **four** configuration layers, in order of *descending* priority:
+
+1. **Command-line flags** (`--no-rich`, `--llm-model`, etc.)
+2. **Environment variables** (prefixed with `NAMEGNOME_`, e.g. `NAMEGNOME_LLM_DEFAULT_MODEL`)
+3. **TOML config file** (`$XDG_CONFIG_HOME/namegnome/config.toml` or `~/.config/namegnome/config.toml`)
+4. **Built-in defaults** (hard-coded sane values)
+
+The command group exposes two sub-commands:
+
+### show
+
+Pretty-print the *resolved* settings after the precedence chain above has been applied.
 
 ```sh
-namegnome config --show
+namegnome config show
 ```
 
-### Options
+### docs
 
-- `--show`: Pretty-print all resolved settings.
+Render a Rich table that lists every known setting, the matching environment variable name, the default value, and a short description.
+
+```sh
+namegnome config docs
+```
+
+This is useful for discovering new flags/env-vars and generating up-to-date documentation in CI.
+
+> Tip: Pipe the output without Rich formatting for scripting by adding `--no-rich` (or exporting `NAMEGNOME_NO_RICH=1`).
 
 ## llm
 

@@ -386,7 +386,7 @@ def test_config_show_command(monkeypatch: MonkeyPatch) -> None:
     # Optional keys
     monkeypatch.delenv("TVDB_API_KEY", raising=False)
     monkeypatch.delenv("FANARTTV_API_KEY", raising=False)
-    result = runner.invoke(app, ["config", "--show"])
+    result = runner.invoke(app, ["config", "show"])
     assert result.exit_code == 0
     assert "TMDB_API_KEY" in result.output
     assert "dumm..." in result.output  # Masked value
@@ -394,7 +394,7 @@ def test_config_show_command(monkeypatch: MonkeyPatch) -> None:
     assert "dumm..." in result.output  # Masked value
     # Now unset a required key and check for error
     monkeypatch.delenv("TMDB_API_KEY", raising=False)
-    result2 = runner.invoke(app, ["config", "--show"])
+    result2 = runner.invoke(app, ["config", "show"])
     assert result2.exit_code == 1
     assert "Missing required API key: TMDB_API_KEY" in result2.output
     assert "See documentation" in result2.output
@@ -456,9 +456,10 @@ def test_scan_command_uses_default_llm_model(monkeypatch: Any, tmp_path: Path) -
     from namegnome.cli.commands import app
 
     runner = CliRunner()
-    # Patch get_default_llm_model to return the current default
+    # Ensure resolve_setting returns our expected default when CLI env/config not set
     monkeypatch.setattr(
-        "namegnome.utils.config.get_default_llm_model", lambda: "llama3:8b"
+        "namegnome.utils.config.resolve_setting",
+        lambda key, default, cli_value=None: "llama3:8b",
     )
     # Patch scan_directory and create_rename_plan to check llm_model in config
     with (

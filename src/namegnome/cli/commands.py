@@ -48,13 +48,20 @@ from namegnome.models.core import MediaType, ScanResult
 from namegnome.models.scan import ScanOptions as ModelScanOptions
 from namegnome.rules.base import RuleSetConfig
 from namegnome.rules.plex import PlexRuleSet
-from namegnome.utils.config import get_default_llm_model, set_default_llm_model
+from namegnome.utils.config import (
+    get_default_llm_model,
+    set_default_llm_model,
+    resolve_setting,
+)
 from namegnome.utils.json import DateTimeEncoder
 from namegnome.utils.plan_store import list_plans, save_plan
 from namegnome.cli.console import (
     console,
     create_default_progress,
 )
+
+# Visual helpers
+from namegnome.cli.utils.ascii_art import print_gnome_status
 
 # Install rich traceback handler
 install_traceback(show_locals=True)
@@ -338,9 +345,40 @@ def scan(  # noqa: PLR0913, C901, PLR0915
         import namegnome.metadata.cache as cache_mod
 
         cache_mod.BYPASS_CACHE = True
-    # Use default LLM model from config if not specified
-    if llm_model is None:
-        llm_model = get_default_llm_model()
+    # Resolve frequently used flags via config precedence --------------------------------
+
+    llm_model = resolve_setting(
+        "llm.default_model",
+        default="llama3:8b",
+        cli_value=llm_model,
+    )
+
+    verify = resolve_setting(
+        "scan.verify_hash",
+        default=False,
+        cli_value=verify if verify else None,
+    )
+
+    strict_directory_structure = resolve_setting(
+        "scan.strict_directory_structure",
+        default=True,
+        cli_value=None
+        if strict_directory_structure is True
+        else strict_directory_structure,
+    )
+
+    untrusted_titles = resolve_setting(
+        "tv.untrusted_titles",
+        default=False,
+        cli_value=untrusted_titles if untrusted_titles else None,
+    )
+
+    max_duration = resolve_setting(
+        "tv.max_duration",
+        default=None,
+        cli_value=max_duration,
+    )
+
     media_type_list = list(media_type)
     if not media_type_list:
         console.print("[red]At least one media type must be specified.[/red]")
@@ -455,11 +493,17 @@ def scan(  # noqa: PLR0913, C901, PLR0915
             if not stub_path.exists():
                 stub_path.write_bytes(b"FAKEIMAGE")
             raise typer.Exit(ExitCode.SUCCESS)
+
+        # Successful completion – celebrate 🎉
+        if not no_color:
+            print_gnome_status("happy", console=console)
     except typer.Exit:
         raise
     except Exception as e:
         console.print(f"[red]Error: An unexpected error occurred: {str(e)}[/red]")
         console.print_exception()
+        if not no_color:
+            print_gnome_status("error", console=console)
         # In test mode with --artwork we prefer a graceful exit rather than failing
         if artwork:
             # Ensure stub poster exists for unit-tests, even when the exception
@@ -650,6 +694,9 @@ def undo(
         undo_plan(plan_path, log_callback=_log)
     console.print(f"[green]Undo completed for plan: {plan_id}[/green]")
 
+    # Success path
+    print_gnome_status("happy", console=console)
+
 
 def _print_settings(settings: Settings) -> None:
     """Print all settings, masking secrets for safety."""
@@ -684,25 +731,60 @@ def _handle_settings_error(e: Exception) -> None:
         console.print(f"[red]{e}[/red]")
 
 
-@app.command()
-def config(
-    show: bool = typer.Option(
-        False,
-        "--show",
-        help="Show all resolved configuration settings (API keys, etc.)",
-    ),
-) -> None:
-    """Show or manage NameGnome configuration (API keys, .env, etc.)."""
-    if show:
-        try:
-            # Instantiation relies on environment variables; mypy complains about
-            # required field *TMDB_API_KEY*, so we silence the static checker only.
-            settings = Settings()  # type: ignore[call-arg]
-            settings.require_keys()
-            _print_settings(settings)
-        except (MissingAPIKeyError, ValidationError) as e:
-            _handle_settings_error(e)
-            raise typer.Exit(1)
+# ---------------------------------------------------------------------------
+# Config sub-commands
+# ---------------------------------------------------------------------------
+
+
+config_app = typer.Typer(help="Configuration management commands.")
+
+
+# Register as top-level group
+app.add_typer(config_app, name="config")
+
+
+@config_app.command("show")
+def config_show() -> None:
+    """Show all resolved configuration settings including API keys."""
+
+    try:
+        # Instantiation relies on env vars; mypy reports required fields.
+        settings = Settings()  # type: ignore[call-arg]
+        settings.require_keys()
+        _print_settings(settings)
+    except (MissingAPIKeyError, ValidationError) as e:
+        _handle_settings_error(e)
+        raise typer.Exit(1)
+
+
+# Mapping of known settings → default value (for docs command)
+_KNOWN_SETTINGS: dict[str, Any] = {
+    "llm.default_model": get_default_llm_model(),
+    "ui.no_rich": False,
+    "scan.verify_hash": False,
+    "scan.strict_directory_structure": True,
+    "tv.untrusted_titles": False,
+    "tv.max_duration": None,
+    # Additional settings can be appended here as we implement parity.
+}
+
+
+@config_app.command("docs")
+def config_docs() -> None:
+    """Render a table of configuration keys, corresponding env-vars, and defaults."""
+
+    table = Table(title="Configuration Settings")
+    table.add_column("Setting", style="cyan")
+    table.add_column("Environment Variable", style="magenta")
+    table.add_column("Default")
+
+    from namegnome.utils.config import _make_env_var_name  # lazy import
+
+    for key, default in _KNOWN_SETTINGS.items():
+        env_var = _make_env_var_name(key)
+        table.add_row(key, env_var, str(default))
+
+    console.print(table)
 
 
 def main() -> None:
@@ -867,7 +949,7 @@ def set_default_model_cli(
     console.print(f"[green]Default LLM model set to:[/green] [bold]{model}[/bold]")
 
 
-# Register llm_app as a subcommand group
+# Register the LLM subcommand group
 app.add_typer(llm_app, name="llm")
 
 
@@ -890,7 +972,14 @@ def _global_options(
 ) -> None:
     """Add global ``--no-rich`` option to the command group."""
 
-    if no_rich:
+    # Determine final value respecting env/config precedence.
+    final_no_rich = resolve_setting(
+        "ui.no_rich",
+        default=False,
+        cli_value=no_rich if no_rich else None,
+    )
+
+    if final_no_rich:
         os.environ["NAMEGNOME_NO_RICH"] = "1"
 
 
