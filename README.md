@@ -161,6 +161,10 @@ pipx install namegnome
 ### Verify installation
 ```bash
 namegnome --help
+# Enable tab-completion (bash example)
+namegnome init bash
+# or just print the script:
+namegnome completion bash > ~/namegnome.bash-completion
 ```
 
 ### Provider API Key Setup
