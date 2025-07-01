@@ -182,6 +182,45 @@ To get started:
 - If a key is missing, only the related feature will be skipped (e.g., no artwork if `FANARTTV_API_KEY` is missing).
 - Never commit your real `.env` file or API keys to version control.
 
+### Configuration & Settings
+
+NameGnome reads configuration from **four** layers, in this exact order of precedence (highest first):
+
+1. **Command-line flags** – e.g. `--llm-model`, `--no-rich`, `--verify`.
+2. **Environment variables** – each setting maps to a `NAMEGNOME_*` env-var (e.g. `NAMEGNOME_LLM_DEFAULT_MODEL`).
+3. **User config file** – `${XDG_CONFIG_HOME:-~/.config}/namegnome/config.toml`.
+4. **Built-in defaults** – sane values baked into the codebase.
+
+You can inspect the final resolved values with:
+
+```bash
+namegnome config show
+```
+
+To see every supported setting, its env-var counterpart, default value, and description, run:
+
+```bash
+namegnome config docs
+```
+
+> Tip: Disable Rich formatting for scripting/CI by adding `--no-rich` or exporting `NAMEGNOME_NO_RICH=1`.
+
+### Example `config.toml`
+
+```toml
+[llm]
+default_model = "codellama:34b"
+
+[ui]
+no_rich = true  # disable spinners/progress bars globally
+
+[scan]
+verify_hash = true  # always compute SHA-256 checksums during scan
+
+[tv]
+max_duration = 60  # anthology pairing threshold (minutes)
+```
+
 ## Project Highlights
 
 - **Zero-click happy-path**: Scan, preview, and rename in one command
