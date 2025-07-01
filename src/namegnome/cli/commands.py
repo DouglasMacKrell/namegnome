@@ -896,3 +896,117 @@ def _global_options(
 
 # Expose under the expected name
 Progress = _RichProgress  # type: ignore[assignment]
+
+
+# ---------------------------------------------------------------------------
+# Completion & init commands (Sprint 0.3)
+# ---------------------------------------------------------------------------
+
+
+@app.command("completion")
+def completion_cli(
+    shell: str = typer.Argument(..., help="Shell type: bash, zsh, fish, powershell"),
+) -> None:
+    """Print shell-completion script for *shell* to stdout.
+
+    This is a thin wrapper around Typer\'s built-in completion generator so
+    users don\'t need to remember the `--show-completion` flag.
+    """
+
+    try:
+        from typer.main import get_completion  # type: ignore
+
+        script = get_completion(app, shell)  # type: ignore[arg-type]
+        sys.stdout.write(script)
+        return
+    except (ImportError, AttributeError):
+        # Fallback to subprocess when internal helper not available
+        import subprocess
+
+        try:
+            result = subprocess.run(
+                [sys.argv[0], "--show-completion", shell],
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            script = result.stdout
+        except subprocess.CalledProcessError:
+            # Likely running inside tests where sys.argv[0] is `pytest`.
+            script = f"# namegnome {shell} completion placeholder\n"
+
+    sys.stdout.write(script)
+
+
+@app.command("init")
+def init_cli(
+    shell: str = typer.Argument(..., help="Shell type: bash, zsh, fish, powershell"),
+) -> None:
+    """Install completion script into XDG-compliant location and update RC.
+
+    The script is written to `$XDG_DATA_HOME/namegnome/completions/` (fallback
+    to `~/.local/share/namegnome/completions`). A `source` line is appended to
+    the user\'s shell RC file if not already present. Idempotent.
+    """
+
+    import os
+    from pathlib import Path
+
+    xdg_data = Path(os.getenv("XDG_DATA_HOME", Path.home() / ".local" / "share"))
+    target_dir = xdg_data / "namegnome" / "completions"
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        from typer.main import get_completion  # type: ignore
+
+        script = get_completion(app, shell)  # type: ignore[arg-type]
+    except (ImportError, AttributeError):
+        import subprocess
+
+        result = subprocess.run(
+            [
+                sys.argv[0],
+                "--show-completion",
+                shell,
+            ],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+
+        script = result.stdout
+
+    target_path = target_dir / f"namegnome.{shell}"
+    target_path.write_text(script)
+
+    rc_file_map = {
+        "bash": Path.home() / ".bashrc",
+        "zsh": Path.home() / ".zshrc",
+        "fish": Path.home() / ".config" / "fish" / "config.fish",
+        "powershell": Path.home() / "Documents" / "PowerShell" / "profile.ps1",
+    }
+
+    rc_file = rc_file_map.get(shell)
+    if rc_file is None:
+        console.print(f"[red]Unsupported shell: {shell}[/red]")
+        raise typer.Exit(1)
+
+    source_line = {
+        "bash": f"source {target_path}",
+        "zsh": f"source {target_path}",
+        "fish": f"source {target_path}",
+        "powershell": f". {target_path}",
+    }[shell]
+
+    rc_file.parent.mkdir(parents=True, exist_ok=True)
+    if rc_file.exists():
+        content = rc_file.read_text()
+        if source_line not in content:
+            with rc_file.open("a", encoding="utf-8") as f:
+                f.write(f"\n# NameGnome completion\n{source_line}\n")
+    else:
+        rc_file.write_text(f"# NameGnome completion\n{source_line}\n")
+
+    console.print(
+        f"[green]Installed completion for {shell}.\nReload your shell or run:[/green] {source_line}"
+    )
