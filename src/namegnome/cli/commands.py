@@ -372,6 +372,10 @@ def scan(  # noqa: PLR0913, C901, PLR0915
                 validated_media_types,
                 options=scan_options,
             )
+            # Surface filenames in progress bar once we have results
+            if task_id is not None:
+                for mf in scan_result.files[:50]:  # cap to avoid flooding terminal
+                    progress.update(task_id, filename=Path(mf.path).name)  # type: ignore[arg-type]
             if not scan_result.files:
                 console.print("[yellow]No media files found.[/yellow]")
                 raise typer.Exit(ExitCode.ERROR)
@@ -510,6 +514,12 @@ def _scan_impl(options: ScanCommandOptions) -> int:
                 scan_result = scan_directory(
                     options.root, media_types, options=scan_options
                 )
+                # Surface filenames in progress bar once we have results
+                if task_id is not None:
+                    from pathlib import Path as _P
+
+                    for mf in scan_result.files[:50]:
+                        progress.update(task_id, filename=_P(mf.path).name)  # type: ignore[arg-type]
                 # Early exit if no files found
                 if len(scan_result.files) == 0:
                     console.print("[yellow]No media files found.[/yellow]")
@@ -630,9 +640,14 @@ def undo(
             raise typer.Exit(1)
     # Progress bar for undo
     with create_default_progress() as progress:
-        progress.add_task("Undoing plan...", total=None, filename="")
-        # Log each file being restored (handled in undo_plan)
-        undo_plan(plan_path, log_callback=lambda msg: console.log(msg))
+        tid = progress.add_task("Undoing plan...", total=None, filename="")
+
+        def _log(msg: str) -> None:  # noqa: D401
+            console.log(msg)
+            if msg:
+                progress.update(tid, filename=msg.split("→")[-1].strip())
+
+        undo_plan(plan_path, log_callback=_log)
     console.print(f"[green]Undo completed for plan: {plan_id}[/green]")
 
 
