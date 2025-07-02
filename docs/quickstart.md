@@ -96,7 +96,6 @@ This will restore your files to their original names.
 
 - See the [LLM Features & Usage Guide](llm.md) for AI features
 - See the [Provider Setup & API Keys](providers.md) doc for metadata/artwork
-- See the [Known Issues & Troubleshooting](KNOWN_ISSUES.md) doc
 - Or run:
   ```sh
   namegnome --help
