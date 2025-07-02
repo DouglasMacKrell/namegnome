@@ -19,18 +19,24 @@ interactively or in CI.
 ## Rich Integration
 
 NameGnome uses the [Rich](https://rich.readthedocs.io/) library for:
-- Colorful tables and status spinners
-- Progress bars with percentage, ETA, and per-file status
+- Colorful tables, panels and status spinners
+- Progress bars with percentage, ETA, and current filename
 - Pretty tracebacks for error reporting
 
 All user-visible output is routed through `rich.console.Console`.
 
-## Progress Bars & Spinners
+## Progress Bars, Spinners & Status Gnomes
 
-- **Progress bars** are shown during long-running operations (apply, undo,
-  scan) with per-file updates.
-- **Spinners** indicate status during network or LLM requests.
-- **No-color mode** (`--no-color`) disables ANSI codes for logs/CI.
+NameGnome surfaces three kinds of live feedback:
+
+1. **Progress bars** – multi-column (`spinner │ description │ % │ elapsed │ filename`).
+2. **Spinners** – transient status (network calls, metadata fetch, LLM).
+3. **Status-gnome panels** – big, emoji panels that mark the lifecycle:
+   * *Working* (yellow) – operation in progress.
+   * *Happy* (green) – success.
+   * *Error* (red) – an exception occurred.
+
+`--no-rich` or the env-var `NAMEGNOME_NO_RICH=1` disables all ANSI output for CI/pipes.
 
 ### Example: CLI Usage
 
@@ -46,14 +52,14 @@ namegnome undo <plan-id>
 
 ```python
 from rich.console import Console
-from rich.progress import Progress
+from namegnome.cli.console import create_default_progress
 
 console = Console()
-with Progress() as progress:
+with create_default_progress() as progress:
     task = progress.add_task("Moving files...", total=10)
     for i in range(10):
         # ... move file ...
-        progress.update(task, advance=1)
+        progress.update(task, advance=1, filename=f"file_{i}.mkv")
 console.log("All files moved!")
 ```
 
