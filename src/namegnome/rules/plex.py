@@ -182,9 +182,10 @@ class PlexRuleSet(RuleSet):
             config = RuleSetConfig()
         filename = media_file.path.name
         # Prefer explicit metadata from MediaFile (for anthology/LLM splits)
-        if media_file.title and (
-            media_file.episode is not None or media_file.episode == 0
-        ):
+        # Reason: episode 0 is no longer considered valid after stricter
+        # normalisation (S00E00 rows are dropped).  We therefore only accept
+        # real episode numbers ≥1.
+        if media_file.title and media_file.episode is not None:
             show_name = media_file.title.replace(".", " ").title()
             season_val = media_file.season if media_file.season is not None else 1
             # Use episode_span if provided (for spans), else media_file.episode
