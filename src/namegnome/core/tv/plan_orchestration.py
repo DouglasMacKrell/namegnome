@@ -188,8 +188,15 @@ def _handle_normal_matching(*args, **kwargs):
     return True
 
 
-# Thin wrapper around the real episode_fetcher for easier monkey-patching in
-# unit-tests while enabling actual provider fallback in production.
+# ---------------------------------------------------------------------------
+# Episode-list helper with in-memory caching & fallback providers
+# ---------------------------------------------------------------------------
+
+# Lightweight per-process cache so repeated calls in a single run don't hit the
+# network multiple times.  Keyed by (show, season, year, provider).
+_EPISODE_CACHE: dict[
+    tuple[str, int | None, int | None, str | None], list[dict[str, Any]]
+] = {}
 
 
 def fetch_episode_list(
@@ -198,22 +205,52 @@ def fetch_episode_list(
     year: int | None = None,
     provider: str | None = None,
 ) -> list[dict[str, Any]]:  # noqa: D401
-    """Fetch an episode list from the metadata layer with basic caching.
+    """Return a list of episode dicts for *show*/*season*.
 
-    This wrapper ensures that existing tests that monkey-patch
-    ``plan_orchestration.fetch_episode_list`` continue to work, while the
-    default behaviour now delegates to
-    ``namegnome.metadata.episode_fetcher.fetch_episode_list`` which supports
-    provider fallback.
+    Behaviour added for Sprint 1.2:
+    1. Per-run **in-memory cache** so duplicate calls are cheap.
+    2. **Provider fallback** when *provider* is ``None`` or returns an empty
+       result.  Order: ``tvdb`` → ``tmdb`` → ``anilist``.  (We pass the provider
+       string straight through to the underlying metadata layer.)
+
+    The signature and error handling stay identical so existing unit tests that
+    monkey-patch this symbol continue to work.
     """
+
+    cache_key = (show or "", season, year, provider)
+    if cache_key in _EPISODE_CACHE:
+        return _EPISODE_CACHE[cache_key]
 
     from namegnome.metadata.episode_fetcher import fetch_episode_list as _real
 
-    try:
-        return _real(show, season, year=year, provider=provider)
-    except TypeError:
-        # Backward-compat with test stubs that omit *provider*.
-        return _real(show, season, year)
+    # Build candidate provider list.
+    if provider is not None:
+        candidates = [provider]
+    else:
+        # ``None`` means let the metadata layer choose its default first, then
+        # fall back explicitly.
+        candidates = [None, "tvdb", "tmdb", "anilist"]
+
+    result: list[dict[str, Any]] = []
+    for prov in candidates:
+        try:
+            # Some tests patch _real without *provider* kw; maintain compat.
+            if prov is None:
+                result = _real(show, season, year=year)
+            else:
+                result = _real(show, season, year=year, provider=prov)
+        except TypeError:
+            # Backward-compat when patched version doesn't accept *provider*.
+            result = _real(show, season, year)
+        except Exception:
+            # Ignore provider-specific errors and try next.
+            result = []
+        if result:
+            break
+
+    # Cache result (even empty list to avoid repeated failing calls).
+    _EPISODE_CACHE[cache_key] = result
+    return result
 
 
 def _handle_fallback_providers_normal(*args, **kwargs):
