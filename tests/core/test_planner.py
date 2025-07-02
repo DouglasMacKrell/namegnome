@@ -1009,6 +1009,17 @@ class TestSavePlan:
         """Test normalization of an episode list."""
         assert planner.normalize_episode_list([{"title": "A"}, {"title": "B"}]) == []
 
+    @pytest.mark.parametrize(
+        "raw,expected",
+        [
+            ([{"season": "00", "episode": "00", "title": "Pilot"}], []),
+            ([{"season": -1, "episode": 2, "title": "Bad"}], []),
+            ([{"season": 1, "episode": "05a", "title": "Weird"}], []),
+        ],
+    )
+    def test_normalize_episode_list_edge_cases(self, raw, expected):  # noqa: D401
+        assert normalize_episode_list(raw) == expected
+
 
 class TestTVPlannerHelpers:
     """Unit tests for pure helpers in tv_planner.py (no logic changes)."""
