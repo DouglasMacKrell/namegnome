@@ -6,100 +6,119 @@ files quickly and safely.
 
 ---
 
-## 1. What is NameGnome?
+## 0. TL;DR (60-second setup)
 
-NameGnome is a tool that helps you organize and rename your TV shows, movies,
-and music files so they work perfectly with media servers like Plex or Jellyfin.
-It can:
-- Scan your folders for media files
-- Suggest new names and folders
-- Help you fix tricky cases with AI (optional)
-- Let you undo changes if needed
-
----
-
-## 2. Prerequisites
-
-- **Python 3.12 or higher**
-- **pipx** (recommended for easy CLI installs)
-
-To check if you have Python:
-```sh
-python3 --version
-```
-If you see a version like `Python 3.12.3`, you're good!
-
-To install pipx (if you don't have it):
-```sh
-python3 -m pip install --user pipx
-python3 -m pipx ensurepath
-```
-
----
-
-## 3. Install NameGnome
-
-With pipx:
-```sh
+```bash
+# 1. Install (isolated, recommended)
 pipx install namegnome
-```
-Or with pip:
-```sh
-pip install namegnome
-```
 
-Check your install:
-```sh
-namegnome --help
-```
-You should see a list of commands.
+# 2. Scan your TV folder (dry-run, nothing changes!)
+namegnome scan ~/Media/TV --media-type tv
 
----
+# 3. Review the plan ID printed at the end – when happy:
+namegnome apply <plan-id>
 
-## 4. Scan Your Media Folder
-
-To preview how NameGnome would organize your files, you must specify at least one media type (tv, movie, or music):
-```sh
-namegnome scan /path/to/your/media --media-type tv
-```
-Replace `/path/to/your/media` with the folder where your files are. You can specify multiple types:
-```sh
-namegnome scan /path/to/your/media --media-type tv --media-type movie
-```
-**Note:** The --media-type option is required. NameGnome will not scan unless you specify at least one media type.
-
----
-
-## 5. Preview and Apply Renames
-
-- **Preview:** The scan will show a table of old and new names. No files are
-  changed yet!
-- **Apply:** To actually rename files, use:
-  ```sh
-  namegnome apply <plan-id>
-  ```
-  The `<plan-id>` is shown after a scan.
-
----
-
-## 6. Undo Changes
-
-If you want to undo a rename:
-```sh
+# 4. Need to revert?
 namegnome undo <plan-id>
 ```
-This will restore your files to their original names.
 
 ---
 
-## 7. Where to Get Help
+## 1. What is NameGnome?
 
-- See the [LLM Features & Usage Guide](llm.md) for AI features
-- See the [Provider Setup & API Keys](providers.md) doc for metadata/artwork
-- Or run:
-  ```sh
-  namegnome --help
-  ```
+NameGnome is a **safety-first** command-line tool that organises and renames
+TV, movie and music files so they play nicely with media servers such as **Plex**
+or **Jellyfin**. Key guarantees:
+
+* Scan is read-only – it never touches your files.
+* Apply is transactional – any error triggers an automatic rollback.
+* Undo restores the original state at any time.
+
+---
+
+## 2. Requirements
+
+* **Python 3.12+**
+* macOS, Linux or Windows
+* Optional provider API keys (TMDB, TVDB…) – see `docs/providers.md`
+
+---
+
+## 3. Installation
+
+### With pipx (recommended)
+```bash
+python3 -m pip install --user pipx
+python3 -m pipx ensurepath  # add to $PATH
+pipx install namegnome
+```
+
+### With pip
+```bash
+pip install --upgrade namegnome
+```
+
+Verify:
+```bash
+namegnome --version && namegnome --help | head -n 5
+```
+
+---
+
+## 4. First Scan (dry-run)
+
+Run **scan** with at least one `--media-type`:
+```bash
+namegnome scan /path/to/TV --media-type tv --json
+```
+Flags worth knowing:
+
+* `--media-type tv|movie|music` – required, repeatable.
+* `--platform plex|jellyfin` – naming rules engine (default `plex`).
+* `--anthology` – enable smart multi-episode splitting.
+* `--no-rich` – plain output, useful in CI.
+
+The command prints a coloured diff + saves a **plan file** locally. Its ID lookslike `20250701_123456.json`.
+
+---
+
+## 5. Apply the Plan (rename files)
+
+```bash
+namegnome apply <plan-id>
+```
+You will see a progress bar with percentage, elapsed time and current filename.
+Interrupt with Ctrl-C to trigger an automatic rollback.
+
+---
+
+## 6. Undo (rollback later)
+
+```bash
+namegnome undo <plan-id>
+```
+This reverses every move and deletes any empty directories created during apply.
+
+---
+
+## 7. Configuration (optional)
+
+All settings can be supplied as:
+1. CLI flag – highest precedence
+2. Environment variable e.g. `NAMEGNOME_SCAN_VERIFY_HASH=1`
+3. TOML file `${XDG_CONFIG_HOME:-~/.config}/namegnome/config.toml`
+
+Run `namegnome config docs` to see the full table.
+
+---
+
+## 8. Getting Help
+
+* `namegnome --help` and sub-command `--help` flags
+* Documentation under `docs/`
+* GitHub issues & discussions – we're friendly!
+
+Happy organising 🧙‍♂️✨
 
 If you get stuck, open an issue on GitHub or ask for help in the project
 community! 
