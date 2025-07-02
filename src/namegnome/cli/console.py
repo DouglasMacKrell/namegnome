@@ -15,19 +15,24 @@ entry-points without triggering heavy Rich initialisation when disabled.
 from __future__ import annotations
 
 import os
-from contextlib import AbstractContextManager
-from typing import Any, Dict
+from contextlib import AbstractContextManager, contextmanager
+from typing import Any, Dict, Generator
 
 from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.traceback import install as install_rich_traceback
 import rich
 
+from namegnome.cli.utils.ascii_art import (
+    print_gnome_status,
+)  # Late import to avoid heavy deps unless used
+
 __all__ = [
     "console",
     "ConsoleManager",
     "FilenameColumn",
     "create_default_progress",
+    "gnome_status",
 ]
 
 # ENV VAR used to disable rich output entirely (useful for piping or testing)
@@ -133,14 +138,53 @@ def create_default_progress() -> Progress:  # noqa: D401
     Columns:
     1. Spinner emoji column
     2. Task description
-    3. Elapsed time
-    4. Current filename (custom column)
+    3. Percentage
+    4. Elapsed time
+    5. Current filename (custom column)
     """
 
     return Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
+        TextColumn("{task.percentage:>3.0f}%"),
         TimeElapsedColumn(),
         FilenameColumn(),
         console=rich.get_console(),
     )
+
+
+# ---------------------------------------------------------------------
+# Gnome status context manager
+# ---------------------------------------------------------------------
+@contextmanager
+def gnome_status(console: Console | None = None) -> Generator[Console, None, None]:  # noqa: D401
+    """Yield the provided console while showing status-gnome panels.
+
+    On *enter* prints the "working" gnome panel, signalling that NameGnome is
+    busy. When the wrapped block exits:
+
+    * If no exception occurred → prints the «happy» gnome panel.
+    * If an exception bubbles out → prints the «error» gnome panel and re-raises.
+
+    Parameters
+    ----------
+    console:
+        The :class:`rich.console.Console` instance to use. When *None*, falls
+        back to the global :data:`namegnome.cli.console.console` object.
+    """
+
+    if console is None:
+        console = rich.get_console()
+
+    # Signal start of work
+    print_gnome_status("working", console=console)
+
+    try:
+        yield console
+    except Exception:
+        # Something went wrong – show sad gnome then propagate error
+        print_gnome_status("error", console=console)
+        raise
+    else:
+        # All good – celebrate! 🎉
+        print_gnome_status("happy", console=console)

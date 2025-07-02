@@ -60,6 +60,9 @@ from namegnome.cli.console import (
     create_default_progress,
 )
 
+# Visual helpers
+from namegnome.cli.utils.ascii_art import print_gnome_status
+
 # Install rich traceback handler
 install_traceback(show_locals=True)
 
@@ -490,11 +493,17 @@ def scan(  # noqa: PLR0913, C901, PLR0915
             if not stub_path.exists():
                 stub_path.write_bytes(b"FAKEIMAGE")
             raise typer.Exit(ExitCode.SUCCESS)
+
+        # Successful completion – celebrate 🎉
+        if not no_color:
+            print_gnome_status("happy", console=console)
     except typer.Exit:
         raise
     except Exception as e:
         console.print(f"[red]Error: An unexpected error occurred: {str(e)}[/red]")
         console.print_exception()
+        if not no_color:
+            print_gnome_status("error", console=console)
         # In test mode with --artwork we prefer a graceful exit rather than failing
         if artwork:
             # Ensure stub poster exists for unit-tests, even when the exception
@@ -684,6 +693,9 @@ def undo(
 
         undo_plan(plan_path, log_callback=_log)
     console.print(f"[green]Undo completed for plan: {plan_id}[/green]")
+
+    # Success path
+    print_gnome_status("happy", console=console)
 
 
 def _print_settings(settings: Settings) -> None:
