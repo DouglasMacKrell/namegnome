@@ -272,22 +272,79 @@ def _handle_normal_plan_item(media_file, rule_set, config, ctx, plan_ctx):
 
 
 def _add_plan_item_and_callback(item, plan_ctx, ctx, media_file):
-    """Append *item* to *plan_ctx.plan.items*; no callback support."""
-    _ensure_plan_container(plan_ctx).append(item)
+    """Add *item* to the plan with conflict-detection and optional progress callback.
+
+    This small helper centralises three responsibilities expected by newer
+    unit-tests and by the higher-level *planner* module:
+
+    1. Ensure *plan_ctx* has a valid ``plan`` object with an ``items`` list.
+    2. Delegate to :pyfunc:`add_plan_item_with_conflict_detection` so that
+       duplicate destination paths are flagged correctly.
+    3. Invoke ``ctx.progress_callback`` (if supplied) letting the caller update
+       a Rich progress bar or log line.  The callback signature in the
+       simplified recovery implementation only expects a single string – we
+       pass the media filename to keep it implementation-agnostic.
+    """
+
+    # 1. Conflict detection & plan append ---------------------------
+    # Use the helper defined earlier in this module so logic stays in one
+    # place.  We treat ``item.destination`` as the authoritative target path.
+    try:
+        target = item.destination  # type: ignore[attr-defined]
+    except Exception:  # pragma: no cover – defensive guard
+        target = getattr(media_file, "path", None) or item.source  # fallback
+
+    add_plan_item_with_conflict_detection(item, plan_ctx, target)
+
+    # 2. Optional progress callback ---------------------------------
+    progress_cb = getattr(ctx, "progress_callback", None)
+    if callable(progress_cb):
+        # Provide a human-readable label – prefer attribute ``name`` then stem.
+        label = getattr(media_file, "name", None)
+        if not label:
+            try:
+                label = media_file.path.name  # type: ignore[attr-defined]
+            except Exception:
+                label = str(media_file)
+        try:
+            progress_cb(label)
+        except Exception:  # pragma: no cover – do not fail planning on callback
+            pass
 
 
 def _handle_unsupported_media_type(media_file, plan_ctx, ctx):
-    """Mark the media file as unsupported by adding a manual RenamePlanItem."""
+    """Add a *manual* plan item for an unsupported media file and report progress.
+
+    This helper is used as the final fallback in the TV planner when a file's
+    media_type isn't supported by the current RuleSet (e.g., a stray music
+    file in a TV-only scan).  Behaviour:
+
+    • Creates a `RenamePlanItem` that keeps the file at its original path.
+    • Marks it as *manual* (status `PlanStatus.MANUAL`) with a clear reason so
+      downstream CLI layers can surface it to the user.
+    • Appends it to the plan via `_ensure_plan_container`.
+    • Invokes `ctx.progress_callback` (if provided) so spinners/bars stay in
+      sync even when encountering unsupported files.
+    """
+
     item = RenamePlanItem(
         source=media_file.path,
         destination=media_file.path,
         media_file=media_file,
         manual=True,
         manual_reason="Unsupported media type",
+        status=PlanStatus.MANUAL,
     )
 
-    # No conflict detection needed – unsupported items keep original path.
     _ensure_plan_container(plan_ctx).append(item)
+
+    progress_cb = getattr(ctx, "progress_callback", None)
+    if callable(progress_cb):
+        label = getattr(media_file, "name", None) or media_file.path.name
+        try:
+            progress_cb(label)
+        except Exception:  # pragma: no cover
+            pass
 
 
 def _handle_explicit_span(span_ctx):
