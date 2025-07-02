@@ -7,10 +7,16 @@ from namegnome.metadata.models import TVEpisode
 def normalize_episode_list(raw: list[Any] | None) -> List[Dict[str, Any]]:
     """Normalise a heterogeneous *raw* episode list to a list of dicts.
 
-    Each output dict contains integer ``season`` and ``episode`` keys and a
-    string ``title`` key.  Objects already of type :class:`TVEpisode` are
-    converted.  Any entries missing required data are skipped.  Titles are
-    left unchanged.
+    Each output dict contains *integer* ``season`` and ``episode`` keys plus a
+    string ``title`` key.  Key points:
+
+    1. Zero-padded strings are coerced to ``int`` (``"07" -> 7``).
+    2. Rows with non-numeric season/episode, negatives, or zeros are **dropped**
+       (specials like *S00E00* are handled elsewhere).
+    3. Titles are passed through unchanged – sanitising is caller-side.
+
+    These guarantees simplify downstream TV planners by ensuring they never
+    encounter invalid episode indices.
     """
     if not raw:
         return []

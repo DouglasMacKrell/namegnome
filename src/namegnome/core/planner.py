@@ -348,7 +348,22 @@ def _normalize_title(title: str) -> str:
 
 
 def normalize_episode_list(raw_list: list[Any]) -> list[dict[str, Any]]:
-    """Normalize raw API episode list to a uniform structure for anthology logic."""
+    """Return a clean ``list[dict]`` from *raw_list*.
+
+    Accepts provider objects, :class:`~namegnome.metadata.models.TVEpisode`
+    instances, plain ``dict`` rows, or lightweight attribute-bags from unit
+    tests.  The function now enforces **strict validity**:
+
+    * ``season`` and ``episode`` are coerced to ``int`` after stripping leading
+      zeros (``"05" -> 5``).
+    * Rows with non-numeric values, negatives, or zeros (e.g. *S00E00* /
+      specials) are skipped *entirely*.
+    * Title strings are preserved verbatim (caller decides further sanitising).
+
+    This stricter filtering guarantees that downstream anthology logic never
+    receives sentinel *0* values or unparseable strings, eliminating a raft of
+    edge-case branches.
+    """
     normalized = []
     for ep in raw_list or []:
         # Support both object and dict
