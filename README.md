@@ -20,7 +20,6 @@ A command-line tool for organizing and renaming media files according to platfor
 - [**CLI Command Reference**](docs/cli-commands.md): All commands, flags, usage, exit codes, and advanced options.
 - [**LLM Features & Usage Guide**](docs/llm.md): Model install, selection, troubleshooting.
 - [**Provider Setup & API Keys**](docs/providers.md): How to configure API keys for metadata/artwork providers.
-- [**Known Issues & Troubleshooting**](docs/KNOWN_ISSUES.md): Common issues and solutions.
 - [**Quickstart Guide**](docs/quickstart.md): First-time setup and usage for beginners.
 
 ## Features
