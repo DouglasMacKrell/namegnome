@@ -22,9 +22,20 @@ def normalize_episode_list(raw: list[Any] | None) -> List[Dict[str, Any]]:
             episode = int(ep.episode_number)
             title = ep.title
         elif isinstance(ep, dict):
-            season = int(ep.get("season", 0) or 0)
-            episode = int(ep.get("episode", 0) or 0)
+            season_val = ep.get("season") or ep.get("season_number")
+            episode_val = ep.get("episode") or ep.get("episode_number")
             title = ep.get("title", "Unknown Title")
+
+            def _coerce(value: object) -> int | None:
+                try:
+                    if isinstance(value, str):
+                        value = value.lstrip("0") or "0"
+                    return int(value)
+                except Exception:
+                    return None
+
+            season = _coerce(season_val) or 0
+            episode = _coerce(episode_val) or 0
         else:
             # Fallback for simple objects with the expected attributes (e.g., EpObj in tests)
             season = int(getattr(ep, "season", 0) or 0)
@@ -34,8 +45,8 @@ def normalize_episode_list(raw: list[Any] | None) -> List[Dict[str, Any]]:
                 # Insufficient data, skip
                 continue
 
-        # Skip rows missing season/episode numbers (0 indicates missing)
-        if season == 0 or episode == 0:
+        # Skip rows missing or invalid
+        if season <= 0 or episode <= 0:
             continue
 
         normalised.append(

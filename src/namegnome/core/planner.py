@@ -365,15 +365,27 @@ def normalize_episode_list(raw_list: list[Any]) -> list[dict[str, Any]]:
             or ep.get("episode")
         )
         title = getattr(ep, "title", None) or ep.get("title")
-        # Only include if all fields are present
-        if season is not None and episode is not None and title:
+
+        # Coerce zero-padded strings ("05" -> 5) and skip invalid rows
+        def _coerce(value: object) -> int | None:
             try:
-                season = int(season)
-                episode = int(episode)
-                title = str(title).strip()
-            except Exception:
-                continue
-            normalized.append({"season": season, "episode": episode, "title": title})
+                # Strip leading zeros then int; fall back to 0 if empty
+                if isinstance(value, str):
+                    value = value.lstrip("0") or "0"
+                return int(value)
+            except Exception:  # pragma: no cover – non-numeric string
+                return None
+
+        season_i = _coerce(season)
+        episode_i = _coerce(episode)
+        if season_i is None or episode_i is None:
+            continue  # non-numeric
+        if season_i <= 0 or episode_i <= 0:
+            continue  # skip S00E00, negatives, zeros
+
+        title = str(title).strip()
+
+        normalized.append({"season": season_i, "episode": episode_i, "title": title})
     return normalized
 
 
