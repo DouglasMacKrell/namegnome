@@ -13,7 +13,7 @@ files quickly and safely.
 pipx install namegnome
 
 # 2. Scan your TV folder (dry-run, nothing changes!)
-namegnome scan ~/Media/TV --media-type tv
+namegnome scan ~/Media/TV --media-type tv --json
 
 # 3. Review the plan ID printed at the end – when happy:
 namegnome apply <plan-id>
@@ -78,7 +78,7 @@ Flags worth knowing:
 * `--anthology` – enable smart multi-episode splitting.
 * `--no-rich` – plain output, useful in CI.
 
-The command prints a coloured diff + saves a **plan file** locally. Its ID lookslike `20250701_123456.json`.
+The command prints a coloured diff and saves a **plan file** locally. Its ID looks like `20250701_123456.json` and the file is stored under `~/.namegnome/plans/`.
 
 ---
 
