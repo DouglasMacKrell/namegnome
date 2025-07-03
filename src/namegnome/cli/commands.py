@@ -38,7 +38,10 @@ from rich.traceback import install as install_traceback
 from rich.progress import Progress as _RichProgress  # noqa: F401
 
 from namegnome.cli.renderer import render_diff
-from namegnome.core.planner import create_rename_plan
+from namegnome.core.planner import (
+    RenamePlanBuildContext,
+    create_rename_plan as _create_plan,
+)
 from namegnome.core.scanner import ScanOptions, scan_directory
 from namegnome.core.undo import undo_plan
 from namegnome.llm import ollama_client
@@ -297,6 +300,25 @@ NO_CACHE = Annotated[
     ),
 ]
 
+# New output path option for Sprint 1.4 -------------------------------------
+OUTPUT_PATH = Annotated[
+    Optional[Path],
+    typer.Option(
+        "--output",
+        "-o",
+        exists=False,
+        file_okay=True,
+        dir_okay=False,
+        writable=True,
+        readable=False,
+        resolve_path=True,
+        help=(
+            "Write the generated plan to the given file path (only meaningful "
+            "when used together with --json)."
+        ),
+    ),
+]
+
 T = TypeVar("T")
 
 
@@ -338,6 +360,7 @@ def scan(  # noqa: PLR0913, C901, PLR0915
     untrusted_titles: UNTRUSTED_TITLES = False,
     max_duration: MAX_DURATION = None,
     artwork: ARTWORK = False,
+    output: OUTPUT_PATH = None,
     no_cache: NO_CACHE = False,
 ) -> None:
     """Scan a directory for media files and generate a rename plan."""
@@ -432,9 +455,7 @@ def scan(  # noqa: PLR0913, C901, PLR0915
                     untrusted_titles=untrusted_titles,
                     max_duration=max_duration,
                 )
-                from typing import cast, Any
-
-                plan = cast(Any, create_rename_plan)(
+                plan = create_rename_plan(
                     scan_result=scan_result,
                     rule_set=rule_set,
                     plan_id=str(uuid.uuid4()),
@@ -469,6 +490,17 @@ def scan(  # noqa: PLR0913, C901, PLR0915
             console.log(f"Plan stored with ID: {plan_id}")
         if json_output:
             json_str = json.dumps(plan.model_dump(), cls=DateTimeEncoder, indent=2)
+
+            # If an explicit output path was provided write the JSON to disk.
+            if output is not None:
+                try:
+                    output.parent.mkdir(parents=True, exist_ok=True)
+                    output.write_text(json_str + "\n", encoding="utf-8")
+                except Exception as exc:  # noqa: BLE001 – surface unexpected IO errors
+                    console.print(f"[red]Failed to write plan to {output}: {exc}[/red]")
+                    raise typer.Exit(ExitCode.ERROR)
+
+            # Still emit to stdout so existing workflows aren't broken.
             sys.stdout.write(json_str + "\n")
         else:
             # Skip diff rendering when --artwork flag is active – the tests only
@@ -592,9 +624,8 @@ def _scan_impl(options: ScanCommandOptions) -> int:
                             untrusted_titles=options.untrusted_titles,
                             max_duration=options.max_duration,
                         )
-                        from typing import cast, Any
 
-                        plan = cast(Any, create_rename_plan)(
+                        plan = create_rename_plan(
                             scan_result=scan_result,
                             rule_set=rule_set,
                             plan_id=str(uuid.uuid4()),
@@ -1105,3 +1136,57 @@ def init_cli(
     console.print(
         f"[green]Installed completion for {shell}.\nReload your shell or run:[/green] {source_line}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Backwards-compatibility ----------------------------------------------------
+# ---------------------------------------------------------------------------
+# Existing unit tests and any third-party callers patch or import
+# ``namegnome.cli.commands.create_rename_plan`` directly.  We now invoke the
+# planner via the alias ``create_rename_plan`` but we expose the old symbol as a thin
+# passthrough to avoid breaking those patches.
+
+# Legacy-compatible trampoline ------------------------------------------------
+# Supports both:
+#   • New preferred call: create_rename_plan(RenamePlanBuildContext)
+#   • Old deprecated signature: create_rename_plan(scan_result, rule_set, plan_id, platform, config=None)
+
+
+def create_rename_plan(*args: object, **kwargs: object):  # type: ignore[override]
+    """Compatibility wrapper around core.create_rename_plan.
+
+    Allows unit tests (and any external callers) that still rely on the old
+    positional-argument signature to function without modification while the
+    internals have migrated to the *RenamePlanBuildContext* API.
+    """
+
+    # New-style – first positional arg is a BuildContext instance -------------
+    if args and isinstance(args[0], RenamePlanBuildContext):  # pragma: no branch
+        return _create_plan(args[0])  # type: ignore[arg-type]
+
+    # -----------------------------------------------------------------------
+    # Legacy-style positional/keyword arguments -----------------------------
+    # -----------------------------------------------------------------------
+    scan_result = kwargs.pop("scan_result", None) or (
+        args[0] if len(args) > 0 else None
+    )
+    rule_set = kwargs.pop("rule_set", None) or (args[1] if len(args) > 1 else None)
+    plan_id = kwargs.pop("plan_id", None) or (args[2] if len(args) > 2 else None)
+    platform = kwargs.pop("platform", None) or (args[3] if len(args) > 3 else None)
+    config = kwargs.pop("config", None) or (args[4] if len(args) > 4 else None)
+
+    if (
+        scan_result is None or rule_set is None or plan_id is None or platform is None
+    ):  # pragma: no cover
+        raise TypeError("create_rename_plan() missing required legacy arguments")
+
+    ctx = RenamePlanBuildContext(
+        scan_result=scan_result,  # type: ignore[arg-type]
+        rule_set=rule_set,  # type: ignore[arg-type]
+        plan_id=str(plan_id),
+        platform=str(platform),
+        config=config,  # type: ignore[arg-type]
+        progress_callback=None,
+    )
+
+    return _create_plan(ctx)
