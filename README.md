@@ -220,16 +220,6 @@ verify_hash = true  # always compute SHA-256 checksums during scan
 max_duration = 60  # anthology pairing threshold (minutes)
 ```
 
-## Project Highlights
-
-- **Zero-click happy-path**: Scan, preview, and rename in one command
-- **Platform presets**: Out-of-the-box support for Plex, Jellyfin, Emby, Navidrome, and more
-- **Fuzzy LLM assist**: Handles anthology episodes, ambiguous titles, and edge cases using local LLMs (Ollama)
-- **Safe by default**: Dry-run planning, conflict detection, and one-command rollback
-- **Rich CLI UX**: Colorful tables, progress bars, and spinners powered by Rich (disable with `--no-rich` or `NAMEGNOME_NO_RICH`)
-- **Extensible**: Pluggable metadata providers and naming rules
-- **Cross-platform**: Works on Windows, macOS, and Linux
-
 ## Usage
 
 NameGnome is a CLI tool. All commands and options are available via `namegnome --help`.
