@@ -105,4 +105,20 @@ console.log("All files moved!")
 
 - [apply-undo.md](apply-undo.md): How progress/logging integrates with apply/undo
 - [README.md](../README.md): CLI usage and quick start
-- [integration-testing.md](integration-testing.md): End-to-end test philosophy 
+- [integration-testing.md](integration-testing.md): End-to-end test philosophy
+
+### Using `ConsoleManager` & `gnome_status`
+
+Most CLI commands already wrap their main logic with the higher-level helpers below.  For library / plugin writers you can use them directly:
+
+```python
+from namegnome.cli.console import ConsoleManager, gnome_status
+
+with ConsoleManager(record=True) as console:
+    with gnome_status(console):
+        # long-running work here
+        run_scan()
+        run_apply()
+```
+
+`ConsoleManager` installs Rich pretty-tracebacks and returns a configured `Console` honouring the `NAMEGNOME_NO_RICH` opt-out.  The nested `gnome_status` prints the **working → happy / error** gnome panels automatically. 
