@@ -1,0 +1,4851 @@
+# Fixture Manifest for TV Test Files
+# Each entry maps a test file to its expected metadata for regression testing
+
+# Danger Mouse 2015 - NOT an anthology show, reboot of 1989 series
+# 2015 is the release year, not part of the title
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E01-Danger Mouse Begins Again.mp4
+  anthology: false
+  season: 1
+  episodes: [1]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E02-Danger At C Level.mp4
+  anthology: false
+  season: 1
+  episodes: [2]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E03-Greenfinger.mp4
+  anthology: false
+  season: 1
+  episodes: [3]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E04-Planet Of The Toilets.mp4
+  anthology: false
+  season: 1
+  episodes: [4]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E05-Pink Dawn.mp4
+  anthology: false
+  season: 1
+  episodes: [5]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E06-Big Head Awakens.mp4
+  anthology: false
+  season: 1
+  episodes: [6]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E07-The World Wide Spider.mp4
+  anthology: false
+  season: 1
+  episodes: [7]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E08-The Other Day The Earth Stood Still.mp4
+  anthology: false
+  season: 1
+  episodes: [8]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E09-Welcome To Danger World.mp4
+  anthology: false
+  season: 1
+  episodes: [9]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E10-Jeopardy Mouse.mp4
+  anthology: false
+  season: 1
+  episodes: [10]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E11-The Return Of Danger K.mp4
+  anthology: false
+  season: 1
+  episodes: [11]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E12-Big Penfold.mp4
+  anthology: false
+  season: 1
+  episodes: [12]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E13-The Unusual Suspects.mp4
+  anthology: false
+  season: 1
+  episodes: [13]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E14-Danger Fan.mp4
+  anthology: false
+  season: 1
+  episodes: [14]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E15-Quark Games.mp4
+  anthology: false
+  season: 1
+  episodes: [15]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E16-Snowman Cometh.mp4
+  anthology: false
+  season: 1
+  episodes: [16]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E17-The Inventor Preventor.mp4
+  anthology: false
+  season: 1
+  episodes: [17]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E18-Never Say Clever Again.mp4
+  anthology: false
+  season: 1
+  episodes: [18]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E19-Sinister Mouse.mp4
+  anthology: false
+  season: 1
+  episodes: [19]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E20-Theres No Place Like Greenback.mp4
+  anthology: false
+  season: 1
+  episodes: [20]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E21-From Duck To Dawn.mp4
+  anthology: false
+  season: 1
+  episodes: [21]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E22-Happy Boom Day.mp4
+  anthology: false
+  season: 1
+  episodes: [22]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E23-Frankensquawks Monster.mp4
+  anthology: false
+  season: 1
+  episodes: [23]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E24-Escape From Big Head.mp4
+  anthology: false
+  season: 1
+  episodes: [24]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E25-Megahurtz Attacks.mp4
+  anthology: false
+  season: 1
+  episodes: [25]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E26-The Hamster Effect.mp4
+  anthology: false
+  season: 1
+  episodes: [26]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E27-The Good The Baaaaa And The Ugly.mp4
+  anthology: false
+  season: 1
+  episodes: [27]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E28-Attack Of The Clowns.mp4
+  anthology: false
+  season: 1
+  episodes: [28]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E29-Cheesemaggedon.mp4
+  anthology: false
+  season: 1
+  episodes: [29]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E30-Queen Of The Weevils.mp4
+  anthology: false
+  season: 1
+  episodes: [30]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E31-Hail Hydrant.mp4
+  anthology: false
+  season: 1
+  episodes: [31]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E32-Wicked Leaks.mp4
+  anthology: false
+  season: 1
+  episodes: [32]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E33-Tomorrow Never Comes.mp4
+  anthology: false
+  season: 1
+  episodes: [33]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E34-Half The World Is Not Enough.mp4
+  anthology: false
+  season: 1
+  episodes: [34]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E35-Send In The Clones.mp4
+  anthology: false
+  season: 1
+  episodes: [35]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E36-Masters Of The Twystyverse.mp4
+  anthology: false
+  season: 1
+  episodes: [36]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E37-Danger Is Forever.mp4
+  anthology: false
+  season: 1
+  episodes: [37]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E38-Very Important Penfold.mp4
+  anthology: false
+  season: 1
+  episodes: [38]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E39-The Cute Shall Inherit The Earth.mp4
+  anthology: false
+  season: 1
+  episodes: [39]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E40-All 5It.mp4
+  anthology: false
+  season: 1
+  episodes: [40]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E41-Dream Worrier.mp4
+  anthology: false
+  season: 1
+  episodes: [41]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E42-The Confidence Trick.mp4
+  anthology: false
+  season: 1
+  episodes: [42]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E43-The Spy Who Came In With A Cold.mp4
+  anthology: false
+  season: 1
+  episodes: [43]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E44-Sir Danger De Mouse.mp4
+  anthology: false
+  season: 1
+  episodes: [44]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E45-The Duckula Show.mp4
+  anthology: false
+  season: 1
+  episodes: [45]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E46-Agent 58.mp4
+  anthology: false
+  season: 1
+  episodes: [46]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E47-Thanks A Minion.mp4
+  anthology: false
+  season: 1
+  episodes: [47]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E48-High School Inedible.mp4
+  anthology: false
+  season: 1
+  episodes: [48]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E49-Mousefall.mp4
+  anthology: false
+  season: 1
+  episodes: [49]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S01E50-Mouse Rise.mp4
+  anthology: false
+  season: 1
+  episodes: [50]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E01-Dark Dawn.mp4
+  anthology: false
+  season: 2
+  episodes: [1]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E02-The Admirable Penfold.mp4
+  anthology: false
+  season: 2
+  episodes: [2]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E03-Colonel Danger Mouse.mp4
+  anthology: false
+  season: 2
+  episodes: [3]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E04-Ernest Penfold And The Half Price Wand.mp4
+  anthology: false
+  season: 2
+  episodes: [4]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E05-Squawkenbard Kingcluck Brunel.mp4
+  anthology: false
+  season: 2
+  episodes: [5]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E06-Live And Let Cry.mp4
+  anthology: false
+  season: 2
+  episodes: [6]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E07-Lost Tempers In Space.mp4
+  anthology: false
+  season: 2
+  episodes: [7]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E08-The Toad Who Would Be King.mp4
+  anthology: false
+  season: 2
+  episodes: [8]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E09-I Believe In Danger Mouse.mp4
+  anthology: false
+  season: 2
+  episodes: [9]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E10-Thanksgiving Sinner.mp4
+  anthology: false
+  season: 2
+  episodes: [10]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E11-Big Trouble In Little Clowntown.mp4
+  anthology: false
+  season: 2
+  episodes: [11]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E12-Quantum Of Rudeness.mp4
+  anthology: false
+  season: 2
+  episodes: [12]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E13-A Loo To A Kill.mp4
+  anthology: false
+  season: 2
+  episodes: [13]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E14-Roll Of The Mice.mp4
+  anthology: false
+  season: 2
+  episodes: [14]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E15-Gold Flinger.mp4
+  anthology: false
+  season: 2
+  episodes: [15]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E16-Theres Something About Scarlett.mp4
+  anthology: false
+  season: 2
+  episodes: [16]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E17-Groundmouse Day.mp4
+  anthology: false
+  season: 2
+  episodes: [17]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E18-Dry Hard.mp4
+  anthology: false
+  season: 2
+  episodes: [18]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E19-Day Of The Derek.mp4
+  anthology: false
+  season: 2
+  episodes: [19]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E20-Crumfan.mp4
+  anthology: false
+  season: 2
+  episodes: [20]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E21-Nero Come Home.mp4
+  anthology: false
+  season: 2
+  episodes: [21]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E22-Dark Side Of The Mouse.mp4
+  anthology: false
+  season: 2
+  episodes: [22]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E23-The Scare Mouse Projec.mp4
+  anthology: false
+  season: 2
+  episodes: [23]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E24-Yule Only Watch Twice.mp4
+  anthology: false
+  season: 2
+  episodes: [24]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E25-Twysted Sister.mp4
+  anthology: false
+  season: 2
+  episodes: [25]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E26-Grand Stressed Auto.mp4
+  anthology: false
+  season: 2
+  episodes: [26]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E27-Clash Of The Odd Esy.mp4
+  anthology: false
+  season: 2
+  episodes: [27]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E28-Henemy Of The State.mp4
+  anthology: false
+  season: 2
+  episodes: [28]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E29-For Your Insides Only.mp4
+  anthology: false
+  season: 2
+  episodes: [29]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E30-A Fistful Of Penfolds.mp4
+  anthology: false
+  season: 2
+  episodes: [30]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E31-Daylight Savings Crime.mp4
+  anthology: false
+  season: 2
+  episodes: [31]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E32-The Law Of Beverages.mp4
+  anthology: false
+  season: 2
+  episodes: [32]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E33-Licence To Care.mp4
+  anthology: false
+  season: 2
+  episodes: [33]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E34-Force Of Nature.mp4
+  anthology: false
+  season: 2
+  episodes: [34]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E35-No More Mr Ice Guy.mp4
+  anthology: false
+  season: 2
+  episodes: [35]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E36-Bot Battles.mp4
+  anthology: false
+  season: 2
+  episodes: [36]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E37-Rodent Recall.mp4
+  anthology: false
+  season: 2
+  episodes: [37]
+  status: auto
+
+- file: Danger Mouse-S02E38-A Fear To Remember.mp4
+  anthology: false
+  season: 2
+  episodes: [38]
+  status: auto
+
+- file: Danger Mouse-S02E39-Melted.mp4
+  anthology: false
+  season: 2
+  episodes: [39]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E40-We Arent Family.mp4
+  anthology: false
+  season: 2
+  episodes: [40]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E41-Crouching Hamster Hidden Wagon.mp4
+  anthology: false
+  season: 2
+  episodes: [41]
+  status: auto
+
+- file: Danger Mouse-S02E42-Danger Thon.mp4
+  anthology: false
+  season: 2
+  episodes: [42]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E43-Jam Session.mp4
+  anthology: false
+  season: 2
+  episodes: [43]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E44-Sharp As A Pin.mp4
+  anthology: false
+  season: 2
+  episodes: [44]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E45-The Last Giraffe Warrior.mp4
+  anthology: false
+  season: 2
+  episodes: [45]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E46-Duplicate Mouse.mp4
+  anthology: false
+  season: 2
+  episodes: [46]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E47-The Supies.mp4
+  anthology: false
+  season: 2
+  episodes: [47]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E48-Lost In Exaggeration.mp4
+  anthology: false
+  season: 2
+  episodes: [48]
+  status: auto
+
+- file: Danger Mouse 2015/Danger Mouse 2015-S02E49-The World Is Full Of Stuff.mp4
+  anthology: false
+  season: 2
+  episodes: [49]
+  status: auto
+
+# Firebuds - Anthology show where episode titles in filenames must be trusted over numbering
+# Season 1 missing from TVDB API (all lumped in Season 2), needs provider fallback to TMDB
+# Each file contains two consecutive episodes (anthology format)
+- file: Firebuds/Firebuds-S01E01-Car In A Tree Dalmatian Day.mp4
+  anthology: true
+  season: 1
+  episodes: [1, 2]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E02-Hubcap Heist Food Truck Fiasco.mp4
+  anthology: true
+  season: 1
+  episodes: [3, 4]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E03-Treehouse Trouble The Getaway Car That Got Away.mp4
+  anthology: true
+  season: 1
+  episodes: [5, 6]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E04-Picnic Pile Up Duo Dash.mp4
+  anthology: true
+  season: 1
+  episodes: [7, 8]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E05-The Not So Haunted House Halloween Heroes.mp4
+  anthology: true
+  season: 1
+  episodes: [9, 10]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E06-Sleepover Stakeout Rescue Club.mp4
+  anthology: true
+  season: 1
+  episodes: [11, 12]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E07-Cliffhanger The Very First Fire.mp4
+  anthology: true
+  season: 1
+  episodes: [13, 14]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E08-Marsh Mayhem The Art Of Friendship.mp4
+  anthology: true
+  season: 1
+  episodes: [15, 16]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E09-Lights Out Handle With Car.mp4
+  anthology: true
+  season: 1
+  episodes: [17, 18]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E10-Transmission Impossible Carkour.mp4
+  anthology: true
+  season: 1
+  episodes: [19, 20]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E11-Care A Van Club Mud About You.mp4
+  anthology: true
+  season: 1
+  episodes: [21, 22]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E12-River Rescue Big Tread.mp4
+  anthology: true
+  season: 1
+  episodes: [23, 24]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E13-Hanukkah Hullabaloo The Christmas Car Sled Race.mp4
+  anthology: true
+  season: 1
+  episodes: [25, 26]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E14-Call Of The Siren Jamals Jam.mp4
+  anthology: true
+  season: 1
+  episodes: [27, 28]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E15-Bayani Cookout Best Of The Rest.mp4
+  anthology: true
+  season: 1
+  episodes: [29, 30]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E16-Pistons Driving School Jazzyland.mp4
+  anthology: true
+  season: 1
+  episodes: [31, 32]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E17-Puppy Pursuit The Ice Cream Truck Bandits.mp4
+  anthology: true
+  season: 1
+  episodes: [33, 34]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E18-Cleft Hood The Case Of The Disappearing Doghouses.mp4
+  anthology: true
+  season: 1
+  episodes: [35, 36]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E19-All That Jazzy Iguana Hold Your Hand.mp4
+  anthology: true
+  season: 1
+  episodes: [37, 38]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E20-Shelter Island Escape From Shelter Island.mp4
+  anthology: true
+  season: 1
+  episodes: [39, 40]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E21-The Super Safety Show Job O Rama Day.mp4
+  anthology: true
+  season: 1
+  episodes: [41, 42]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E22-Star Vehicle Firebuds Fever.mp4
+  anthology: true
+  season: 1
+  episodes: [43, 44]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E23-The Birthday Blaze Everybody Loves Axl.mp4
+  anthology: true
+  season: 1
+  episodes: [45, 46]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E24-The Four Door Troubadours Moto Polo.mp4
+  anthology: true
+  season: 1
+  episodes: [47, 48]
+  status: auto
+
+- file: Firebuds/Firebuds-S01E25-Roller Coaster Rescue The Night Shift.mp4
+  anthology: true
+  season: 1
+  episodes: [49, 50]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E01-Hello Halo Whats Up Woodpecker.mp4
+  anthology: true
+  season: 2
+  episodes: [1, 2]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E02-Sugar Crash The Cut N Chrome Caper.mp4
+  anthology: true
+  season: 2
+  episodes: [3, 4]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E03-Mayhem At The Museum Wrong Way Rescue.mp4
+  anthology: true
+  season: 2
+  episodes: [5, 6]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E04-Apple Pie Peril Hike Seek.mp4
+  anthology: true
+  season: 2
+  episodes: [7, 8]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E05-Blizzard Buds Parade Escapade.mp4
+  anthology: true
+  season: 2
+  episodes: [9, 10]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E06-Annie Spokely Ingrid On Ice.mp4
+  anthology: true
+  season: 2
+  episodes: [11, 12]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E07-Science Fair Snafu The Scavenger Hunt.mp4
+  anthology: true
+  season: 2
+  episodes: [13, 14]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E08-Balancing Act Monster Truck Piston.mp4
+  anthology: true
+  season: 2
+  episodes: [15, 16]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E09-Skitty Kitty Heat Wave.mp4
+  anthology: true
+  season: 2
+  episodes: [17, 18]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E10-Waynes Trains And Automobiles Jazzy Buds.mp4
+  anthology: true
+  season: 2
+  episodes: [19, 20]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E11-The Drive Along Rescue Club Rangers.mp4
+  anthology: true
+  season: 2
+  episodes: [21, 22]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E12-Fire Tower Frenzy Whats Cookin.mp4
+  anthology: true
+  season: 2
+  episodes: [23, 24]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E13-Woodland Wiley P I Piston.mp4
+  anthology: true
+  season: 2
+  episodes: [25, 26]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E14-Mayor For The Day Dozer Disaster.mp4
+  anthology: true
+  season: 2
+  episodes: [27, 28]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E15-Haywire Halo Smorgasburger.mp4
+  anthology: true
+  season: 2
+  episodes: [29, 30]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E16-Windy Wheels.mp4
+  anthology: true
+  season: 2
+  episodes: [31]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E17-Full Time Flash Bubba Trouble.mp4
+  anthology: true
+  season: 2
+  episodes: [32, 33]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E18-Scarlett Skid Alpine Adventure.mp4
+  anthology: true
+  season: 2
+  episodes: [34, 35]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E19-Guac And Roll All Terrain Trek.mp4
+  anthology: true
+  season: 2
+  episodes: [36, 37]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E20-The Camp Fire.mp4
+  anthology: true
+  season: 2
+  episodes: [38]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E21-The Haunted Hq All Souls Surprise.mp4
+  anthology: true
+  season: 2
+  episodes: [39, 40]
+  status: auto
+
+- file: Firebuds/Firebuds-S02E22-Bamboozled Bo Food In A Flash.mp4
+  anthology: true
+  season: 2
+  episodes: [41, 42]
+  status: auto
+
+# Harvey Girls Forever! - Anthology show with untrusted episode names from Sonarr
+# Special character "!" in name, runtime-based span logic needed
+# Sonarr-renamed files must use numbering + canonical episode durations, ignoring input titles
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E01 - War and Trees WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [1, 2]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E02 - Trade Wreck WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [3, 4]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E03 - While You Weren't Sleeping WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [5, 6]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E04 - The Secret Strife of Pets WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [7, 8]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E05 - Harveyween WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [9, 10]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E06 - New Kid on the Block WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [11, 12]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E07 - It's a Wonderful LARP WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [13, 14]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E08 - My Sectional Romance WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [15, 16]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E09 - Campfire Weekend WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [17, 18]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E10 - Girls Just Wanna Save Fun WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [19, 20]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E11 - FruLess WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [21, 22]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E12 - Citizen Cape WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [23, 24]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S01E13 - Cereal WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [25, 26]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E01 - Raiders of the Lost Park WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [1]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E02 - Dottie Rocket WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [2, 3]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E03 - Weekend at Audrey's WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [4, 5]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E04 - Boy Story WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [6, 7]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E05 - Puzzle, Puzzle, Toil and Trouble WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [8, 9]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E06 - Treasure of Sierra Harvey WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [10, 11]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E07 - Babies Day In WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [12, 13]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E08 - The Lice Storm WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [14]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E09 - Mission ImpossiBow WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [15, 16]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E10 - The Fandom Menace WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [17, 18]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E11 - Moby Dot WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [19, 20]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E12 - The Cheer Hunter WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [21, 22]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S02E13 - Dot's Entertainment WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 2
+  episodes: [23, 24]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E01 - Get Rich Quick WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [1, 2]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E02 - Noogie Nights WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [3, 4]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E03 - Audrey Dreams of Ice Cream WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [5, 6]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E04 - Blame That Tune WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [7, 8]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E05 - Bad LotTenant WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [9, 10]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E06 - Jet Fretters WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [11, 12]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E07 - Now It's Con WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [13, 14]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E08 - A Stu is Born WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [15, 16]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E09 - Ruffspringa WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [17, 18]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E10 - Fast Times at Richmond Harv WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [19, 20]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E11 - Sleepless in Sky Mansion WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [21, 22]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E12 - Skull and Bows WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [23, 24]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S03E13 - Nine to Harv WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 3
+  episodes: [25, 26]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E01 - Get Rich or Cry Trying WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [1, 2]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E02 - Dingo Unchained WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [3, 4]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E03 - Miracle on Harvey Street WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [5, 6]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E04 - I Know…t You Did Last Stu-mmer WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [7, 8]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E05 - Hero Effect WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [9, 10]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E06 - VR the World WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [11, 12]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E07 - The Dread Pirate Richie WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [13, 14]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E08 - Crush 4U Where RU WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [15, 16]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E09 - Bobby of Influence WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [17, 18]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E10 - Grill or Be Grilled WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [19, 20]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E11 - Grosse Point Prank WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [21, 22]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E12 - Breaking Butt WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [23, 24]
+  status: auto
+
+- file: Harvey Girls Forever/Harvey Girls Forever! - S04E13 - Chevronica Mars WEBDL-1080p.mkv
+  anthology: true
+  title_trusted: false
+  season: 4
+  episodes: [25, 26]
+  status: auto
+
+# Martha Speaks - Anthology show with important edge cases
+# First episode shares name with show title "Martha Speaks" 
+# Contains apostrophes that get sanitized in filenames (Ain T Nothin vs Ain't Nothin')
+- file: Martha Speaks/Martha Speaks-S01E01-Martha Speaks Martha Gives Advice.mp4
+  anthology: true
+  season: 1
+  episodes: [1, 2]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E02-Martha And Skits Martha Plays A Part.mp4
+  anthology: true
+  season: 1
+  episodes: [3, 4]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E03-Martha Takes The Cake Codename Martha.mp4
+  anthology: true
+  season: 1
+  episodes: [5, 6]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E04-Martha To The Rescue Martha Camps Out.mp4
+  anthology: true
+  season: 1
+  episodes: [7, 8]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E05-Down On The Farm Martha Runs Away.mp4
+  anthology: true
+  season: 1
+  episodes: [9, 10]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E06-Martha And The Canine Caper Perfectly Martha.mp4
+  anthology: true
+  season: 1
+  episodes: [11, 12]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E07-Firedog Martha Martha S Pickle.mp4
+  anthology: true
+  season: 1
+  episodes: [13, 14]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E08-The Dog Who Came To Dinner Martha Calling.mp4
+  anthology: true
+  season: 1
+  episodes: [15, 16]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E09-Oh Noooo Bye Martha.mp4
+  anthology: true
+  season: 1
+  episodes: [17, 18]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E10-Martha Walks The Dog Martha S Got Talent.mp4
+  anthology: true
+  season: 1
+  episodes: [19, 20]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E11-Truman And The Deep Blue Sea Martha In Charge.mp4
+  anthology: true
+  season: 1
+  episodes: [21, 22]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E12-Escape From Flea Island No Dogs Allowed.mp4
+  anthology: true
+  season: 1
+  episodes: [23, 24]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E13-Ain T Nothin But A Pound Dog Part 1 Ain T Nothin But A Pound Dog Part 2.mp4
+  anthology: true
+  season: 1
+  episodes: [25, 26]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E14-Martha Doesn T Speak Monkey Martha And Truman Get Lost.mp4
+  anthology: true
+  season: 1
+  episodes: [27, 28]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E15-Martha Gets Spooked Martha Changes Her Luck.mp4
+  anthology: true
+  season: 1
+  episodes: [29, 30]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E16-Martha Runs The Store Part 1 Martha Runs The Store Part 2.mp4
+  anthology: true
+  season: 1
+  episodes: [31, 32]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E17-Itchy Martha Martha And The Thief Of Hearts.mp4
+  anthology: true
+  season: 1
+  episodes: [33, 34]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E18-There Goes The Neighborhood Ice Scream.mp4
+  anthology: true
+  season: 1
+  episodes: [35, 36]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E19-Nurse Martha T D Gets The Scoop.mp4
+  anthology: true
+  season: 1
+  episodes: [37, 38]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E20-Alice Twinkle Toes Martha Fails The Course.mp4
+  anthology: true
+  season: 1
+  episodes: [39, 40]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E21-Martha Sings T D Makes The Band.mp4
+  anthology: true
+  season: 1
+  episodes: [41, 42]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E22-Skits Under The Weather Martha The Weather Dog.mp4
+  anthology: true
+  season: 1
+  episodes: [43, 44]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E23-Martha In The Doghouse Martha Models.mp4
+  anthology: true
+  season: 1
+  episodes: [45, 46]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E24-T D And The Steak Tree T D And Martha Gopher Broke.mp4
+  anthology: true
+  season: 1
+  episodes: [47, 48]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E25-Martha S Dirty Habit Helen S All Thumbs.mp4
+  anthology: true
+  season: 1
+  episodes: [49, 50]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E26-Martha The Witness Martha Takes A Stand.mp4
+  anthology: true
+  season: 1
+  episodes: [51, 52]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E27-Martha Goes To School T D And The Light Bulb Of Doom.mp4
+  anthology: true
+  season: 1
+  episodes: [53, 54]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E28-Martha Treads The Boards Martha S Pack.mp4
+  anthology: true
+  season: 1
+  episodes: [55, 56]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E29-Martha Smells Martha Hears.mp4
+  anthology: true
+  season: 1
+  episodes: [57, 58]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E30-Martha S Worst Best Day Truman S Brother.mp4
+  anthology: true
+  season: 1
+  episodes: [59, 60]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E31-Here S Martha Dog Fight.mp4
+  anthology: true
+  season: 1
+  episodes: [61, 62]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E32-Therapy Dog Martha S Duck Trouble.mp4
+  anthology: true
+  season: 1
+  episodes: [63, 64]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E33-Truman S Secret Skits Monkeys Around.mp4
+  anthology: true
+  season: 1
+  episodes: [65, 66]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E34-What S Bothering Bob Martha Spins A Tale.mp4
+  anthology: true
+  season: 1
+  episodes: [67, 68]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E35-Martha Bakes Martha Makes Scents.mp4
+  anthology: true
+  season: 1
+  episodes: [69, 70]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E36-Martha vs Robot Virtually Martha.mp4
+  anthology: true
+  season: 1
+  episodes: [71, 72]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E37-The Martha Show Martha S Millions.mp4
+  anthology: true
+  season: 1
+  episodes: [73, 74]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E38-Carolina S Gifted The Dog Did It.mp4
+  anthology: true
+  season: 1
+  episodes: [75, 76]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E39-Martha Out West T D S Magic.mp4
+  anthology: true
+  season: 1
+  episodes: [77, 78]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S01E40-Scaredy Cat The Opera Contest.mp4
+  anthology: true
+  season: 1
+  episodes: [79, 80]
+  status: auto
+
+# Martha Speaks Season 2 - 30 episodes (S02E01-S02E30) mapped to 15 files
+# Based on TVDB Season 2: https://www.thetvdb.com/series/martha-speaks/seasons/official/2
+- file: Martha Speaks/Martha Speaks-S02E01-Martha S Chair T D The Pack Rat.mp4
+  anthology: true
+  season: 2
+  episodes: [1, 2]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E02-Martha S Nightmare Martha S Dreams.mp4
+  anthology: true
+  season: 2
+  episodes: [3, 4]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E03-Martha Puts Out The Lights.mp4
+  anthology: true
+  season: 2
+  episodes: [5, 6]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E04-The Penguin Always Rings Twice The Martha Code.mp4
+  anthology: true
+  season: 2
+  episodes: [7, 8]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E05-Martha S Dirty Habit Helen S All Thumbs.mp4
+  anthology: true
+  season: 2
+  episodes: [9, 10]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E06-Martha In The White House.mp4
+  anthology: true
+  season: 2
+  episodes: [11, 12]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E07-The Jakey Express Martha Sled Dog.mp4
+  anthology: true
+  season: 2
+  episodes: [13, 14]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E08-Paws And Effect The Trouble With Teddy.mp4
+  anthology: true
+  season: 2
+  episodes: [15, 16]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E09-Que Pasa Martha T D Is Talking Dog.mp4
+  anthology: true
+  season: 2
+  episodes: [17, 18]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E10-Dogs In Space Dogs From Space.mp4
+  anthology: true
+  season: 2
+  episodes: [19, 20]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E11-Skits On Ice Marthas Steamed.mp4
+  anthology: true
+  season: 2
+  episodes: [21, 22]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E12-Marthas Life In Crime.mp4
+  anthology: true
+  season: 2
+  episodes: [23, 24]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E13-Martha Plays Favorites Martha And The Doggie Lover.mp4
+  anthology: true
+  season: 2
+  episodes: [25, 26]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E14-Martha And The One Thousand Fleas Nice And Crabby.mp4
+  anthology: true
+  season: 2
+  episodes: [27, 28]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S02E15-Martha Secret Agent Dog.mp4
+  anthology: true
+  season: 2
+  episodes: [29, 30]
+  status: auto
+
+
+- file: Martha Speaks/Martha Speaks-S03E01-The Martha Show.mp4
+  anthology: true
+  season: 3
+  episodes: [1, 2]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E02-Marthas Millions Carolinas Gifted.mp4
+  anthology: true
+  season: 3
+  episodes: [3, 4]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E03-Martha S Slumber Party Of The Weird Return To Marthas Slumber Party Of The Weird.mp4
+  anthology: true
+  season: 3
+  episodes: [5, 6]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E04-The Long Rotten Summer The Case Of The Shattered Vase.mp4
+  anthology: true
+  season: 3
+  episodes: [7, 8]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E05-The Dog Did It Martha Out West.mp4
+  anthology: true
+  season: 3
+  episodes: [9, 10]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E06-T D S Magic Scaredy Cat.mp4
+  anthology: true
+  season: 3
+  episodes: [11, 12]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E07-The Opera Contest Maestro Martha.mp4
+  anthology: true
+  season: 3
+  episodes: [13, 14]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E08-Skits And Mr Scruffles Brave Truman.mp4
+  anthology: true
+  season: 3
+  episodes: [15, 16]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E09-Alice Covers Up Carolina Picks A Lily.mp4
+  anthology: true
+  season: 3
+  episodes: [17, 18]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E10-Wagstaff Races The Missing Metal Mystery.mp4
+  anthology: true
+  season: 3
+  episodes: [19, 20]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E11-Marthas Slumber Party Of The Weird Return To Marthas Slumber Party Of The Weird.mp4
+  anthology: true
+  season: 3
+  episodes: [21, 22]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E12-Wagstaff Races The Missing Metal Mystery.mp4
+  anthology: true
+  season: 3
+  episodes: [23, 24]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E13-Marthas Slumber Party Of The Weird Return To Marthas Slumber Party Of The Weird.mp4
+  anthology: true
+  season: 3
+  episodes: [25, 26]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E14-The Long Rotten Summer The Case Of The Shattered Vase.mp4
+  anthology: true
+  season: 3
+  episodes: [27, 28]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S03E15-Alice Covers Up Carolina Picks A Lily.mp4
+  anthology: true
+  season: 3
+  episodes: [29, 30]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S04E01-Puppy Skits Dinosaurs In Trouble.mp4
+  anthology: true
+  season: 4
+  episodes: [1, 2]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S04E02-Billy Collins Speaks Milos Reading Buddy.mp4
+  anthology: true
+  season: 4
+  episodes: [3, 4]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S04E03-Verb Dog When Action Calls Marthas Adverb Adventure.mp4
+  anthology: true
+  season: 4
+  episodes: [5, 6]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S04E04-Return Of The Bookbots The Case Of The Missing Words.mp4
+  anthology: true
+  season: 4
+  episodes: [7, 8]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S04E05-Eyes On The Skies Camp Truman.mp4
+  anthology: true
+  season: 4
+  episodes: [9, 10]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S04E06-Monkeyshines Martha Dog Daze.mp4
+  anthology: true
+  season: 4
+  episodes: [11, 12]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S04E07-The Puppy Tooth Fairy Martha S Blue Period.mp4
+  anthology: true
+  season: 4
+  episodes: [13, 14]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S04E08-Bulldozer Versus Dinosaur Carolina Tackles Football.mp4
+  anthology: true
+  season: 4
+  episodes: [15, 16]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S04E09-Too Many Marthas Too Much Martha.mp4
+  anthology: true
+  season: 4
+  episodes: [17, 18]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S04E10-Marthas Market Bye Bye Burger Boy.mp4
+  anthology: true
+  season: 4
+  episodes: [19, 20]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S05E01-Puppy Skits Dinosaurs In Trouble.mp4
+  anthology: true
+  season: 5
+  episodes: [1, 2]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S05E02-The Puppy Tooth Fairy Martha S Blue Period.mp4
+  anthology: true
+  season: 5
+  episodes: [3, 4]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S05E03-The Puppy Show Never Forget To Remember.mp4
+  anthology: true
+  season: 5
+  episodes: [5, 6]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S05E04-Martha S Puppy The Cheating Chum Caper.mp4
+  anthology: true
+  season: 5
+  episodes: [7, 8]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S05E05-The Puppy Show Never Forget To Remember.mp4
+  anthology: true
+  season: 5
+  episodes: [9, 10]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S05E06-Mouse Patrol The Big Knockover.mp4
+  anthology: true
+  season: 5
+  episodes: [11, 12]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S05E07-My Mother The Dog Martha S Must Have.mp4
+  anthology: true
+  season: 5
+  episodes: [13, 14]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S05E08-Martha S Puppy The Cheating Chum Caper.mp4
+  anthology: true
+  season: 5
+  episodes: [15, 16]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S06E01-T D Gives A Report Martha S Canine Cleaners.mp4
+  anthology: true
+  season: 6
+  episodes: [1, 2]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S06E02-April Fools Bully For You.mp4
+  anthology: true
+  season: 6
+  episodes: [3, 4]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S06E03-Thou Callest Me A Dog Martha S Paper Chase.mp4
+  anthology: true
+  season: 6
+  episodes: [5, 6]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S06E04-Bookbots 3 Fit Fights Fat Grandpa Bernie Cleans Up.mp4
+  anthology: true
+  season: 6
+  episodes: [7, 8]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S06E05-Alice Tells A Story Pirates And Princess.mp4
+  anthology: true
+  season: 6
+  episodes: [9, 10]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S06E06-Tomato You Say Martha Questions.mp4
+  anthology: true
+  season: 6
+  episodes: [11, 12]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S06E07-Martha S Sweater The Mystery Of The Missing Dinosaur.mp4
+  anthology: true
+  season: 6
+  episodes: [13, 14]
+  status: auto
+
+- file: Martha Speaks/Martha Speaks-S06E08-Martha S Holiday Surprise We Re Powerless.mp4
+  anthology: true
+  season: 6
+  episodes: [15, 16]
+  status: auto
+
+# Paw Patrol - Anthology show with complex episode mapping
+# Season 1 has 48 episodes total across 26 files
+# Double-length episodes (22 min) are single episodes in files
+# Regular episodes (11 min) are paired in files
+# File numbering doesn't match canonical TVDB episode order
+
+# S01E01-E02: Pups and the Kitty-tastrophe / Pups Save a Train
+- file: Paw Patrol/Paw Patrol-S01E01-Pups And The Kitty Tastrophe Pups Save A Train.mp4
+  anthology: true
+  season: 1
+  episodes: [5, 6]
+  status: auto
+
+# S01E03-E04: Pups Save the Sea Turtles / Pup and the Very Big Baby  
+- file: Paw Patrol/Paw Patrol-S01E03-Pups Save The Sea Turtles Pup And The Very Big Baby.mp4
+  anthology: true
+  season: 1
+  episodes: [3, 4]
+  status: auto
+
+# S01E07-E08: Pup Pup Boogie / Pups in a Fog
+- file: Paw Patrol/Paw Patrol-S01E02-Pup Pup Boogie Pups In A Fog.mp4
+  anthology: true
+  season: 1
+  episodes: [7, 8]
+  status: auto
+
+# S01E13-E14: Pups Save the Circus / Pup A Doodle Do
+- file: Paw Patrol/Paw Patrol-S01E04-Pups Save The Circus Pup A Doodle Do.mp4
+  anthology: true
+  season: 1
+  episodes: [13, 14]
+  status: auto
+
+# S01E09-E10: Pup Pup Goose / Pup Pup and Away
+- file: Paw Patrol/Paw Patrol-S01E05-Pup Pup Goose Pup Pup And Away.mp4
+  anthology: true
+  season: 1
+  episodes: [9, 10]
+  status: auto
+
+# S01E15-E16: Pups Pit Crew / Pups Fight Fire
+- file: Paw Patrol/Paw Patrol-S01E06-Pups Pit Crew Pups Fight Fire.mp4
+  anthology: true
+  season: 1
+  episodes: [15, 16]
+  status: auto
+
+# S01E22-E23: Pups Save the Bunnies / Puptacular
+- file: Paw Patrol/Paw Patrol-S01E07-Pups Save The Bunnies Puptacular.mp4
+  anthology: true
+  season: 1
+  episodes: [22, 23]
+  status: auto
+
+# S01E24-E25: Pups Save the Bay / Pups Save a Goodway
+- file: Paw Patrol/Paw Patrol-S01E08-Pups Save The Bay Pups Save A Goodway.mp4
+  anthology: true
+  season: 1
+  episodes: [24, 25]
+  status: auto
+
+# S01E20-E21: Pups Get a Rubble / Pups Save a Walrus
+- file: Paw Patrol/Paw Patrol-S01E09-Pups Get A Rubble Pups Save A Walrus.mp4
+  anthology: true
+  season: 1
+  episodes: [20, 21]
+  status: auto
+
+# S01E17-E18: Pups Save the Treats / Pups Get a Lift
+- file: Paw Patrol/Paw Patrol-S01E10-Pups Save The Treats Pups Get A Lift.mp4
+  anthology: true
+  season: 1
+  episodes: [17, 18]
+  status: auto
+
+# S01E26-E27: Pups Save a Hoedown / Pups Save Alex
+- file: Paw Patrol/Paw Patrol-S01E11-Pups Save A Hoedown Pups Save Alex.mp4
+  anthology: true
+  season: 1
+  episodes: [26, 27]
+  status: auto
+
+# S01E19: Pups and the Ghost Pirate (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S01E12-Pups And The Ghost Pirate.mp4
+  anthology: true
+  season: 1
+  episodes: [19]
+  status: auto
+
+# S01E28-E29: Pups Save a School Day / Pups Turn on the Lights
+- file: Paw Patrol/Paw Patrol-S01E13-Pups Save A School Day Pups Turn On The Lights.mp4
+  anthology: true
+  season: 1
+  episodes: [28, 29]
+  status: auto
+
+# S01E30-E31: Pups Save a Pool Day / Circus Pup-Formers
+- file: Paw Patrol/Paw Patrol-S01E14-Pups Save A Pool Day Circus Pup Formers.mp4
+  anthology: true
+  season: 1
+  episodes: [30, 31]
+  status: auto
+
+# S01E01-E02: Pups Make a Splash / Pups Fall Festival
+- file: Paw Patrol/Paw Patrol-S01E15-Pups Make A Splash Pups Fall Festival.mp4
+  anthology: true
+  season: 1
+  episodes: [1, 2]
+  status: auto
+
+# S01E32: Pups Save Christmas (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S01E16-Pups Save Christmas.mp4
+  anthology: true
+  season: 1
+  episodes: [32]
+  status: auto
+
+# S01E11-E12: Pups on Ice / Pups and the Snow Monster
+- file: Paw Patrol/Paw Patrol-S01E17-Pups On Ice Pups And The Snow Monster.mp4
+  anthology: true
+  season: 1
+  episodes: [11, 12]
+  status: auto
+
+# S01E47-E48: Pups Save a Super Pup / Pups Save Ryder's Robot
+- file: Paw Patrol/Paw Patrol-S01E18-Pups Save A Super Pup Pups Save Ryder S Robot.mp4
+  anthology: true
+  season: 1
+  episodes: [47, 48]
+  status: auto
+
+# S01E33-E34: Pups Go All Monkey / Pups Save a Hoot
+- file: Paw Patrol/Paw Patrol-S01E19-Pups Save A Monkey Pups Save A Hoot.mp4
+  anthology: true
+  season: 1
+  episodes: [33, 34]
+  status: auto
+
+# S01E35-E36: Pups Save a Bat / Pups Save a Toof
+- file: Paw Patrol/Paw Patrol-S01E20-Pups Save A Bat Pups Save A Toof.mp4
+  anthology: true
+  season: 1
+  episodes: [35, 36]
+  status: auto
+
+# S01E46: Pups Save the Easter Egg Hunt (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S01E21-Pups Save The Easter Egg Hunt.mp4
+  anthology: true
+  season: 1
+  episodes: [46]
+  status: auto
+
+# S01E41-E42: Pups and the Lighthouse Boogie / Pups Save Ryder
+- file: Paw Patrol/Paw Patrol-S01E22-Pups And The Lighthouse Boogie Pups Save Ryder.mp4
+  anthology: true
+  season: 1
+  episodes: [41, 42]
+  status: auto
+
+# S01E43-E44: Pups Great Race / Pups Take the Cake
+- file: Paw Patrol/Paw Patrol-S01E23-Pups Great Race Pups Take The Cake.mp4
+  anthology: true
+  season: 1
+  episodes: [43, 44]
+  status: auto
+
+# S01E39-E40: Pups and the Beanstalk / Pups Save the Turbots
+- file: Paw Patrol/Paw Patrol-S01E24-Pups And The Beanstalk Pups Save The Turbots.mp4
+  anthology: true
+  season: 1
+  episodes: [39, 40]
+  status: auto
+
+# S01E37-E38: Pups Save the Camping Trip / Pups and the Trouble with Turtles
+- file: Paw Patrol/Paw Patrol-S01E25-Pups Save The Camping Trip Pups And The Trouble With Turtles.mp4
+  anthology: true
+  season: 1
+  episodes: [37, 38]
+  status: auto
+
+# S01E45: Pups and the Pirate Treasure (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S01E26-Pups And The Pirate Treasure.mp4
+  anthology: true
+  season: 1
+  episodes: [45]
+  status: auto
+
+# Paw Patrol Season 2 - Anthology show with complex episode mapping
+# Season 2 has 48 episodes total across 26 files
+# Double-length episodes (22 min) are single episodes in files
+# Regular episodes (11 min) are paired in files
+# File numbering doesn't match canonical TVDB episode order
+
+# S02E05-E06: Pups Save the Space Alien / Pups Save a Flying Frog
+- file: Paw Patrol/Paw Patrol-S02E01-Pups Save The Space Alien Pups Save A Flying Frog.mp4
+  anthology: true
+  season: 2
+  episodes: [5, 6]
+  status: auto
+
+# S02E01-E02: Pups Save the Penguins / Pups Save a Dolphin Pup
+- file: Paw Patrol/Paw Patrol-S02E02-Pups Save The Penguins Pups Save A Dolphin Pup.mp4
+  anthology: true
+  season: 2
+  episodes: [1, 2]
+  status: auto
+
+# S02E03-E04: Pups Save Jake / Pups Save the Parade
+- file: Paw Patrol/Paw Patrol-S02E03-Pups Save Jake Pups Save The Parade.mp4
+  anthology: true
+  season: 2
+  episodes: [3, 4]
+  status: auto
+
+# S02E07-E08: Pups Save the Diving Bell / Pups Save the Beavers
+- file: Paw Patrol/Paw Patrol-S02E04-Pups Save The Diving Bell Pups Save The Beavers.mp4
+  anthology: true
+  season: 2
+  episodes: [7, 8]
+  status: auto
+
+# S02E12-E13: Pups Save a Ghost / Pups Save a Show
+- file: Paw Patrol/Paw Patrol-S02E05-Pups Save A Ghost Pups Save A Show.mp4
+  anthology: true
+  season: 2
+  episodes: [12, 13]
+  status: auto
+
+# S02E10-E11: Pups Save an Ace / Pups Save a Wedding
+- file: Paw Patrol/Paw Patrol-S02E06-Pups Save An Ace Pups Save A Wedding.mp4
+  anthology: true
+  season: 2
+  episodes: [10, 11]
+  status: auto
+
+# S02E09: The New Pup (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S02E07-The New Pup.mp4
+  anthology: true
+  season: 2
+  episodes: [9]
+  status: auto
+
+# S02E14-E15: Pups Jungle Trouble / Pups Save a Herd
+- file: Paw Patrol/Paw Patrol-S02E08-Pups Jungle Trouble Pups Save A Herd.mp4
+  anthology: true
+  season: 2
+  episodes: [14, 15]
+  status: auto
+
+# S02E16-E17: Pups and the Big Freeze / Pups Save a Basketball Game
+- file: Paw Patrol/Paw Patrol-S02E09-Pups And The Big Freeze Pups Save A Basketball Game.mp4
+  anthology: true
+  season: 2
+  episodes: [16, 17]
+  status: auto
+
+# S02E18-E19: Pups Save a Talent Show / Pups Save the Corn Roast
+- file: Paw Patrol/Paw Patrol-S02E10-Pups Save A Talent Show Pups Save The Corn Roast.mp4
+  anthology: true
+  season: 2
+  episodes: [18, 19]
+  status: auto
+
+# S02E20-E21: Pups Leave Marshall Home Alone / Pups Save the Deer
+- file: Paw Patrol/Paw Patrol-S02E11-Pups Leave Marshall Home Alone Pups Save The Deer.mp4
+  anthology: true
+  season: 2
+  episodes: [20, 21]
+  status: auto
+
+# S02E27-E28: Pups Save a Friend / Pups Save a Stowaway
+- file: Paw Patrol/Paw Patrol-S02E12-Pups Save A Friend Pups Save A Stowaway.mp4
+  anthology: true
+  season: 2
+  episodes: [27, 28]
+  status: auto
+
+# S02E22-E23: Pups Save the Parrot / Pups Save the Queen Bee
+- file: Paw Patrol/Paw Patrol-S02E13-Pups Save The Parrot Pups Save The Queen Bee.mp4
+  anthology: true
+  season: 2
+  episodes: [22, 23]
+  status: auto
+
+# S02E29-E30: Pups' Adventures in Babysitting / Pups Save the Fireworks
+- file: Paw Patrol/Paw Patrol-S02E14-Pups Adventures In Babysitting Pups Save The Fireworks.mp4
+  anthology: true
+  season: 2
+  episodes: [29, 30]
+  status: auto
+
+# S02E25-E26: Pups Save an Elephant Family / Pups and the Mischievous Kittens
+- file: Paw Patrol/Paw Patrol-S02E15-Pups Save An Elephant Family Pups And The Mischievous Kitty.mp4
+  anthology: true
+  season: 2
+  episodes: [25, 26]
+  status: auto
+
+# S02E24: Pups Save a Mer-Pup (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S02E16-Pups Save A Mer Pup.mp4
+  anthology: true
+  season: 2
+  episodes: [24]
+  status: auto
+
+# S02E31-E32: Pups Save a Sniffle / Pups and the Ghost Cabin
+- file: Paw Patrol/Paw Patrol-S02E17-Pups Save A Sniffle Pups And The Ghost Cabin.mp4
+  anthology: true
+  season: 2
+  episodes: [31, 32]
+  status: auto
+
+# S02E33-E34: Pups Save an Adventure / Pups Save a Surprise
+- file: Paw Patrol/Paw Patrol-S02E18-Pups Save An Adventure Pups Save A Surprise.mp4
+  anthology: true
+  season: 2
+  episodes: [33, 34]
+  status: auto
+
+# S02E37: Pup-Fu! (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S02E19-Pup Fu.mp4
+  anthology: true
+  season: 2
+  episodes: [37]
+  status: auto
+
+# S02E43-E44: Pups Save the Mayor's Race / Pups Save an Outlaw's Loot
+- file: Paw Patrol/Paw Patrol-S02E20-Pups Save The Mayor S Race Pups Save An Outlaw S Loot.mp4
+  anthology: true
+  season: 2
+  episodes: [43, 44]
+  status: auto
+
+# S02E45-E46: Pups Save Walinda / Pups Save a Big Bone
+- file: Paw Patrol/Paw Patrol-S02E21-Pups Save Walinda Pups Save A Big Bone.mp4
+  anthology: true
+  season: 2
+  episodes: [45, 46]
+  status: auto
+
+# S02E47-E48: Pups Save a Floundering Francois / Pups Save the Pop-Up Penguins
+- file: Paw Patrol/Paw Patrol-S02E22-Pups Save A Floundering Francois Pups Save The Pop Up Penguins.mp4
+  anthology: true
+  season: 2
+  episodes: [47, 48]
+  status: auto
+
+# S02E38-E39: Pups Save a Snowboard Competition / Pups Save a Chicken of the Sea
+- file: Paw Patrol/Paw Patrol-S02E23-Pups Save A Snowboard Competition Pups Save A Chicken Of The Sea.mp4
+  anthology: true
+  season: 2
+  episodes: [38, 39]
+  status: auto
+
+# S02E35-E36: Pups Save a Pizza / Pups Save Skye
+- file: Paw Patrol/Paw Patrol-S02E24-Pups Save A Pizza Pups Save Skye.mp4
+  anthology: true
+  season: 2
+  episodes: [35, 36]
+  status: auto
+
+# S02E40-E41: Pups Save the Woof and Roll Show / Pups Save an Eagle
+- file: Paw Patrol/Paw Patrol-S02E25-Pups Save The Woof And Roll Show Pups Save An Eagle.mp4
+  anthology: true
+  season: 2
+  episodes: [40, 41]
+  status: auto
+
+# S02E42: Pups Bark With Dinosaurs (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S02E26-Pups Bark With Dinosaurs.mp4
+  anthology: true
+  season: 2
+  episodes: [42]
+  status: auto
+
+# Paw Patrol Season 3 - Anthology show with complex episode mapping
+# Season 3 has 48 episodes total across 26 files
+# Double-length episodes (22 min) are single episodes in files
+# Regular episodes (11 min) are paired in files
+# File numbering doesn't match canonical TVDB episode order
+
+# S03E01-E02: Pups Find a Genie / Pups Save a Tightrope Walker
+- file: Paw Patrol/Paw Patrol-S03E01-Pups Find A Genie Pups Save A Tightrope Walker.mp4
+  anthology: true
+  season: 3
+  episodes: [1, 2]
+  status: auto
+
+# S03E03-E04: Pups Save a Goldrush / Pups Save the Paw Patroller
+- file: Paw Patrol/Paw Patrol-S03E02-Pups Save A Goldrush Pups Save The Paw Patroller.mp4
+  anthology: true
+  season: 3
+  episodes: [3, 4]
+  status: auto
+
+# S03E05-E06: Pups Save the Soccer Game / Pups Save a Lucky Collar
+- file: Paw Patrol/Paw Patrol-S03E03-Pups Save The Soccer Game Pups Save A Lucky Collar.mp4
+  anthology: true
+  season: 3
+  episodes: [5, 6]
+  status: auto
+
+# S03E07-E08: Pups Save Alex's Mini-Patrol / Pups Save a Lost Tooth
+- file: Paw Patrol/Paw Patrol-S03E04-Pups Save Alex S Mini Patrol Pups Save A Lost Tooth.mp4
+  anthology: true
+  season: 3
+  episodes: [7, 8]
+  status: auto
+
+# S03E09: Air Pups (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S03E05-Air Pups.mp4
+  anthology: true
+  season: 3
+  episodes: [9]
+  status: auto
+
+# S03E10: Pups Save Friendship Day (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S03E06-Pups Save Friendship Day.mp4
+  anthology: true
+  season: 3
+  episodes: [10]
+  status: auto
+
+# S03E11-E12: Pups Save Apollo / Pups Save the Hippos
+- file: Paw Patrol/Paw Patrol-S03E07-Pups Save Apollo Pups Save The Hippos.mp4
+  anthology: true
+  season: 3
+  episodes: [11, 12]
+  status: auto
+
+# S03E13-E14: Pups Save Daring Danny X / Pups in a Fix
+- file: Paw Patrol/Paw Patrol-S03E08-Pups Save Daring Danny X Pups In A Fix.mp4
+  anthology: true
+  season: 3
+  episodes: [13, 14]
+  status: auto
+
+# S03E15-E16: Pups Save a Dragon / Pups Save Three Little Pigs
+- file: Paw Patrol/Paw Patrol-S03E09-Pups Save A Dragon Pups Save The Three Little Pigs.mp4
+  anthology: true
+  season: 3
+  episodes: [15, 16]
+  status: auto
+
+# S03E17-E18: Pups Save a Stinky Flower / Pups Save a Monkey-Naut
+- file: Paw Patrol/Paw Patrol-S03E10-Pups Save A Stinky Flower Pups Save A Monkey Naut.mp4
+  anthology: true
+  season: 3
+  episodes: [17, 18]
+  status: auto
+
+# S03E19-E20: Pups Save the Polar Bears / A Pup in Sheep's Clothing
+- file: Paw Patrol/Paw Patrol-S03E11-Pups Save The Polar Bears A Pup In Sheep S Clothing.mp4
+  anthology: true
+  season: 3
+  episodes: [19, 20]
+  status: auto
+
+# S03E21-E22: Pups Save a School Bus / Pups Save the Songbirds
+- file: Paw Patrol/Paw Patrol-S03E12-Pups Save A School Bus Pups Save The Songbirds.mp4
+  anthology: true
+  season: 3
+  episodes: [21, 22]
+  status: auto
+
+# S03E23-E24: Pups Save Old Trusty / Pups Save a Pony
+- file: Paw Patrol/Paw Patrol-S03E13-Pups Save Old Trusty Pups Save A Pony.mp4
+  anthology: true
+  season: 3
+  episodes: [23, 24]
+  status: auto
+
+# S03E25-E26: Pups Save a Robo-Saurus / Pups Save a Film Festival
+- file: Paw Patrol/Paw Patrol-S03E14-Pups Save A Robo Saurus Pups Save A Film Festival.mp4
+  anthology: true
+  season: 3
+  episodes: [25, 26]
+  status: auto
+
+# S03E27: Tracker Joins the Pups! (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S03E15-Tracker Joins The Pups.mp4
+  anthology: true
+  season: 3
+  episodes: [27]
+  status: auto
+
+# S03E28-E29: Pups Bear-ly Save Danny / Pups Save the Mayor's Tulips
+- file: Paw Patrol/Paw Patrol-S03E16-Pups Bear Ly Save Danny Pups Save The Mayor S Tulips.mp4
+  anthology: true
+  season: 3
+  episodes: [28, 29]
+  status: auto
+
+# S03E30-E31: All Star Pups! / Pups Save Sports Day
+- file: Paw Patrol/Paw Patrol-S03E17-All Star Pups Pups Save A Sports Day.mp4
+  anthology: true
+  season: 3
+  episodes: [30, 31]
+  status: auto
+
+# S03E32-E33: Pups in a Jam / Pups Save a Windsurfing Pig
+- file: Paw Patrol/Paw Patrol-S03E18-Pups In A Jam Pups Save A Windsurfing Pig.mp4
+  anthology: true
+  season: 3
+  episodes: [32, 33]
+  status: auto
+
+# S03E34-E35: Pups Get Growing / Pups Save a Space Toy
+- file: Paw Patrol/Paw Patrol-S03E19-Pups Get Growing Pups Save A Space Toy.mp4
+  anthology: true
+  season: 3
+  episodes: [34, 35]
+  status: auto
+
+# S03E36-E37: Pups Get Skunked / Pups and a Whale of a Tale
+- file: Paw Patrol/Paw Patrol-S03E20-Pups Get Skunked Pups And A Whale Of A Tale.mp4
+  anthology: true
+  season: 3
+  episodes: [36, 37]
+  status: auto
+
+# S03E38-E39: Parroting Pups / Merpups Save the Turbots
+- file: Paw Patrol/Paw Patrol-S03E21-Parroting Pups Merpups Save The Turbots.mp4
+  anthology: true
+  season: 3
+  episodes: [38, 39]
+  status: auto
+
+# S03E40: The Pups' Winter Wonder Show (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S03E22-The Pups Winter Wonder Show.mp4
+  anthology: true
+  season: 3
+  episodes: [40]
+  status: auto
+
+# S03E41-E42: Pups Save the Gliding Turbots / Pups Save a Plane
+- file: Paw Patrol/Paw Patrol-S03E23-Pups Save The Gliding Turbots Pups Save A Plane.mp4
+  anthology: true
+  season: 3
+  episodes: [41, 42]
+  status: auto
+
+# S03E43-E44: Pups Save a Giant Plant / Pups Get Stuck
+- file: Paw Patrol/Paw Patrol-S03E24-Pups Save A Giant Plant Pups Get Stuck.mp4
+  anthology: true
+  season: 3
+  episodes: [43, 44]
+  status: auto
+
+# S03E45-E46: Pups Raise the Paw Patroller / Pups Save the Crows
+- file: Paw Patrol/Paw Patrol-S03E25-Pups Raise The Paw Patroller Pups Save The Crows.mp4
+  anthology: true
+  season: 3
+  episodes: [45, 46]
+  status: auto
+
+# S03E47-E48: Pups Save Their Floating Friends / Pups Save a Satellite
+- file: Paw Patrol/Paw Patrol-S03E26-Pups Save Their Floating Friends Pups Save A Satellite.mp4
+  anthology: true
+  season: 3
+  episodes: [47, 48]
+  status: auto
+
+# Paw Patrol Season 4 - Anthology show with complex episode mapping
+# Season 4 has 47 episodes total across 26 files
+# Double-length episodes (22 min) are single episodes in files
+# Regular episodes (11 min) are paired in files
+# File numbering doesn't match canonical TVDB episode order
+# Contains examples of incorrect input titles needing correction
+
+# S04E01-E02: Pups Save a Blimp / Pups Save the Chili Cook-Off
+# Note: File shows "Chili Cook Out" but canonical is "Chili Cook-Off"
+- file: Paw Patrol/Paw Patrol-S04E01-Pups Save A Blimp Pups Save A Chili Cook Out.mp4
+  anthology: true
+  season: 4
+  episodes: [1, 2]
+  status: auto
+
+# S04E03-E04: Pups Save a Teeny Penguin / Pups Save the Cat Show
+- file: Paw Patrol/Paw Patrol-S04E02-Pups Save A Teeny Tiny Penguin Pups Save The Cat Show.mp4
+  anthology: true
+  season: 4
+  episodes: [3, 4]
+  status: auto
+
+# S04E05-E06: Pups Save a Playful Dragon / Pups Save the Critters
+- file: Paw Patrol/Paw Patrol-S04E03-Pups Save A Playful Dragon Pups Save The Critters.mp4
+  anthology: true
+  season: 4
+  episodes: [5, 6]
+  status: auto
+
+# S04E07: Mission Paw: Quest For The Crown (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S04E04-Mission Paw Quest For The Crown.mp4
+  anthology: true
+  season: 4
+  episodes: [7]
+  status: auto
+
+# S04E08-E09: Pups Save a Sleepover / Pups Save the Carnival
+- file: Paw Patrol/Paw Patrol-S04E05-Pups Save A Sleepover Pups Save The Carnival.mp4
+  anthology: true
+  season: 4
+  episodes: [8, 9]
+  status: auto
+
+# S04E10-E11: Pups Save Jake's Cake / Pups Save a Wild Ride
+- file: Paw Patrol/Paw Patrol-S04E06-Pups Save Jake S Cake Pups Save A Wild Ride.mp4
+  anthology: true
+  season: 4
+  episodes: [10, 11]
+  status: auto
+
+# S04E12-E13: Mission Paw: Royally Spooked / Pups Save Monkey-dinger
+- file: Paw Patrol/Paw Patrol-S04E07-Mission Paw Royally Spooked Pups Save Monkey Dinger.mp4
+  anthology: true
+  season: 4
+  episodes: [12, 13]
+  status: auto
+
+# S04E14-E15: Pups Save the Flying Food / Pups Save a Ferris Wheel
+- file: Paw Patrol/Paw Patrol-S04E08-Pups Save The Flying Food Pups Save A Ferris Wheel.mp4
+  anthology: true
+  season: 4
+  episodes: [14, 15]
+  status: auto
+
+# S04E18: Mission Paw: Pups Save the Royal Throne (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S04E09-Mission Paw Pups Save The Royal Throne.mp4
+  anthology: true
+  season: 4
+  episodes: [18]
+  status: auto
+
+# S04E16-E17: Pups Save a Sleepwalking Bear / Pups Save Dude Ranch Danny
+- file: Paw Patrol/Paw Patrol-S04E10-Pups Save A Sleepwalking Bear Pups Save Dude Ranch Danny.mp4
+  anthology: true
+  season: 4
+  episodes: [16, 17]
+  status: auto
+
+# S04E23: Sea Patrol: Pups Save a Baby Octopus (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S04E11-Pups Save A Baby Octopus.mp4
+  anthology: true
+  season: 4
+  episodes: [23]
+  status: auto
+
+# S04E19-E20: Pups Save Big Hairy / Pups Save a Flying Kitty
+- file: Paw Patrol/Paw Patrol-S04E12-Pups Save Big Hairy Pups Save A Flying Kitty.mp4
+  anthology: true
+  season: 4
+  episodes: [19, 20]
+  status: auto
+
+# S04E21-E22: Pups Party with Bats / Pups Save Sensei Yumi
+- file: Paw Patrol/Paw Patrol-S04E13-Pups Party With Bats Pups Save Sensei Yumi.mp4
+  anthology: true
+  season: 4
+  episodes: [21, 22]
+  status: auto
+
+# S04E24-E25: Pups Save the Runaway Kitties / Pups Save Tiny Marshall
+- file: Paw Patrol/Paw Patrol-S04E14-Pups Save The Runaway Kitties Pups Save Tiny Marshall.mp4
+  anthology: true
+  season: 4
+  episodes: [24, 25]
+  status: auto
+
+# S04E26-E27: Pups Chill Out / Pups Save Farmer Alex
+- file: Paw Patrol/Paw Patrol-S04E15-Pups Chill Out Pups Save Farmer Alex.mp4
+  anthology: true
+  season: 4
+  episodes: [26, 27]
+  status: auto
+
+# S04E28-E29: Sea Patrol: Pups Save a Shark / Sea Patrol: Pups Save the Pier
+- file: Paw Patrol/Paw Patrol-S04E16-Sea Patrol Pups Save A Shark Sea Patrol Pups Save The Pier.mp4
+  anthology: true
+  season: 4
+  episodes: [28, 29]
+  status: auto
+
+# S04E30-E31: Pups Save a Space Rock / Pups Save a Good Mayor
+- file: Paw Patrol/Paw Patrol-S04E17-Pups Save A Space Rock Pups Save A Good Mayor.mp4
+  anthology: true
+  season: 4
+  episodes: [30, 31]
+  status: auto
+
+# S04E32-E33: Pups Save a City Kitty / Pups Save a Cloud Surfer
+- file: Paw Patrol/Paw Patrol-S04E18-Pups Save A City Kitty Pups Save A Cloud Surfer.mp4
+  anthology: true
+  season: 4
+  episodes: [32, 33]
+  status: auto
+
+# S04E34: Sea Patrol: Pirate Pups to the Rescue (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S04E19-Sea Patrol Pirate Pups To The Rescue.mp4
+  anthology: true
+  season: 4
+  episodes: [34]
+  status: auto
+
+# S04E35-E36: Pups Save the Mail / Pups Save a Frog Mayor
+- file: Paw Patrol/Paw Patrol-S04E20-Pups Save The Mail Pups Save A Frog Mayor.mp4
+  anthology: true
+  season: 4
+  episodes: [35, 36]
+  status: auto
+
+# S04E37-E38: Pups Save the Runaway Turtles / Pups Save the Shivering Sheep
+- file: Paw Patrol/Paw Patrol-S04E21-Pups Save The Runaway Turtles Pups Save The Shivering Sheep.mp4
+  anthology: true
+  season: 4
+  episodes: [37, 38]
+  status: auto
+
+# S04E39-E40: Sea Patrol: Pups Save a Frozen Flounder / Sea Patrol: Pups Save a Narwhal
+- file: Paw Patrol/Paw Patrol-S04E22-Sea Patrol Pups Save A Frozen Flounder Sea Patrol Pups Save A Narwhal.mp4
+  anthology: true
+  season: 4
+  episodes: [39, 40]
+  status: auto
+
+# S04E41-E42: Pups Save Luke Stars / Pups Save Chicken Day
+- file: Paw Patrol/Paw Patrol-S04E23-Pups Save Luke Stars Pups Save Chicken Day.mp4
+  anthology: true
+  season: 4
+  episodes: [41, 42]
+  status: auto
+
+# S04E43-E44: Pups Save Francois The Penguin / Pups Save Daring Danny's Hippo
+- file: Paw Patrol/Paw Patrol-S04E24-Pups Save Francois The Penguin Pups Save Daring Danny S Hippo.mp4
+  anthology: true
+  season: 4
+  episodes: [43, 44]
+  status: auto
+
+# S04E45-E46: Pups Save Baby Humdinger / Pups Save a Piñata
+- file: Paw Patrol/Paw Patrol-S04E25-Pups Save Baby Humdinger Pups Save A Pinata.mp4
+  anthology: true
+  season: 4
+  episodes: [45, 46]
+  status: auto
+
+# S04E47: Sea Patrol: Pups Save Puplantis (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S04E26-Sea Patrol Pups Save Puplantis.mp4
+  anthology: true
+  season: 4
+  episodes: [47]
+  status: auto
+
+# Paw Patrol Season 5 - Anthology show with complex episode mapping
+# Season 5 has 47 episodes total across 25 files
+# Double-length episodes (22 min) are single episodes in files
+# Regular episodes (11 min) are paired in files
+# File numbering doesn't match canonical TVDB episode order
+
+# S05E01-E02: Pups Save the Kitty Rescue Crew / Pups Save an Ostrich
+- file: Paw Patrol/Paw Patrol-S05E01-Pups Save The Kitty Rescue Crew Pups Save An Ostrich.mp4
+  anthology: true
+  season: 5
+  episodes: [1, 2]
+  status: auto
+
+# S05E03-E04: Pups Save Big Paw / Pups Save the Hum-Mover
+- file: Paw Patrol/Paw Patrol-S05E02-Pups Save Big Paw Pups Save A Hum Mover.mp4
+  anthology: true
+  season: 5
+  episodes: [3, 4]
+  status: auto
+
+# S05E05-E06: Sea Patrol: Pups Save a Sunken Sloop / Sea Patrol: Pups Save a Wiggly Whale
+- file: Paw Patrol/Paw Patrol-S05E03-Sea Patrol Pups Save The Sunken Sloop Sea Patrol Pups Save A Wiggly Whale.mp4
+  anthology: true
+  season: 5
+  episodes: [5, 6]
+  status: auto
+
+# S05E07-E08: Pups Save a High-Flying Skye / Pups Go for the Gold
+- file: Paw Patrol/Paw Patrol-S05E04-Pups Save A High Flying Skye Pups Go For The Gold.mp4
+  anthology: true
+  season: 5
+  episodes: [7, 8]
+  status: auto
+
+# S05E09-E10: Pups Save an Extreme Lunch / Pups Save a Cat Burglar
+- file: Paw Patrol/Paw Patrol-S05E05-Pups Save An Extreme Lunch Pups Save A Cat Burglar.mp4
+  anthology: true
+  season: 5
+  episodes: [9, 10]
+  status: auto
+
+# S05E11-E12: Sea Patrol: Pups Save the Flying Diving Bell / Sea Patrol: Pups Save a Soggy Farm
+- file: Paw Patrol/Paw Patrol-S05E06-Sea Patrol Pups Save The Flying Diving Bell Sea Patrol Pups Save A Soggy Farm.mp4
+  anthology: true
+  season: 5
+  episodes: [11, 12]
+  status: auto
+
+# S05E15-E16: Pups Save the Bookmobile / Pups Save Heady Humdinger
+- file: Paw Patrol/Paw Patrol-S05E07-Pups Save A Bookmobile Pups Save Heady Humdinger.mp4
+  anthology: true
+  season: 5
+  episodes: [15, 16]
+  status: auto
+
+# S05E13-E14: Pups Save the Butterflies / Pups Save an Underground Chicken
+- file: Paw Patrol/Paw Patrol-S05E08-Pups Save The Butterflies Pups Save An Underground Chicken.mp4
+  anthology: true
+  season: 5
+  episodes: [13, 14]
+  status: auto
+
+# S05E17: Sea Patrol: Pups Save Their Pirated Sea Patroller (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S05E09-Sea Patrol Pups Save The Pirated Sea Patroller.mp4
+  anthology: true
+  season: 5
+  episodes: [17]
+  status: auto
+
+# S05E20: Ultimate Rescue: Pups Save the Royal Kitties (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S05E10-Ultimate Rescue Pups Save The Royal Kitties.mp4
+  anthology: true
+  season: 5
+  episodes: [20]
+  status: auto
+
+# S05E18-E19: Pups Save the PawPaws / Pups Save a Popped Top
+- file: Paw Patrol/Paw Patrol-S05E11-Pups Save The Pawpaws Pups Save A Popped Top.mp4
+  anthology: true
+  season: 5
+  episodes: [18, 19]
+  status: auto
+
+# S05E21-E22: Pups Save the Snowshoeing Goodways / Pups Save a Duck Pond
+- file: Paw Patrol/Paw Patrol-S05E12-Pups Save The Snowshoeing Goodways Pups Save A Duck Pond.mp4
+  anthology: true
+  season: 5
+  episodes: [21, 22]
+  status: auto
+
+# S05E23-E24: Sea Patrol: Pups Save Tilly Turbot / Pups Save an Upset Elephant
+- file: Paw Patrol/Paw Patrol-S05E13-Sea Patrol Pups Save Tilly Turbot Pups Save An Upset Elephant.mp4
+  anthology: true
+  season: 5
+  episodes: [23, 24]
+  status: auto
+
+# S05E26: Ultimate Rescue: Pups Save the Tigers (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S05E14-Ultimate Rescue Pups Save The Tigers.mp4
+  anthology: true
+  season: 5
+  episodes: [26]
+  status: auto
+
+# S05E27-E28: Rocky Saves Himself / Pups and the Mystery of the Driverless Snow Cat
+- file: Paw Patrol/Paw Patrol-S05E15-Rocky Saves Himself Pups And The Mystery Of The Driverless Snowcat.mp4
+  anthology: true
+  season: 5
+  episodes: [27, 28]
+  status: auto
+
+# S05E32-E25: Pups Save the Trick-or-Treaters / Pups Save an Out of Control Mini Patrol
+- file: Paw Patrol/Paw Patrol-S05E16-Pups Save The Trick Or Treaters Pups Save An Out Of Control Mini Patrol.mp4
+  anthology: true
+  season: 5
+  episodes: [32, 25]
+  status: auto
+
+# S05E31: Ultimate Rescue: Pups Save the Movie Monster (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S05E17-Ultimate Rescue Pups Save The Movie Monster.mp4
+  anthology: true
+  season: 5
+  episodes: [31]
+  status: auto
+
+# S05E33-E34: Mission PAW: Pups Save a Royal Concert / Mission PAW: Pups Save the Princess' Pals
+- file: Paw Patrol/Paw Patrol-S05E18-Mission Paw Pups Save A Royal Concert Mission Paw Pups Save The Princess Pals.mp4
+  anthology: true
+  season: 5
+  episodes: [33, 34]
+  status: auto
+
+# S05E29-E30: Pups and the Werepuppy / Pups Save a Sleepwalking Mayor
+- file: Paw Patrol/Paw Patrol-S05E19-Pups And The Werepuppy Pups Save A Sleepwalking Mayor.mp4
+  anthology: true
+  season: 5
+  episodes: [29, 30]
+  status: auto
+
+# S05E37-E38: Pups Save a Cuckoo Clock / Pups Save Ms. Marjorie's House
+- file: Paw Patrol/Paw Patrol-S05E21-Pups Save A Cuckoo Clock Pups Save Ms Marjorie S House.mp4
+  anthology: true
+  season: 5
+  episodes: [37, 38]
+  status: auto
+
+# S05E39-E40: Pups Save Thanksgiving / Pups Save a Windy Bay
+- file: Paw Patrol/Paw Patrol-S05E22-Pups Rescue Thanksgiving Pups Save A Windy Bay.mp4
+  anthology: true
+  season: 5
+  episodes: [39, 40]
+  status: auto
+
+# S05E35-E36: Ultimate Rescue: Pups Save a Swamp Monster / Ultimate Rescue: Pups and the Hidden Golden Bones
+- file: Paw Patrol/Paw Patrol-S05E23-Ultimate Rescue Pups Save A Swamp Monster Ultimate Rescue Pups And The Hidden Golden Bones.mp4
+  anthology: true
+  season: 5
+  episodes: [35, 36]
+  status: auto
+
+# S05E41-E42: Pups Save a Frozen Camp Out / Pups Save the Fizzy Pickles
+- file: Paw Patrol/Paw Patrol-S05E24-Pups Save A Frozen Camp Out Pups Save The Fizzy Pickles.mp4
+  anthology: true
+  season: 5
+  episodes: [41, 42]
+  status: auto
+
+# S05E43-E44: Pups Save a Pluck-o-matic / Pups Save a Mascot
+- file: Paw Patrol/Paw Patrol-S05E25-Pups Save A Pluck O Matic Pups Save A Mascot.mp4
+  anthology: true
+  season: 5
+  episodes: [43, 44]
+  status: auto
+
+# S05E45: Ultimate Rescue: Pups Save a Runaway Stargazer (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S05E26-Ultimate Rescue Pups Save A Runaway Stargazer.mp4
+  anthology: true
+  season: 5
+  episodes: [45]
+  status: auto
+
+# S05E46-E47: Pups Save Ace's Birthday Surprise / Pups Save a Tower of Pizza
+- file: Paw Patrol/Paw Patrol-S05E20-Pups Save Ace S Birthday Surprise Pups Save A Tower Of Pizza.mp4
+  anthology: true
+  season: 5
+  episodes: [46, 47]
+  status: auto
+
+# Paw Patrol Season 6 - Anthology show with complex episode mapping
+# Season 6 has 49 episodes total across 26 files
+# Double-length episodes (22 min) are single episodes in files
+# Special 15-minute episodes are paired together in files
+# Regular episodes (11 min) are paired in files
+# File numbering doesn't match canonical TVDB episode order
+
+# S06E01-E02: Pups Save the Jungle Penguins / Pups Save a Freighter
+- file: Paw Patrol/Paw Patrol-S06E01-Pups Save The Jungle Penguins Pups Save A Freighter.mp4
+  anthology: true
+  season: 6
+  episodes: [1, 2]
+  status: auto
+
+# S06E03-E04: Ultimate Rescue: Pups Stop a Meltdown / Ultimate Rescue: Pups and the Mystery of the Missing Phones
+- file: Paw Patrol/Paw Patrol-S06E02-Ultimate Rescue Pups Stop A Meltdown Ultimate Rescue Pups And The Mystery Of The Missing Cell Phones.mp4
+  anthology: true
+  season: 6
+  episodes: [3, 4]
+  status: auto
+
+# S06E05-E06: Pups Save a Melon Festival / Pups Save a Cow
+- file: Paw Patrol/Paw Patrol-S06E03-Pups Save A Melon Festival Pups Save A Cow.mp4
+  anthology: true
+  season: 6
+  episodes: [5, 6]
+  status: auto
+
+# S06E07-E08: Pups Save the Honey / Pups Save Mayor Goodway's Purse
+- file: Paw Patrol/Paw Patrol-S06E04-Pups Save The Honey Pups Save Mayor Goodway S Purse.mp4
+  anthology: true
+  season: 6
+  episodes: [7, 8]
+  status: auto
+
+# S06E09-E10: Ultimate Rescue: Pups Save the Mountain Climbers / Ultimate Rescue: Pups Save Captain Gordy
+- file: Paw Patrol/Paw Patrol-S06E05-Ultimate Rescue Pups Save The Mountain Climbers Ultimate Rescue Pups Save Captain Gordy.mp4
+  anthology: true
+  season: 6
+  episodes: [9, 10]
+  status: auto
+
+# S06E11-E12: Pups and the Stinky Bubble Trouble / Pups Save the Baby Ostriches
+- file: Paw Patrol/Paw Patrol-S06E06-Pups And The Stinky Bubble Trouble Pups Save The Baby Ostriches.mp4
+  anthology: true
+  season: 6
+  episodes: [11, 12]
+  status: auto
+
+# S06E13-E14: Pups Save Gustavo's Guitar / Pups Save the Yoga Goats
+- file: Paw Patrol/Paw Patrol-S06E07-Pups Save Gustavo S Guitar Pups Save The Yoga Goats.mp4
+  anthology: true
+  season: 6
+  episodes: [13, 14]
+  status: auto
+
+# S06E15-E16: Pups Save Bedtime / Pups Save Chickaletta's Egg
+- file: Paw Patrol/Paw Patrol-S06E08-Pups Save Bedtime Pups Save Chickaletta S Egg.mp4
+  anthology: true
+  season: 6
+  episodes: [15, 16]
+  status: auto
+
+# S06E17: Mighty Pups, Super Paws: When Super Kitties Attack (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S06E09-Mighty Pups Super Paws When Super Kitties Attack.mp4
+  anthology: true
+  season: 6
+  episodes: [17]
+  status: auto
+
+# S06E18-E19: Pups Save a Manatee / Pups Save Breakfast
+- file: Paw Patrol/Paw Patrol-S06E10-Pups Save A Manatee Pups Save Breakfast.mp4
+  anthology: true
+  season: 6
+  episodes: [18, 19]
+  status: auto
+
+# S06E20-E21: Pups Save the Land Pirates / Pups Save the Birdwatching Turbots
+- file: Paw Patrol/Paw Patrol-S06E11-Pups Save The Land Pirates Pups Save The Birdwatching Turbots.mp4
+  anthology: true
+  season: 6
+  episodes: [20, 21]
+  status: auto
+
+# S06E22: Mighty Pups, Super Paws: Pups Meet the Mighty Twins (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S06E12-Mighty Pups Super Paws Pups Meet The Mighty Twins.mp4
+  anthology: true
+  season: 6
+  episodes: [22]
+  status: auto
+
+# S06E23-E24: Pups Save a Freaky Pup-Day / Pups Save a Runaway Mayor
+- file: Paw Patrol/Paw Patrol-S06E13-Pups Save A Freaky Pup Day Pups Save A Runaway Mayor.mp4
+  anthology: true
+  season: 6
+  episodes: [23, 24]
+  status: auto
+
+# S06E25-E26: Pups Save a Bat Family / Pups Save a Mud Monster
+- file: Paw Patrol/Paw Patrol-S06E14-Pups Save A Bat Family Pups Save A Mud Monster.mp4
+  anthology: true
+  season: 6
+  episodes: [25, 26]
+  status: auto
+
+# S06E27-E28: Mighty Pups, Super Paws: Pups Save a Giant Chicken / Mighty Pups, Super Paws: Pups Stop Harold's Deep Freeze
+- file: Paw Patrol/Paw Patrol-S06E15-Mighty Pups Super Paws Pups Save A Giant Chicken Mighty Pups Super Paws Pups Stop Harold S Deep Freeze.mp4
+  anthology: true
+  season: 6
+  episodes: [27, 28]
+  status: auto
+
+# S06E29-E30: Pups Save the Balloon Pups / Pups Save the Spider Spies
+- file: Paw Patrol/Paw Patrol-S06E16-Pups Save The Balloon Pups Pups Save The Spider Spies.mp4
+  anthology: true
+  season: 6
+  episodes: [29, 30]
+  status: auto
+
+# S06E31-E32: Pups Save the Bears / Pups Save a Farmerless Farm
+- file: Paw Patrol/Paw Patrol-S06E17-Pups Save The Bears Pups Save A Farmerless Farm.mp4
+  anthology: true
+  season: 6
+  episodes: [31, 32]
+  status: auto
+
+# S06E33-E34: Mighty Pups, Super Paws: Pups and the Big Twin Trick / Mighty Pups, Super Paws: Pups Save the Mega Mayor
+- file: Paw Patrol/Paw Patrol-S06E18-Mighty Pups Super Paws Pups And The Big Twin Trick Mighty Pups Super Paws Pups Save A Mega Mayor.mp4
+  anthology: true
+  season: 6
+  episodes: [33, 34]
+  status: auto
+
+# S06E35-E36: Pups Save a White Wolf / Pups Save a Wrong Way Explorer
+- file: Paw Patrol/Paw Patrol-S06E19-Pups Save A White Wolf Pups Save A Wrong Way Explorer.mp4
+  anthology: true
+  season: 6
+  episodes: [35, 36]
+  status: auto
+
+# S06E37-E38: Pups Save the Squirrels / Pups Save a Roo
+- file: Paw Patrol/Paw Patrol-S06E20-Pups Save The Squirrels Pups Save A Roo.mp4
+  anthology: true
+  season: 6
+  episodes: [37, 38]
+  status: auto
+
+# S06E39: Mighty Pups, Charged Up: Pups vs. the Copycat (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S06E21-Mighty Pups Charged Up Pups Vs The Copycat.mp4
+  anthology: true
+  season: 6
+  episodes: [39]
+  status: auto
+
+# S06E40-E41: Pups Save a Humsquatch / Pups Save a Far Flung Flying Disc
+- file: Paw Patrol/Paw Patrol-S06E22-Pups Save A Humsquatch Pups Stop A Far Flung Flying Disc.mp4
+  anthology: true
+  season: 6
+  episodes: [40, 41]
+  status: auto
+
+# S06E42-E43: Pups Rescue a Rescuer / Pups Save the Phantom of the Frog Pond
+- file: Paw Patrol/Paw Patrol-S06E23-Pups Rescue A Rescuer Pups Save The Phantom Of The Frog Pond.mp4
+  anthology: true
+  season: 6
+  episodes: [42, 43]
+  status: auto
+
+# S06E44-E45: Mighty Pups, Charged Up: Pups Stop a Big Bad Bot / Mighty Pups, Charged Up: Mighty Pups Versus the Dome
+- file: Paw Patrol/Paw Patrol-S06E24-Mighty Pups Charged Up Pups Stop A Big Bad Bot Mighty Pups Charged Up Pups Vs The Dome.mp4
+  anthology: true
+  season: 6
+  episodes: [44, 45]
+  status: auto
+
+# S06E46-E47: Ultimate Rescue: Pups Save the Opening Ceremonies / Ultimate Rescue: Pups Save the Adventure Bay Games (15 min episodes paired)
+- file: Paw Patrol/Paw Patrol-S06E25-Ultimate Rescue Pups Save The Opening Ceremonies Ultimate Rescue Pups Save The Adventure Bay Games.mp4
+  anthology: true
+  season: 6
+  episodes: [46, 47]
+  status: auto
+
+# S06E48-E49: Pups Save a Tour Bus / Pups Save Midnight at the Museum
+- file: Paw Patrol/Paw Patrol-S06E26-Pups Save A Tour Bus Pups Save Midnight At The Museum.mp4
+  anthology: true
+  season: 6
+  episodes: [48, 49]
+  status: auto
+
+# Paw Patrol Season 7 - Anthology show with complex episode mapping
+# Season 7 has 45 episodes total across 26 files
+# Double-length episodes (22 min) are single episodes in files
+# Regular episodes (11 min) are paired in files
+# File numbering doesn't match canonical TVDB episode order
+# Introduces Dino Rescue and Moto Pups special episode arcs
+
+# S07E01-E02: Mighty Pups, Charged Up: Pups Stop a Humdinger Horde / Mighty Pups, Charged Up: Pups Save a Mighty Lighthouse
+- file: Paw Patrol/Paw Patrol-S07E01-Mighty Pups Charged Up Pups Stop A Humdinger Horde Pups Save A Mighty Lighthouse.mp4
+  anthology: true
+  season: 7
+  episodes: [1, 2]
+  status: auto
+
+# S07E03-E04: Pups Save Election Day / Pups Save the Bubble Monkeys
+- file: Paw Patrol/Paw Patrol-S07E02-Pups Save Election Day Pups Save The Bubble Monkeys.mp4
+  anthology: true
+  season: 7
+  episodes: [3, 4]
+  status: auto
+
+# S07E05-E06: Pups Save an Antarctic Martian / Pups Save the Maze Explorers
+- file: Paw Patrol/Paw Patrol-S07E03-Pups Save An Antarctic Martian Pups Save The Maze Explorers.mp4
+  anthology: true
+  season: 7
+  episodes: [5, 6]
+  status: auto
+
+# S07E07: Mighty Pups, Charged Up: Pups vs. Three Super Baddies (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S07E04-Mighty Pups Charged Up Pups Vs Three Super Baddies.mp4
+  anthology: true
+  season: 7
+  episodes: [7]
+  status: auto
+
+# S07E08-E09: Pups Save a Waiter Bot / Pups Stop a Pie-Clone
+- file: Paw Patrol/Paw Patrol-S07E05-Pups Save A Waiter Bot Pups Stop A Pie Clone.mp4
+  anthology: true
+  season: 7
+  episodes: [8, 9]
+  status: auto
+
+# S07E10: Dino Rescue: Pups and the Lost Dino Eggs (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S07E06-Dino Rescue Pups And The Lost Dino Eggs.mp4
+  anthology: true
+  season: 7
+  episodes: [10]
+  status: auto
+
+# S07E11-E12: Dino Rescue: Pups Save a Pterodactyl / Dino Rescue: Pups and the Big Rumble
+- file: Paw Patrol/Paw Patrol-S07E07-Dino Rescue Pups Save A Pterodactyl Dino Rescue Pups And The Big Rumble.mp4
+  anthology: true
+  season: 7
+  episodes: [11, 12]
+  status: auto
+
+# S07E13: Dino Rescue: Pups Save a Hum-Dino (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S07E08-Dino Rescue Pups Save A Hum Dino.mp4
+  anthology: true
+  season: 7
+  episodes: [13]
+  status: auto
+
+# S07E14-E15: Dino Rescue: Pups Save a Sore Dino / Dino Rescue: Pups Save the Triceratops Tag-Alongs
+- file: Paw Patrol/Paw Patrol-S07E09-Dino Rescue Pups Save A Sore Dino Dino Rescue Pups Save The Triceratops Tag Alongs.mp4
+  anthology: true
+  season: 7
+  episodes: [14, 15]
+  status: auto
+
+# S07E16-E17: Pups Save the Big Bad Bird Crew / Pups Save a Soapbox Derby
+- file: Paw Patrol/Paw Patrol-S07E10-Pups Save The Big Bad Bird Crew Pups Save A Soapbox Derby.mp4
+  anthology: true
+  season: 7
+  episodes: [16, 17]
+  status: auto
+
+# S07E18-E19: Pups Save the Skydivers / Pups Save the Cupcakes
+- file: Paw Patrol/Paw Patrol-S07E11-Pups Save The Skydivers Pups Save The Cupcakes.mp4
+  anthology: true
+  season: 7
+  episodes: [18, 19]
+  status: auto
+
+# S07E20: Ultimate Rescue: Pups Save the Pupmobiles (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S07E12-Ultimate Rescue Pups Save The Pupmobiles.mp4
+  anthology: true
+  season: 7
+  episodes: [20]
+  status: auto
+
+# S07E21-E22: Pups Save a Lost Gold Miner / Pups Save Uncle Otis from His Cabin
+- file: Paw Patrol/Paw Patrol-S07E13-Pups Save A Lost Gold Miner Pups Save Uncle Otis From His Cabin.mp4
+  anthology: true
+  season: 7
+  episodes: [21, 22]
+  status: auto
+
+# S07E23-E24: Pups Save a Rocket Roller Skater / Pups Save Ryder's Surprise
+- file: Paw Patrol/Paw Patrol-S07E14-Pups Save A Rocket Roller Skater Pups Save Ryder S Surprise.mp4
+  anthology: true
+  season: 7
+  episodes: [23, 24]
+  status: auto
+
+# S07E25-E26: Pups Save the Marooned Mayors / Pups Save the Game Show
+- file: Paw Patrol/Paw Patrol-S07E15-Pups Save The Game Show Pups Save The Marooned Mayors.mp4
+  anthology: true
+  season: 7
+  episodes: [25, 26]
+  status: auto
+
+# S07E27-E28: Pups Save the Chalk Art / Pups Save the Hot Potato
+- file: Paw Patrol/Paw Patrol-S07E16-Pups Save The Chalk Art Pups Save The Hot Potato.mp4
+  anthology: true
+  season: 7
+  episodes: [27, 28]
+  status: auto
+
+# S07E31: Pups Save a Bah Humdinger! (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S07E17-Pups Save A Bah Humdinger.mp4
+  anthology: true
+  season: 7
+  episodes: [31]
+  status: auto
+
+# S07E34: Moto Pups: Pups vs. the Ruff-Ruff Pack (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S07E18-Moto Pups Pups Vs The Ruff Ruff Pack.mp4
+  anthology: true
+  season: 7
+  episodes: [34]
+  status: auto
+
+# S07E35-E36: Pups Save a Trash-Dinger / Pups Save the Royal Armor
+- file: Paw Patrol/Paw Patrol-S07E19-Pups Save A Trash Dinger Pups Save The Royal Armor.mp4
+  anthology: true
+  season: 7
+  episodes: [35, 36]
+  status: auto
+
+# S07E37-E38: Moto Pups: Pups Save the Donuts / Moto Pups: Pups Save the Kitties
+- file: Paw Patrol/Paw Patrol-S07E20-Moto Pups Pups Save The Donuts Moto Pups Pups Save The Kitties.mp4
+  anthology: true
+  season: 7
+  episodes: [37, 38]
+  status: auto
+
+# S07E32-E33: Pups Save Queen Cluck-Cluck / Pups Save a Desert Flounder
+- file: Paw Patrol/Paw Patrol-S07E21-Pups Save Queen Cluck Cluck Pups Save A Desert Flounder.mp4
+  anthology: true
+  season: 7
+  episodes: [32, 33]
+  status: auto
+
+# S07E39: Moto Pups: Pups Save a Moto Mayor (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S07E22-Moto Pups Pups Save A Moto Mayor.mp4
+  anthology: true
+  season: 7
+  episodes: [39]
+  status: auto
+
+# S07E29-E30: Pups Save Little Hairy / Pups Save a Kooky Climber
+- file: Paw Patrol/Paw Patrol-S07E23-Pups Save Little Hairy Pups Save A Kooky Climber.mp4
+  anthology: true
+  season: 7
+  episodes: [29, 30]
+  status: auto
+
+# S07E44-E41: Pups Save Thundermouth / Moto Pups: Pups Save a Sneezy Chase
+- file: Paw Patrol/Paw Patrol-S07E24-Pups Save Thundermouth Moto Pups Pups Save A Sneezy Chase.mp4
+  anthology: true
+  season: 7
+  episodes: [44, 41]
+  status: auto
+
+# S07E40-E42: Moto Pups: Rescue at Twisty Top Mesa / Ultimate Rescue: Pups Stop a Junk-Monster
+- file: Paw Patrol/Paw Patrol-S07E25-Moto Pups Rescue At Twisty Top Mesa Ultimate Rescue Pups Stop A Junk Monster.mp4
+  anthology: true
+  season: 7
+  episodes: [40, 42]
+  status: auto
+
+# S07E43-E45: Pups Save the Whale Pod / Pups Save a Class Pet
+- file: Paw Patrol/Paw Patrol-S07E26-Pups Save The Whale Pod Pups Save A Class Pet.mp4
+  anthology: true
+  season: 7
+  episodes: [43, 45]
+  status: auto
+
+# Paw Patrol Season 8 - Anthology show with complex episode mapping
+# Season 8 has 45 episodes total across 26 files
+# Double-length episodes (22 min) are single episodes in files
+# Regular episodes (11 min) are paired in files
+# File numbering doesn't match canonical TVDB episode order
+# Introduces Rescue Knights special episode arc
+
+# S08E01-E02: Pups Save a Runaway Rooster / Pups Save a Snowbound Cow
+- file: Paw Patrol/Paw Patrol-S08E01-Pups Save A Runaway Rooster Pups Save A Snowbound Cow.mp4
+  anthology: true
+  season: 8
+  episodes: [1, 2]
+  status: auto
+
+# S08E03-E04: Pups Save a Sweet Mayor / Pups Save a Magic Trick
+- file: Paw Patrol/Paw Patrol-S08E02-Pups Save A Sweet Mayor Pups Save A Magic Trick.mp4
+  anthology: true
+  season: 8
+  episodes: [3, 4]
+  status: auto
+
+# S08E05-E06: Pups Save a Rubble-Double / Pups Save a Clown
+- file: Paw Patrol/Paw Patrol-S08E03-Pups Save A Rubble Double Pups Save A Clown.mp4
+  anthology: true
+  season: 8
+  episodes: [5, 6]
+  status: auto
+
+# S08E07: Pups Stop the Cheetah (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S08E04-Pups Stop The Cheetah.mp4
+  anthology: true
+  season: 8
+  episodes: [7]
+  status: auto
+
+# S08E08-E09: Pups Save the Mustache / Pups Save the Funhouse
+- file: Paw Patrol/Paw Patrol-S08E05-Pups Save The Mustache Pups Save The Funhouse.mp4
+  anthology: true
+  season: 8
+  episodes: [8, 9]
+  status: auto
+
+# S08E10-E11: Sea Patrol: Pups Save a Water Walker / Sea Patrol: Pups Save a Windsurfer
+- file: Paw Patrol/Paw Patrol-S08E06-Sea Patrol Pups Save A Water Walker Sea Patrol Pups Save A Windsurfer.mp4
+  anthology: true
+  season: 8
+  episodes: [10, 11]
+  status: auto
+
+# S08E12-E13: Pups Save the Hiding Elephants / Pups Save a Yodeler
+- file: Paw Patrol/Paw Patrol-S08E07-Pups Save The Hiding Elephants Pups Save A Yodeler.mp4
+  anthology: true
+  season: 8
+  episodes: [12, 13]
+  status: auto
+
+# S08E14-E15: Pups Save the Dizzy Dust Express / Pups Save the Treetop Trekkers
+- file: Paw Patrol/Paw Patrol-S08E08-Pups Save The Dizzy Dust Express Pups Save The Treetop Trekkers.mp4
+  anthology: true
+  season: 8
+  episodes: [14, 15]
+  status: auto
+
+# S08E16-E17: Pups Save the Treasure Cruise / Pups Save Rocket Ryder
+- file: Paw Patrol/Paw Patrol-S08E09-Pups Save The Treasure Cruise Pups Save Rocket Ryder.mp4
+  anthology: true
+  season: 8
+  episodes: [16, 17]
+  status: auto
+
+# S08E18-E19: Pups and Katie Stop the Barking Kitty Crew / Pups Save the Glasses
+- file: Paw Patrol/Paw Patrol-S08E10-Pups And Katie Stop The Barking Kitty Crew Pups Save The Glasses.mp4
+  anthology: true
+  season: 8
+  episodes: [18, 19]
+  status: auto
+
+# S08E20-E21: Pups vs. a Neon Humdinger / Pups Save a Royal Painting
+- file: Paw Patrol/Paw Patrol-S08E11-Pups Vs A Neon Humdinger Pups Save A Royal Painting.mp4
+  anthology: true
+  season: 8
+  episodes: [20, 21]
+  status: auto
+
+# S08E24-E25: Pups Save a Show Jumper / Pups Save the Salmon
+- file: Paw Patrol/Paw Patrol-S08E12-Pups Save A Show Jumper Pups Save The Salmon.mp4
+  anthology: true
+  season: 8
+  episodes: [24, 25]
+  status: auto
+
+# S08E26-E27: Pups vs. Ouchy Paws / Pups Save a Glow-in-the-Dark Party
+- file: Paw Patrol/Paw Patrol-S08E13-Pups Vs Ouchy Paws Pups Save A Glow In The Dark Party.mp4
+  anthology: true
+  season: 8
+  episodes: [26, 27]
+  status: auto
+
+# S08E29-E30: Pups Stop a Super Shaker / Pups Save a Flying Farmhouse
+- file: Paw Patrol/Paw Patrol-S08E14-Pups Stop A Super Shaker Pups Save A Flying Farmhouse.mp4
+  anthology: true
+  season: 8
+  episodes: [29, 30]
+  status: auto
+
+# S08E14-E15: Pups Save the Dizzy Dust Express / Pups Save the Treetop Trekkers (duplicate file)
+- file: Paw Patrol/Paw Patrol-S08E15-Pups Save The Dizzy Dust Express Pups Save The Treetop Trekkers.mp4
+  anthology: true
+  season: 8
+  episodes: [14, 15]
+  status: auto
+
+# S08E16-E17: Pups Save the Treasure Cruise / Pups Save Rocket Ryder (duplicate file)
+- file: Paw Patrol/Paw Patrol-S08E16-Pups Save The Treasure Cruise Pups Save Rocket Ryder.mp4
+  anthology: true
+  season: 8
+  episodes: [16, 17]
+  status: auto
+
+# S08E28: Rescue Knights: Quest for the Dragon's Tooth (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S08E17-Rescue Knights Quest For The Dragon S Tooth.mp4
+  anthology: true
+  season: 8
+  episodes: [28]
+  status: auto
+
+# S08E36-E37: Rescue Knights: Break the Ice / Rescue Knights: Pups Save Excalibark
+- file: Paw Patrol/Paw Patrol-S08E18-Rescue Knights Break The Ice Rescue Knights Pups Save Excalibark.mp4
+  anthology: true
+  season: 8
+  episodes: [36, 37]
+  status: auto
+
+# S08E34-E35: Rescue Knights: Pups Save a Tournament / Rescue Knights: Pups Save the Baby Dragons
+- file: Paw Patrol/Paw Patrol-S08E19-Rescue Knights Pups Save A Tournament Rescue Knights Pups Save The Baby Dragons.mp4
+  anthology: true
+  season: 8
+  episodes: [34, 35]
+  status: auto
+
+# S08E33: Rescue Knights: Pups Save a Dozing Dragon (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S08E20-Rescue Knights Pups Save A Dozing Dragon.mp4
+  anthology: true
+  season: 8
+  episodes: [33]
+  status: auto
+
+# S08E38-E39: Dancing with Luke Stars / Pups Save a Mischievous Octopus
+- file: Paw Patrol/Paw Patrol-S08E21-Dancing With Luke Stars Pups Save A Mischievous Octopus.mp4
+  anthology: true
+  season: 8
+  episodes: [38, 39]
+  status: auto
+
+# S08E44-E45: Pups Save a Lonesome Walrus / Pups Save the Hummy Gummies
+- file: Paw Patrol/Paw Patrol-S08E22-Pups Save A Lonesome Walrus Pups Save The Hummy Gummies.mp4
+  anthology: true
+  season: 8
+  episodes: [44, 45]
+  status: auto
+
+# S08E40-E41: Pups Save the Kitties and the Kiddies / Pups Save the Greenhouse
+- file: Paw Patrol/Paw Patrol-S08E23-Pups Save The Kitties And The Kiddies Pups Save The Greenhouse.mp4
+  anthology: true
+  season: 8
+  episodes: [40, 41]
+  status: auto
+
+# S08E31-E32: Pups Save a Box Fort / Pups Save Travelin' Travis from Really Big Bill
+- file: Paw Patrol/Paw Patrol-S08E24-Pups Save A Box Fort Pups Save Travelin Travis From Really Big Bill.mp4
+  anthology: true
+  season: 8
+  episodes: [31, 32]
+  status: auto
+
+# S08E42-E43: Pups Save the Floating Goodways / Pups Save the Portable Pet Wash
+- file: Paw Patrol/Paw Patrol-S08E25-Pups Save The Floating Goodways Pups Save The Portable Pet Wash.mp4
+  anthology: true
+  season: 8
+  episodes: [42, 43]
+  status: auto
+
+# S08E22-E23: Pups Save a Chicken Tulip / Pups Stop an Xtreme Shark
+- file: Paw Patrol/Paw Patrol-S08E26-Pups Save A Chicken Tulip Pups Stop An Xtreme Shark.mp4
+  anthology: true
+  season: 8
+  episodes: [22, 23]
+  status: auto
+
+# Paw Patrol Season 9 - Anthology show with complex episode mapping
+# Season 9 has 46 episodes total across 28 files
+# Double-length episodes (22 min) are single episodes in files
+# Regular episodes (11 min) are paired in files
+# Introduces new special arcs: Cat Pack, Big Truck Pups, Aqua Pups
+# File numbering doesn't match canonical TVDB episode order
+
+# S09E01-E02: Liberty Makes a New Friend / Pups Save the Pup Pup Boogie Contest
+- file: Paw Patrol/Paw Patrol-S09E01-Liberty Makes A New Friend Pups Save The Pup Pup Boogie Contest.mp4
+  anthology: true
+  season: 9
+  episodes: [1, 2]
+  status: auto
+
+# S09E03: Pups Meet the Cat Pack (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S09E02-Pups Meet The Cat Pack.mp4
+  anthology: true
+  season: 9
+  episodes: [3]
+  status: auto
+
+# S09E04-E05: Cat Pack/PAW Patrol Rescue: Rocket Rescuers / Cat Pack/PAW Patrol Rescue: The Golden Lion Mask
+- file: Paw Patrol/Paw Patrol-S09E03-Cat Pack Paw Patrol Rescue Rocket Rescuers.mp4
+  anthology: true
+  season: 9
+  episodes: [4]
+  status: auto
+
+# S09E05: Cat Pack/PAW Patrol Rescue: The Golden Lion Mask (single episode in file)
+- file: Paw Patrol/Paw Patrol-S09E04-Cat Pack Paw Patrol Rescue The Golden Lion Mask.mp4
+  anthology: true
+  season: 9
+  episodes: [5]
+  status: auto
+
+# S09E06-E07: Cat Pack/PAW Patrol Rescue: The Cat Who Roared / Cat Pack/PAW Patrol Rescue: Saving the Safe
+- file: Paw Patrol/Paw Patrol-S09E05-Cat Pack Paw Patrol Rescue The Cat Who Roared.mp4
+  anthology: true
+  season: 9
+  episodes: [6]
+  status: auto
+
+# S09E07: Cat Pack/PAW Patrol Rescue: Saving the Safe (single episode in file)
+- file: Paw Patrol/Paw Patrol-S09E06-Cat Pack Paw Patrol Rescue Saving The Safe.mp4
+  anthology: true
+  season: 9
+  episodes: [7]
+  status: auto
+
+# S09E08: Big Truck Pups Stop a Flood (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S09E07-Big Truck Pups Stop A Flood.mp4
+  anthology: true
+  season: 9
+  episodes: [8]
+  status: auto
+
+# S09E13-E14: Pups Save the Hatchlings / Pups Save a Wrongway Farmhand
+- file: Paw Patrol/Paw Patrol-S09E08-Pups Save The Hatchlings Pups Save A Wrongway Farmhand.mp4
+  anthology: true
+  season: 9
+  episodes: [13, 14]
+  status: auto
+
+# S09E15: Big Truck Pups: Pups Save the Bridge (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S09E09-Big Truck Pups Pups Save The Bridge.mp4
+  anthology: true
+  season: 9
+  episodes: [15]
+  status: auto
+
+# S09E16-E17: Big Truck Pups: Pups Save a Sliding Chalet / Big Truck Pups: Pups Save a Really Big Dish
+- file: Paw Patrol/Paw Patrol-S09E10-Big Truck Pups Pups Save A Sliding Chalet Big Truck Pups Pups Save A Really Big Dish.mp4
+  anthology: true
+  season: 9
+  episodes: [16, 17]
+  status: auto
+
+# S09E18-E19: Big Truck Pups: Pups Save the Swiped Speakers / Big Truck Pups: Pups Save the Big Big Pipes
+- file: Paw Patrol/Paw Patrol-S09E11-Big Truck Pups Pups Save The Swiped Speakers Big Truck Pups Pups Save The Big Big Pipes.mp4
+  anthology: true
+  season: 9
+  episodes: [18, 19]
+  status: auto
+
+# S09E20-E21: Pups Stop the Return of Humsquatch / Pups Save a Lonely Ghost
+- file: Paw Patrol/Paw Patrol-S09E12-Pups Stop The Return Of Humsquatch Pups Save A Lonely Ghost.mp4
+  anthology: true
+  season: 9
+  episodes: [20, 21]
+  status: auto
+
+# S09E22-E23: Mighty Pups Stop a Mighty Eel / Pups Save a Floating Royal Carriage
+- file: Paw Patrol/Paw Patrol-S09E13-Mighty Pups Super Paws Pups Stop A Mighty Eel Mission Paw Pups Save A Floating Royal Carriage.mp4
+  anthology: true
+  season: 9
+  episodes: [22, 23]
+  status: auto
+
+# S09E24: Aqua Pups: Pups Save a Floating Castle (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S09E14-Aqua Pups Pups Save A Floating Castle.mp4
+  anthology: true
+  season: 9
+  episodes: [24]
+  status: auto
+
+# S09E25-E26: Pups Save a T-Rex Tyke / Pups Save a Playful Elephant Calf
+- file: Paw Patrol/Paw Patrol-S09E15-Dino Rescue Pups Save A T Rex Tyke Pups Save A Playful Elephant Calf.mp4
+  anthology: true
+  season: 9
+  episodes: [25, 26]
+  status: auto
+
+# S09E27: All Paws on Deck (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S09E16-All Paws On Deck.mp4
+  anthology: true
+  season: 9
+  episodes: [27]
+  status: auto
+
+# S09E28-E29: Pups Save Katie and Some Kitties / Pups Save a Helo Humdinger
+- file: Paw Patrol/Paw Patrol-S09E17-Pups Save Katie And Some Kitties Pups Save A Helo Humdinger.mp4
+  anthology: true
+  season: 9
+  episodes: [28, 29]
+  status: auto
+
+# S09E30: Aqua Pups: Pups Save a Mer-Race (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S09E18-Aqua Pups Pups Save A Mer Race.mp4
+  anthology: true
+  season: 9
+  episodes: [30]
+  status: auto
+
+# S09E31-E32: Aqua Pups: Pups Save a Merdinger / Aqua Pups: Pups Save the Whale Patroller
+- file: Paw Patrol/Paw Patrol-S09E19-Aqua Pups Pups Save A Merdinger Aqua Pups Pups Save The Whale Patroller.mp4
+  anthology: true
+  season: 9
+  episodes: [31, 32]
+  status: auto
+
+# S09E33-E34: Aqua Pups: Pups Save the Reef / Aqua Pups: Pups Stop a Giant Squid
+- file: Paw Patrol/Paw Patrol-S09E20-Aqua Pups Pups Save The Reef Aqua Pups Pups Stop A Giant Squid.mp4
+  anthology: true
+  season: 9
+  episodes: [33, 34]
+  status: auto
+
+# S09E35-E36: Pups Save a Flamingo Dancer / Pups Save a Mayor and Her Mini
+- file: Paw Patrol/Paw Patrol-S09E21-Pups Save A Flamingo Dancer Pups Save A Mayor And Her Mini.mp4
+  anthology: true
+  season: 9
+  episodes: [35, 36]
+  status: auto
+
+# S09E37-E38: Pups Save the Wind Trekkers / Pups Save a Trophy
+- file: Paw Patrol/Paw Patrol-S09E22-Pups Save The Wind Trekkers Pups Save A Trophy.mp4
+  anthology: true
+  season: 9
+  episodes: [37, 38]
+  status: auto
+
+# S09E39-E40: Pups Save Alex's Feathery Friends / Pups Save a Puffy Mayor
+- file: Paw Patrol/Paw Patrol-S09E23-Pups Save Alexs Feathery Friends Pups Save A Puffy Mayor.mp4
+  anthology: true
+  season: 9
+  episodes: [39, 40]
+  status: auto
+
+# S09E41-E42: Pups Save a Jukebox / Pups Save a Mayor on a Wire
+- file: Paw Patrol/Paw Patrol-S09E24-Pups Save A Jukebox Pups Save A Mayor On A Wire.mp4
+  anthology: true
+  season: 9
+  episodes: [41, 42]
+  status: auto
+
+# S09E43-E44: Pups Save the Baby Space Rocks / Pups Save the Eddies and Emmys
+- file: Paw Patrol/Paw Patrol-S09E25-Pups Save The Baby Space Rocks Pups Save The Eddies And Emmys.mp4
+  anthology: true
+  season: 9
+  episodes: [43, 44]
+  status: auto
+
+# S09E45-E46: Charger Visits the Pups / Pups Save a Shiny Ride
+- file: Paw Patrol/Paw Patrol-S09E26-Charger Visits The Pups Pups Save A Shiny Ride.mp4
+  anthology: true
+  season: 9
+  episodes: [45, 46]
+  status: auto
+
+# S09E09-E10: Pups Save a Humdinger Doll / Pups Save a Sand Sculpture Contest
+- file: Paw Patrol/Paw Patrol-S09E27-Pups Save A Humdinger Doll Pups Save A Sand Sculpture Contest.mp4
+  anthology: true
+  season: 9
+  episodes: [9, 10]
+  status: auto
+
+# S09E11-E12: Pups Save the Tooth Fairy / Pups Solve the Mystery of the Missing Art
+- file: Paw Patrol/Paw Patrol-S09E28-Pups Save The Tooth Fairy Pups Solve The Mystery Of The Missing Art.mp4
+  anthology: true
+  season: 9
+  episodes: [11, 12]
+  status: auto
+
+# Paw Patrol Season 10 - Anthology show with complex episode mapping
+# Season 10 has 47 episodes total across 32 files
+# Double-length episodes (22 min) are single episodes in files
+# Regular episodes (11 min) are paired in files
+# Introduces new special arcs: Jungle Pups, Rescue Wheels
+# Some files have unusual naming patterns with "Episode XA/XB" format
+
+# S10E01: Pups Save the Wacky Water Skiers (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E01-Episode 1A Pups Save The Wacky Water Skiers.mp4
+  anthology: true
+  season: 10
+  episodes: [1]
+  status: auto
+
+# S10E02: Pups Save the Mayor's Assistant (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E01-Episode 1B Pups Save The Mayors Assistant.mp4
+  anthology: true
+  season: 10
+  episodes: [2]
+  status: auto
+
+# S10E03: Pups Save a High-Flying Hen (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E02-Episode 2A Pups Save A High Flying Hen.mp4
+  anthology: true
+  season: 10
+  episodes: [3]
+  status: auto
+
+# S10E04: Pups Save a Sloth (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E02-Episode 2B Pups Save A Sloth.mp4
+  anthology: true
+  season: 10
+  episodes: [4]
+  status: auto
+
+# S10E05: Pups Save a Windswept Polar Bear Cub (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E04-Episode 4A Pups Save A Windswept Polar Bear Cub.mp4
+  anthology: true
+  season: 10
+  episodes: [5]
+  status: auto
+
+# S10E06: Pups Save a Drive-In (missing from files, episode 6 not found)
+
+# S10E07: Jungle Pups: Pups Find a Hidden Jungle (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S10E03-Jungle Pups Pups Find A Hidden Jungle.mp4
+  anthology: true
+  season: 10
+  episodes: [7]
+  status: auto
+
+# S10E08: Pups Save Their Digi-Tal Friends (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E05-Episode 5A Pups Save Their Digi Tal Friends.mp4
+  anthology: true
+  season: 10
+  episodes: [8]
+  status: auto
+
+# S10E09: Pups Save the Rainbow (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E05-Episode 5B Pups Save The Rainbow.mp4
+  anthology: true
+  season: 10
+  episodes: [9]
+  status: auto
+
+# S10E10: Jungle Pups: Pups Save the Big, Big Animals (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S10E06-Jungle Pups Pups Save The Big Big Animals.mp4
+  anthology: true
+  season: 10
+  episodes: [10]
+  status: auto
+
+# S10E11-E12: Pups Save the Meerkat Pirates / Pups Save a Hum-Hippo
+- file: Paw Patrol/Paw Patrol-S10E07-Pups Save The Meerkat Pirates Pups Save A Hum Hippo.mp4
+  anthology: true
+  season: 10
+  episodes: [11, 12]
+  status: auto
+
+# S10E13-E14: Pups Save a Golden Sweetie / Pups Save the Giant Ants
+- file: Paw Patrol/Paw Patrol-S10E08-Pups Save A Golden Sweetie Pups Save The Giant Ants.mp4
+  anthology: true
+  season: 10
+  episodes: [13, 14]
+  status: auto
+
+# S10E15: Pups Stop a Gold Finding Machine (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E09-Episode 9A Pups Stop A Gold Finding Machine.mp4
+  anthology: true
+  season: 10
+  episodes: [15]
+  status: auto
+
+# S10E16: Pups Help Mayor Humdinger Out of a Jam (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E09-Episode 9B Pups Help Mayor Humdinger Out Of A Jam.mp4
+  anthology: true
+  season: 10
+  episodes: [16]
+  status: auto
+
+# S10E17: Liberty's Mountain Rescue (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E10-Episode 10A Libertys Mountain Rescue.mp4
+  anthology: true
+  season: 10
+  episodes: [17]
+  status: auto
+
+# S10E18: Pups Save a Flying Farmer Yumi (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E10-Episode 10B Pups Save A Flying Farmer Yumi.mp4
+  anthology: true
+  season: 10
+  episodes: [18]
+  status: auto
+
+# S10E19-E20: Pups Stop the Falling Space Junk / Pups Stop the Giant Cuckoo
+- file: Paw Patrol/Paw Patrol-S10E11-Pups Stop The Falling Space Junk Pups Stop The Giant Cuckoo.mp4
+  anthology: true
+  season: 10
+  episodes: [19, 20]
+  status: auto
+
+# S10E21-E22: Pups Save a Hum-ñata / Pups Stop the Foggy Skies
+- file: Paw Patrol/Paw Patrol-S10E12-Pups Save A Hum Nata Pups Stop The Foggy Skies.mp4
+  anthology: true
+  season: 10
+  episodes: [21, 22]
+  status: auto
+
+# S10E23: Mighty Pups vs. The Mayor of the Universe (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S10E13-Mighty Pups Vs The Mayor Of The Universe.mp4
+  anthology: true
+  season: 10
+  episodes: [23]
+  status: auto
+
+# S10E24: Charger's Christmas Adventure (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E14-Episode 14A Chargers Christmas Adventure.mp4
+  anthology: true
+  season: 10
+  episodes: [24]
+  status: auto
+
+# S10E25: Pups Save Great Uncle Smiley's Cup (split into separate file)
+- file: Paw Patrol/Paw Patrol-S10E14-Episode 14B Pups Save Great Uncle Smileys Cup.mp4
+  anthology: true
+  season: 10
+  episodes: [25]
+  status: auto
+
+# S10E26-E27: Pups Save a Baby Caribou / Pups Save Luke and His Luke-Alike
+- file: Paw Patrol/Paw Patrol-S10E15-Pups Save A Baby Caribou Pups Save Luke And His Luke Alike.mp4
+  anthology: true
+  season: 10
+  episodes: [26, 27]
+  status: auto
+
+# S10E28-E29: Mighty Pups vs. The Big Chill / Mighty Pups vs. The Mighty Cheetah
+- file: Paw Patrol/Paw Patrol-S10E16-Mighty Pups Vs The Big Chill Mighty Pups Vs The Mighty Cheetah.mp4
+  anthology: true
+  season: 10
+  episodes: [28, 29]
+  status: auto
+
+# S10E30-E31: Mighty Pups Stop the Mighty Queen / Mighty Pups Stop the Hiccups
+- file: Paw Patrol/Paw Patrol-S10E17-Mighty Pups Stop The Mighty Queen Mighty Pups Stop The Hiccups.mp4
+  anthology: true
+  season: 10
+  episodes: [30, 31]
+  status: auto
+
+# S10E32-E33: Pups Save a Disappearing Flounder / Pups Save Little Grandpa and Mr. Alex
+- file: Paw Patrol/Paw Patrol-S10E18-Pups Save A Disappearing Flounder Pups Save Little Grandpa And Mr Alex.mp4
+  anthology: true
+  season: 10
+  episodes: [32, 33]
+  status: auto
+
+# S10E34-E35: Pups Save the Elephant Spa / Pups Save an Underwater Otis
+- file: Paw Patrol/Paw Patrol-S10E19-Pups Save The Elephant Spa Pups Save An Underwater Otis.mp4
+  anthology: true
+  season: 10
+  episodes: [34, 35]
+  status: auto
+
+# S10E36-E37: Pups vs. the Hum-Flectors / Pups Save a Capybara
+- file: Paw Patrol/Paw Patrol-S10E20-Pups Vs The Hum Flectors Pups Save A Capybara.mp4
+  anthology: true
+  season: 10
+  episodes: [36, 37]
+  status: auto
+
+# S10E38-E39: Pups and Cats Save HumCatDingerMan / Pups Save a Turbot Tournament
+- file: Paw Patrol/Paw Patrol-S10E21-Cat Pack Pups Cats Save Humcatdingerman Pups Save A Turbot Tournament.mp4
+  anthology: true
+  season: 10
+  episodes: [38, 39]
+  status: auto
+
+# S10E40-E41: Pups Save a Talkative Mini Patrol / Pups Save the History of Adventure Bay
+- file: Paw Patrol/Paw Patrol-S10E22-Pups Save A Talkative Mini Patrol Pups Save The History Of Adventure Bay.mp4
+  anthology: true
+  season: 10
+  episodes: [40, 41]
+  status: auto
+
+# S10E42: Rescue Wheels: Pups Save Adventure Bay (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S10E23-Rescue Wheels Pups Save Adventure Bay.mp4
+  anthology: true
+  season: 10
+  episodes: [42]
+  status: auto
+
+# S10E43-E44: Pups Save a Runaway Robo-Chicken Purse / Pups Save the Buggy Trekkers
+- file: Paw Patrol/Paw Patrol-S10E24-Pups Save A Runaway Robo Chicken Purse Pups Save The Buggy Trekkers.mp4
+  anthology: true
+  season: 10
+  episodes: [43, 44]
+  status: auto
+
+# S10E45-E46: Pups Take in a Runaway Kitty! / Pups Save the Cheese Goat!
+- file: Paw Patrol/Paw Patrol-S10E25-Pups Take In A Runaway Kitty Pups Save The Cheese Goat.mp4
+  anthology: true
+  season: 10
+  episodes: [45, 46]
+  status: auto
+
+# S10E47: Rescue Wheels: Pups vs. the Monster Mayor (22 min double-length episode, season finale)
+- file: Paw Patrol/Paw Patrol-S10E26-Rescue Wheels Pups Vs The Monster Mayor.mp4
+  anthology: true
+  season: 10
+  episodes: [47]
+  status: auto
+
+# Paw Patrol Season 11 - Anthology show with complex episode mapping
+# Season 11 has 46 episodes total across 26 files
+# Double-length episodes (22 min) are single episodes in files
+# Regular episodes (11 min) are paired in files
+# Introduces new special arcs: Air Rescue, Fire Rescue
+# Continues Rescue Wheels arc from Season 10
+
+# S11E01-E02: Rescue Wheels: Pups Save the Teetering Tower / Rescue Wheels: Pups Save the Spelunkers
+- file: Paw Patrol/Paw Patrol-S11E01-Rescue Wheels Pups Save The Teetering Tower Rescue Wheels Pups Save The Spelunkers.mp4
+  anthology: true
+  season: 11
+  episodes: [1, 2]
+  status: auto
+
+# S11E03-E04: Rescue Wheels: Pups Save the Risky Race / Rescue Wheels: Pups Save the Runaway Truck
+- file: Paw Patrol/Paw Patrol-S11E02-Rescue Wheels Pups Save The Risky Race Rescue Wheels Pups Save The Runaway Truck.mp4
+  anthology: true
+  season: 11
+  episodes: [3, 4]
+  status: auto
+
+# S11E05-E06: Pups Plus a Plucky Chicken / Pups Save a Pet Show
+- file: Paw Patrol/Paw Patrol-S11E03-Pups Plus A Plucky Chicken Pups Save A Pet Show.mp4
+  anthology: true
+  season: 11
+  episodes: [5, 6]
+  status: auto
+
+# S11E07-E08: Pups Save Helga & the Humsquatch / Pups Save the Missing Bone-Stone
+- file: Paw Patrol/Paw Patrol-S11E04-Pups Save Helga And The Humsquatch Pups Save The Missing Bone Stone.mp4
+  anthology: true
+  season: 11
+  episodes: [7, 8]
+  status: auto
+
+# S11E09-E10: Pups Save the Director / Pups Save the Super Cows
+- file: Paw Patrol/Paw Patrol-S11E05-Pups Save The Director Pups Save The Super Cows.mp4
+  anthology: true
+  season: 11
+  episodes: [9, 10]
+  status: auto
+
+# S11E11: Air Rescue: Pups Save the Airport Opening (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S11E06-Air Rescue Pups Save The Airport Opening.mp4
+  anthology: true
+  season: 11
+  episodes: [11]
+  status: auto
+
+# S11E12-E13: Pups Save the Mountain Surfers / Pups Save Humdinger's Home Away from Home
+- file: Paw Patrol/Paw Patrol-S11E07-Pups Save The Mountain Surfers Pups Save Humdingers Home Away From Home.mp4
+  anthology: true
+  season: 11
+  episodes: [12, 13]
+  status: auto
+
+# S11E14-E15: Pups Get Your Goat / Pups Save the Crop Circles
+- file: Paw Patrol/Paw Patrol-S11E08-Pups Get Your Goat Pups Save The Crop Circles.mp4
+  anthology: true
+  season: 11
+  episodes: [14, 15]
+  status: auto
+
+# S11E16: Air Rescue: Pups Save a Hum-stronaut (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S11E09-Air Rescue Pups Save A Hum Stronaut.mp4
+  anthology: true
+  season: 11
+  episodes: [16]
+  status: auto
+
+# S11E17-E18: Air Rescue: Pups Stop a Rocket-Powered Pogo Stick / Air Rescue: Pups Save the Sky-High Stunt Show
+- file: Paw Patrol/Paw Patrol-S11E10-Air Rescue Pups Stop A Rocket Powered Pogo Stick Air Rescue Pups Save The Sky High Stunt Show.mp4
+  anthology: true
+  season: 11
+  episodes: [17, 18]
+  status: auto
+
+# S11E19-E20: Air Rescue: Pups vs. the Hum-Cloud / Air Rescue: Pups Stop the Mid-Air Magnet
+- file: Paw Patrol/Paw Patrol-S11E11-Air Rescue Pups Vs The Hum Cloud Air Rescue Pups Stop The Mid Air Magnet.mp4
+  anthology: true
+  season: 11
+  episodes: [19, 20]
+  status: auto
+
+# S11E21-E22: Pups Save the Baddies / Pups Save the Yumi Bee
+- file: Paw Patrol/Paw Patrol-S11E12-Pups Save The Baddies Pups Save The Yumi Bee.mp4
+  anthology: true
+  season: 11
+  episodes: [21, 22]
+  status: auto
+
+# S11E23-E24: Pups Save the Big Book Delivery / Pups Save the Puppets
+- file: Paw Patrol/Paw Patrol-S11E13-Pups Save The Big Book Delivery Pups Save The Puppets.mp4
+  anthology: true
+  season: 11
+  episodes: [23, 24]
+  status: auto
+
+# S11E25: A Jr. Patrollers' Christmas (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S11E14-A Jr Patrollers Christmas.mp4
+  anthology: true
+  season: 11
+  episodes: [25]
+  status: auto
+
+# S11E26-E27: Pups vs. The Robo-Ducky / Pups Save the Lost Penguin
+- file: Paw Patrol/Paw Patrol-S11E15-Pups Vs The Robo Ducky Pups Save The Lost Penguin.mp4
+  anthology: true
+  season: 11
+  episodes: [26, 27]
+  status: auto
+
+# S11E28-E29: Pups Save the Chicken Conductor! / Pups Save the Digi-Tal Stylists
+- file: Paw Patrol/Paw Patrol-S11E16-Pups Save The Chicken Conductor Pups Save The Digi Tal Stylists.mp4
+  anthology: true
+  season: 11
+  episodes: [28, 29]
+  status: auto
+
+# S11E30-E31: Pups Save the Stage Actor / Pups Save Fogstock
+- file: Paw Patrol/Paw Patrol-S11E17-Pups Save The Stage Actor Pups Save Fogstock.mp4
+  anthology: true
+  season: 11
+  episodes: [30, 31]
+  status: auto
+
+# S11E32: Fire Rescue: Pups Save the Big BBQ (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S11E18-Fire Rescue Pups Save The Big BBQ.mp4
+  anthology: true
+  season: 11
+  episodes: [32]
+  status: auto
+
+# S11E33-E34: Hum-Patrol to the Rescue / Pups Save Morning Mountain Yoga
+- file: Paw Patrol/Paw Patrol-S11E19-Hum Patrol To The Rescue Pups Save Morning Mountain Yoga.mp4
+  anthology: true
+  season: 11
+  episodes: [33, 34]
+  status: auto
+
+# S11E35-E36: Pups and the Power of Flowers / Pups Save the Alien Egg Hunt
+- file: Paw Patrol/Paw Patrol-S11E20-Pups And The Power Of Flowers Pups Save The Alien Egg Hunt.mp4
+  anthology: true
+  season: 11
+  episodes: [35, 36]
+  status: auto
+
+# S11E37: Fire Rescue: Pups Save Lizzy's Lemonade Blaze (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S11E21-Fire Rescue Pups Save Lizzys Lemonade Blaze.mp4
+  anthology: true
+  season: 11
+  episodes: [37]
+  status: auto
+
+# S11E38-E39: Fire Rescue: Pups Save the Flaming Flounder / Fire Rescue: Pups Make the News
+- file: Paw Patrol/Paw Patrol-S11E22-Fire Rescue Pups Save The Flaming Flounder Fire Rescue Pups Make The News.mp4
+  anthology: true
+  season: 11
+  episodes: [38, 39]
+  status: auto
+
+# S11E40-E41: Fire Rescue: Pups Save a Baby Goat Birthday / Fire Rescue: Pups Save a S'more-mergency
+- file: Paw Patrol/Paw Patrol-S11E23-Fire Rescue Pups Save A Baby Goat Birthday Fire Rescue Pups Save A S More Mergency.mp4
+  anthology: true
+  season: 11
+  episodes: [40, 41]
+  status: auto
+
+# S11E42-E43: Pups Save Captain Crinkle-cut / Pups Save the Big Nightlight
+- file: Paw Patrol/Paw Patrol-S11E24-Pups Save Captain Crinkle Cut Pups Save The Big Nightlight.mp4
+  anthology: true
+  season: 11
+  episodes: [42, 43]
+  status: auto
+
+# S11E44: Skye's Road Trip Rescue (22 min double-length episode)
+- file: Paw Patrol/Paw Patrol-S11E25-Skyes Road Trip Rescue.mp4
+  anthology: true
+  season: 11
+  episodes: [44]
+  status: auto
+
+# S11E45-E46: Pups Save the Space Kitty / Pups Save the Sea Sponges
+- file: Paw Patrol/Paw Patrol-S11E26-Pups Save The Space Kitty Pups Save The Sea Sponges.mp4
+  anthology: true
+  season: 11
+  episodes: [45, 46]
+  status: auto
+
+# The Octonauts Season 1 - Special case anthology show
+# Directory and files prefixed with "The" but canonical title is "Octonauts"
+# Season 1 has 50 episodes total, each in its own file (unusual for anthology)
+# All episodes are 11 minutes each
+# Educational underwater adventure series for children
+# Each episode focuses on a different sea creature or marine environment
+
+# S01E01: The Whale Shark
+- file: The Octonauts/The Octonauts-S01E01-The Whale Shark.mp4
+  anthology: true
+  season: 1
+  episodes: [1]
+  status: auto
+
+# S01E02: The Undersea Storm
+- file: The Octonauts/The Octonauts-S01E02-The Undersea Storm.mp4
+  anthology: true
+  season: 1
+  episodes: [2]
+  status: auto
+
+# S01E03: The Crab and Urchin
+- file: The Octonauts/The Octonauts-S01E03-The Crab And Urchin.mp4
+  anthology: true
+  season: 1
+  episodes: [3]
+  status: auto
+
+# S01E04: The Walrus Chief
+- file: The Octonauts/The Octonauts-S01E04-The Walrus Chief.mp4
+  anthology: true
+  season: 1
+  episodes: [4]
+  status: auto
+
+# S01E05: The Flying Fish
+- file: The Octonauts/The Octonauts-S01E05-The Flying Fish.mp4
+  anthology: true
+  season: 1
+  episodes: [5]
+  status: auto
+
+# S01E06: The Giant Squid
+- file: The Octonauts/The Octonauts-S01E06-The Giant Squid.mp4
+  anthology: true
+  season: 1
+  episodes: [6]
+  status: auto
+
+# S01E07: The Orcas
+- file: The Octonauts/The Octonauts-S01E07-The Orcas.mp4
+  anthology: true
+  season: 1
+  episodes: [7]
+  status: auto
+
+# S01E08: The Great Algae Escape
+- file: The Octonauts/The Octonauts-S01E08-The Great Algae Escape.mp4
+  anthology: true
+  season: 1
+  episodes: [8]
+  status: auto
+
+# S01E09: The Remipedes
+- file: The Octonauts/The Octonauts-S01E09-The Remipedes.mp4
+  anthology: true
+  season: 1
+  episodes: [9]
+  status: auto
+
+# S01E10: The Speedy Sailfish
+- file: The Octonauts/The Octonauts-S01E10-The Speedy Sailfish.mp4
+  anthology: true
+  season: 1
+  episodes: [10]
+  status: auto
+
+# S01E11: The Blobfish Brothers
+- file: The Octonauts/The Octonauts-S01E11-The Blobfish Brothers.mp4
+  anthology: true
+  season: 1
+  episodes: [11]
+  status: auto
+
+# S01E12: The Monster Map
+- file: The Octonauts/The Octonauts-S01E12-The Monster Map.mp4
+  anthology: true
+  season: 1
+  episodes: [12]
+  status: auto
+
+# S01E13: The Lost Sea Star
+- file: The Octonauts/The Octonauts-S01E13-The Lost Sea Star.mp4
+  anthology: true
+  season: 1
+  episodes: [13]
+  status: auto
+
+# S01E14: The Albino Humpback Whale
+- file: The Octonauts/The Octonauts-S01E14-The Albino Humpback Whale.mp4
+  anthology: true
+  season: 1
+  episodes: [14]
+  status: auto
+
+# S01E15: The Giant Kelp Forest
+- file: The Octonauts/The Octonauts-S01E15-The Giant Kelp Forest.mp4
+  anthology: true
+  season: 1
+  episodes: [15]
+  status: auto
+
+# S01E16: The Enemy Anemones
+- file: The Octonauts/The Octonauts-S01E16-The Enemy Anemones.mp4
+  anthology: true
+  season: 1
+  episodes: [16]
+  status: auto
+
+# S01E17: The Narwhal
+- file: The Octonauts/The Octonauts-S01E17-The Narwhal.mp4
+  anthology: true
+  season: 1
+  episodes: [17]
+  status: auto
+
+# S01E18: The Midnight Zone
+- file: The Octonauts/The Octonauts-S01E18-The Midnight Zone.mp4
+  anthology: true
+  season: 1
+  episodes: [18]
+  status: auto
+
+# S01E19: The Snapping Shrimp
+- file: The Octonauts/The Octonauts-S01E19-The Snapping Shrimp.mp4
+  anthology: true
+  season: 1
+  episodes: [19]
+  status: auto
+
+# S01E20: The Snot Sea Cucumber
+- file: The Octonauts/The Octonauts-S01E20-The Snot Sea Cucumber.mp4
+  anthology: true
+  season: 1
+  episodes: [20]
+  status: auto
+
+# S01E21: The Giant Whirlpool
+- file: The Octonauts/The Octonauts-S01E21-The Giant Whirlpool.mp4
+  anthology: true
+  season: 1
+  episodes: [21]
+  status: auto
+
+# S01E22: The Hermit Crabs
+- file: The Octonauts/The Octonauts-S01E22-The Hermit Crabs.mp4
+  anthology: true
+  season: 1
+  episodes: [22]
+  status: auto
+
+# S01E23: The Mixed-Up Whales
+- file: The Octonauts/The Octonauts-S01E23-The Mixed Up Whales.mp4
+  anthology: true
+  season: 1
+  episodes: [23]
+  status: auto
+
+# S01E24: The Kelp Forest Rescue
+- file: The Octonauts/The Octonauts-S01E24-The Kelp Forest Rescue.mp4
+  anthology: true
+  season: 1
+  episodes: [24]
+  status: auto
+
+# S01E25: The Decorator Crab
+- file: The Octonauts/The Octonauts-S01E25-The Decorator Crab.mp4
+  anthology: true
+  season: 1
+  episodes: [25]
+  status: auto
+
+# S01E26: The Beluga Whales
+- file: The Octonauts/The Octonauts-S01E26-The Beluga Whales.mp4
+  anthology: true
+  season: 1
+  episodes: [26]
+  status: auto
+
+# S01E27: The Hungry Pilot Fish
+- file: The Octonauts/The Octonauts-S01E27-The Hungry Pilot Fish.mp4
+  anthology: true
+  season: 1
+  episodes: [27]
+  status: auto
+
+# S01E28: The Vampire Squid
+- file: The Octonauts/The Octonauts-S01E28-The Vampire Squid.mp4
+  anthology: true
+  season: 1
+  episodes: [28]
+  status: auto
+
+# S01E29: The Seahorse Tale
+- file: The Octonauts/The Octonauts-S01E29-The Seahorse Tale.mp4
+  anthology: true
+  season: 1
+  episodes: [29]
+  status: auto
+
+# S01E30: The Giant Jelly
+- file: The Octonauts/The Octonauts-S01E30-The Giant Jelly.mp4
+  anthology: true
+  season: 1
+  episodes: [30]
+  status: auto
+
+# S01E31: The Cookiecutter Sharks
+- file: The Octonauts/The Octonauts-S01E31-The Cookiecutter Shark.mp4
+  anthology: true
+  season: 1
+  episodes: [31]
+  status: auto
+
+# S01E32: The Oarfish
+- file: The Octonauts/The Octonauts-S01E32-The Oarfish.mp4
+  anthology: true
+  season: 1
+  episodes: [32]
+  status: auto
+
+# S01E33: The Combtooth Blenny
+- file: The Octonauts/The Octonauts-S01E33-The Combtooth Blenny.mp4
+  anthology: true
+  season: 1
+  episodes: [33]
+  status: auto
+
+# S01E34: The Jellyfish Bloom
+- file: The Octonauts/The Octonauts-S01E34-The Jellyfish Bloom.mp4
+  anthology: true
+  season: 1
+  episodes: [34]
+  status: auto
+
+# S01E35: The Baby Dolphin
+- file: The Octonauts/The Octonauts-S01E35-The Baby Dolphin.mp4
+  anthology: true
+  season: 1
+  episodes: [35]
+  status: auto
+
+# S01E36: The Scary Spookfish
+- file: The Octonauts/The Octonauts-S01E36-The Scary Spookfish.mp4
+  anthology: true
+  season: 1
+  episodes: [36]
+  status: auto
+
+# S01E37: The Arctic Orcas
+- file: The Octonauts/The Octonauts-S01E37-The Arctic Orcas.mp4
+  anthology: true
+  season: 1
+  episodes: [37]
+  status: auto
+
+# S01E38: The Slime Eels
+- file: The Octonauts/The Octonauts-S01E38-The Slime Eels.mp4
+  anthology: true
+  season: 1
+  episodes: [38]
+  status: auto
+
+# S01E39: The Enormous Elephant Seal
+- file: The Octonauts/The Octonauts-S01E39-The Enormous Elephant Seal.mp4
+  anthology: true
+  season: 1
+  episodes: [39]
+  status: auto
+
+# S01E40: The Sardine School
+- file: The Octonauts/The Octonauts-S01E40-The Sardine School.mp4
+  anthology: true
+  season: 1
+  episodes: [40]
+  status: auto
+
+# S01E41: The Dolphin Reef Rescue
+- file: The Octonauts/The Octonauts-S01E41-The Dolphin Reef Rescue.mp4
+  anthology: true
+  season: 1
+  episodes: [41]
+  status: auto
+
+# S01E42: The Eel Ordeal
+- file: The Octonauts/The Octonauts-S01E42-The Eel Ordeal.mp4
+  anthology: true
+  season: 1
+  episodes: [42]
+  status: auto
+
+# S01E43: The Marine Iguanas
+- file: The Octonauts/The Octonauts-S01E43-The Marine Iguanas.mp4
+  anthology: true
+  season: 1
+  episodes: [43]
+  status: auto
+
+# S01E44: The Dwarf Lantern Shark
+- file: The Octonauts/The Octonauts-S01E44-The Dwarf Lanternshark.mp4
+  anthology: true
+  season: 1
+  episodes: [44]
+  status: auto
+
+# S01E45: The Pirate Parrotfish
+- file: The Octonauts/The Octonauts-S01E45-The Pirate Parrotfish.mp4
+  anthology: true
+  season: 1
+  episodes: [45]
+  status: auto
+
+# S01E46: The Electric Torpedo Rays
+- file: The Octonauts/The Octonauts-S01E46-The Electric Torpedo Rays.mp4
+  anthology: true
+  season: 1
+  episodes: [46]
+  status: auto
+
+# S01E47: The Crafty Cuttlefish
+- file: The Octonauts/The Octonauts-S01E47-The Crafty Cuttlefish.mp4
+  anthology: true
+  season: 1
+  episodes: [47]
+  status: auto
+
+# S01E48: The Lost Lemon Shark
+- file: The Octonauts/The Octonauts-S01E48-The Lost Lemon Shark.mp4
+  anthology: true
+  season: 1
+  episodes: [48]
+  status: auto
+
+# S01E49: The Humuhumunukunukuapua'a
+- file: The Octonauts/The Octonauts-S01E49-The Humuhumunukunukuapua A.mp4
+  anthology: true
+  season: 1
+  episodes: [49]
+  status: auto
+
+# S01E50: The Giant Spider Crab (season finale)
+- file: The Octonauts/The Octonauts-S01E50-The Giant Spider Crab.mp4
+  anthology: true
+  season: 1
+  episodes: [50]
+  status: auto
+
+# The Octonauts Season 2 - Special case anthology show
+# Directory and files prefixed with "The" but canonical title is "Octonauts"
+# Season 2 has 22 episodes total, each in its own file (unusual for anthology)
+# All episodes are 11 minutes each
+# Educational underwater adventure series for children
+# Each episode focuses on a different sea creature or marine environment
+
+# S02E01: The Colossal Squid
+- file: The Octonauts/The Octonauts-S02E01-The Colossal Squid.mp4
+  anthology: true
+  season: 2
+  episodes: [1]
+  status: auto
+
+# S02E02: The Adelie Penguins
+- file: The Octonauts/The Octonauts-S02E02-The Adelie Penguins.mp4
+  anthology: true
+  season: 2
+  episodes: [2]
+  status: auto
+
+# S02E03: The Coconut Crabs
+- file: The Octonauts/The Octonauts-S02E03-The Coconut Crabs.mp4
+  anthology: true
+  season: 2
+  episodes: [3]
+  status: auto
+
+# S02E04: The Great White Shark
+- file: The Octonauts/The Octonauts-S02E04-The Great White Shark.mp4
+  anthology: true
+  season: 2
+  episodes: [4]
+  status: auto
+
+# S02E05: The Sea Snakes
+- file: The Octonauts/The Octonauts-S02E05-The Sea Snakes.mp4
+  anthology: true
+  season: 2
+  episodes: [5]
+  status: auto
+
+# S02E06: The Bowhead Whales
+- file: The Octonauts/The Octonauts-S02E06-The Bowhead Whales.mp4
+  anthology: true
+  season: 2
+  episodes: [6]
+  status: auto
+
+# S02E07: The Jawfish
+- file: The Octonauts/The Octonauts-S02E07-The Jawfish.mp4
+  anthology: true
+  season: 2
+  episodes: [7]
+  status: auto
+
+# S02E08: The Porcupine Puffer
+- file: The Octonauts/The Octonauts-S02E08-The Porcupine Puffer.mp4
+  anthology: true
+  season: 2
+  episodes: [8]
+  status: auto
+
+# S02E09: The Damselfish
+- file: The Octonauts/The Octonauts-S02E09-The Damselfish.mp4
+  anthology: true
+  season: 2
+  episodes: [9]
+  status: auto
+
+# S02E10: The Scared Sperm Whale
+- file: The Octonauts/The Octonauts-S02E10-The Sperm Whale.mp4
+  anthology: true
+  season: 2
+  episodes: [10]
+  status: auto
+
+# S02E11: The Long Armed Squid
+- file: The Octonauts/The Octonauts-S02E11-The Long Armed Squid.mp4
+  anthology: true
+  season: 2
+  episodes: [11]
+  status: auto
+
+# S02E12: The Fiddler Crabs
+- file: The Octonauts/The Octonauts-S02E12-The Fiddler Crabs.mp4
+  anthology: true
+  season: 2
+  episodes: [12]
+  status: auto
+
+# S02E13: The Manta Rays
+- file: The Octonauts/The Octonauts-S02E13-The Manta Rays.mp4
+  anthology: true
+  season: 2
+  episodes: [13]
+  status: auto
+
+# S02E14: The Swashbuckling Swordfish
+- file: The Octonauts/The Octonauts-S02E14-The Swashbuckling Swordfish.mp4
+  anthology: true
+  season: 2
+  episodes: [14]
+  status: auto
+
+# S02E15: The Triggerfish
+- file: The Octonauts/The Octonauts-S02E15-The Triggerfish.mp4
+  anthology: true
+  season: 2
+  episodes: [15]
+  status: auto
+
+# S02E16: The Mimic Octopus
+- file: The Octonauts/The Octonauts-S02E16-The Mimic Octopus.mp4
+  anthology: true
+  season: 2
+  episodes: [16]
+  status: auto
+
+# S02E17: The Lionfish
+- file: The Octonauts/The Octonauts-S02E17-The Lionfish.mp4
+  anthology: true
+  season: 2
+  episodes: [17]
+  status: auto
+
+# S02E18: The Leafy Sea Dragons
+- file: The Octonauts/The Octonauts-S02E18-The Leafy Sea Dragons.mp4
+  anthology: true
+  season: 2
+  episodes: [18]
+  status: auto
+
+# S02E19: The Manatees
+- file: The Octonauts/The Octonauts-S02E19-The Manatees.mp4
+  anthology: true
+  season: 2
+  episodes: [19]
+  status: auto
+
+# S02E20: The Saltwater Crocodile
+- file: The Octonauts/The Octonauts-S02E20-The Saltwater Crocodile.mp4
+  anthology: true
+  season: 2
+  episodes: [20]
+  status: auto
+
+# S02E21: The Humphead Parrotfish
+- file: The Octonauts/The Octonauts-S02E21-The Humphead Parrotfish.mp4
+  anthology: true
+  season: 2
+  episodes: [21]
+  status: auto
+
+# S02E22: The Gulper Eels (season finale)
+- file: The Octonauts/The Octonauts-S02E22-The Gulper Eels.mp4
+  anthology: true
+  season: 2
+  episodes: [22]
+  status: auto
+
+# The Octonauts Season 3 - Special case anthology show
+# Directory and files prefixed with "The" but canonical title is "Octonauts"
+# Season 3 has 20 episodes total, each in its own file (unusual for anthology)
+# All episodes are 11 minutes each
+# Educational underwater adventure series for children
+# Season aired in multiple blocks with episodes 6, 18, and 20 marked as finales
+# Each episode focuses on a different sea creature or marine environment
+
+# S03E01: The Siphonophore
+- file: The Octonauts/The Octonauts-S03E01-The Siphonophore.mp4
+  anthology: true
+  season: 3
+  episodes: [1]
+  status: auto
+
+# S03E02: The Waterbears
+- file: The Octonauts/The Octonauts-S03E02-The Water Bears.mp4
+  anthology: true
+  season: 3
+  episodes: [2]
+  status: auto
+
+# S03E03: The Cone Snail
+- file: The Octonauts/The Octonauts-S03E03-The Cone Snails.mp4
+  anthology: true
+  season: 3
+  episodes: [3]
+  status: auto
+
+# S03E04: The Artificial Reef
+- file: The Octonauts/The Octonauts-S03E04-The Artificial Reef.mp4
+  anthology: true
+  season: 3
+  episodes: [4]
+  status: auto
+
+# S03E05: The Humpback Whales
+- file: The Octonauts/The Octonauts-S03E05-The Humpback Whales.mp4
+  anthology: true
+  season: 3
+  episodes: [5]
+  status: auto
+
+# S03E06: The Pelicans (season finale - first block)
+- file: The Octonauts/The Octonauts-S03E06-The Pelicans.mp4
+  anthology: true
+  season: 3
+  episodes: [6]
+  status: auto
+
+# S03E07: The Sea Pigs
+- file: The Octonauts/The Octonauts-S03E07-The Sea Pigs.mp4
+  anthology: true
+  season: 3
+  episodes: [7]
+  status: auto
+
+# S03E08: The Yeti Crab
+- file: The Octonauts/The Octonauts-S03E08-The Yeti Crab.mp4
+  anthology: true
+  season: 3
+  episodes: [8]
+  status: auto
+
+# S03E09: The Barracudas
+- file: The Octonauts/The Octonauts-S03E12-The Barracudas.mp4
+  anthology: true
+  season: 3
+  episodes: [9]
+  status: auto
+
+# S03E10: The Duck-Billed Platypus
+- file: The Octonauts/The Octonauts-S03E09-The Duck Billed Platypus.mp4
+  anthology: true
+  season: 3
+  episodes: [10]
+  status: auto
+
+# S03E11: The Sea Skaters
+- file: The Octonauts/The Octonauts-S03E10-The Sea Skaters.mp4
+  anthology: true
+  season: 3
+  episodes: [11]
+  status: auto
+
+# S03E12: The Mudskippers
+- file: The Octonauts/The Octonauts-S03E11-The Mudskippers.mp4
+  anthology: true
+  season: 3
+  episodes: [12]
+  status: auto
+
+# S03E13: The Harbor Seal
+- file: The Octonauts/The Octonauts-S03E13-The Harbor Seal.mp4
+  anthology: true
+  season: 3
+  episodes: [13]
+  status: auto
+
+# S03E14: The Lion's Mane Jellyfish
+- file: The Octonauts/The Octonauts-S03E14-The Lions Mane Jellyfish.mp4
+  anthology: true
+  season: 3
+  episodes: [14]
+  status: auto
+
+# S03E15: The Red Rock Crabs
+- file: The Octonauts/The Octonauts-S03E15-The Red Rock Crabs.mp4
+  anthology: true
+  season: 3
+  episodes: [15]
+  status: auto
+
+# S03E16: The Sea Sponge
+- file: The Octonauts/The Octonauts-S03E16-The Sea Sponge.mp4
+  anthology: true
+  season: 3
+  episodes: [16]
+  status: auto
+
+# S03E17: The Immortal Jellyfish
+- file: The Octonauts/The Octonauts-S03E17-The Immortal Jellyfish.mp4
+  anthology: true
+  season: 3
+  episodes: [17]
+  status: auto
+
+# S03E18: The Urchin Invasion (season finale - second block)
+- file: The Octonauts/The Octonauts-S03E18-The Urchin Invasion.mp4
+  anthology: true
+  season: 3
+  episodes: [18]
+  status: auto
+
+# S03E19: Hammerhead Sharks
+- file: The Octonauts/The Octonauts-S03E19-The Hammerhead Sharks.mp4
+  anthology: true
+  season: 3
+  episodes: [19]
+  status: auto
+
+# S03E20: Loggerhead Sea Turtle (season finale - third block)
+- file: The Octonauts/The Octonauts-S03E20-The Loggerhead Sea Turtle.mp4
+  anthology: true
+  season: 3
+  episodes: [20]
+  status: auto
+
+# The Octonauts Season 4 - Special case anthology show
+# Directory and files prefixed with "The" but canonical title is "Octonauts"
+# Season 4 has 24 episodes total, each in its own file (unusual for anthology)
+# All episodes are 11 minutes each
+# Educational underwater adventure series for children
+# File numbering doesn't match canonical TVDB episode order
+# Each episode focuses on a different sea creature or marine environment
+
+# S04E01: The Walrus Pups
+- file: The Octonauts/The Octonauts-S04E05-The Walrus Pups.mp4
+  anthology: true
+  season: 4
+  episodes: [1]
+  status: auto
+
+# S04E02: The Mantis Shrimp
+- file: The Octonauts/The Octonauts-S04E06-The Mantis Shrimp.mp4
+  anthology: true
+  season: 4
+  episodes: [2]
+  status: auto
+
+# S04E03: The Poison Dart Frogs
+- file: The Octonauts/The Octonauts-S04E01-The Poison Dart Frogs.mp4
+  anthology: true
+  season: 4
+  episodes: [3]
+  status: auto
+
+# S04E04: The Hidden Lake
+- file: The Octonauts/The Octonauts-S04E02-The Hidden Lake.mp4
+  anthology: true
+  season: 4
+  episodes: [4]
+  status: auto
+
+# S04E05: The Baby Sea Turtles
+- file: The Octonauts/The Octonauts-S04E04-The Baby Sea Turtles.mp4
+  anthology: true
+  season: 4
+  episodes: [5]
+  status: auto
+
+# S04E06: The Octopod Mystery
+- file: The Octonauts/The Octonauts-S04E03-The Octopod Mystery.mp4
+  anthology: true
+  season: 4
+  episodes: [6]
+  status: auto
+
+# S04E07: The Tree Lobsters
+- file: The Octonauts/The Octonauts-S04E08-The Tree Lobsters.mp4
+  anthology: true
+  season: 4
+  episodes: [7]
+  status: auto
+
+# S04E08: The Convict Fish
+- file: The Octonauts/The Octonauts-S04E09-The Convict Fish.mp4
+  anthology: true
+  season: 4
+  episodes: [8]
+  status: auto
+
+# S04E09: The Crawfish
+- file: The Octonauts/The Octonauts-S04E13-Octonauts And The Crawfish.mp4
+  anthology: true
+  season: 4
+  episodes: [9]
+  status: auto
+
+# S04E10: The Surfing Snails
+- file: The Octonauts/The Octonauts-S04E14-Octonauts And The Surfing Snails.mp4
+  anthology: true
+  season: 4
+  episodes: [10]
+  status: auto
+
+# S04E11: The Baby Gator
+- file: The Octonauts/The Octonauts-S04E11-Octonauts And The Baby Gator.mp4
+  anthology: true
+  season: 4
+  episodes: [11]
+  status: auto
+
+# S04E12: The Bomber Worms
+- file: The Octonauts/The Octonauts-S04E12-The Bomber Worms.mp4
+  anthology: true
+  season: 4
+  episodes: [12]
+  status: auto
+
+# S04E13: The Flamingos
+- file: The Octonauts/The Octonauts-S04E15-Octonauts And The Flamingos.mp4
+  anthology: true
+  season: 4
+  episodes: [13]
+  status: auto
+
+# S04E14: Operation Cooperation
+- file: The Octonauts/The Octonauts-S04E16-Octonauts And Operation Cooperation.mp4
+  anthology: true
+  season: 4
+  episodes: [14]
+  status: auto
+
+# S04E15: The Kelp Monster Mystery
+- file: The Octonauts/The Octonauts-S04E17-Octonauts And The Kelp Monster Mystery.mp4
+  anthology: true
+  season: 4
+  episodes: [15]
+  status: auto
+
+# S04E16: The Hippos
+- file: The Octonauts/The Octonauts-S04E22-Octonauts And The Hippos.mp4
+  anthology: true
+  season: 4
+  episodes: [16]
+  status: auto
+
+# S04E17: The Yellow-Bellied Sea Snakes
+- file: The Octonauts/The Octonauts-S04E18-Octonauts And The Yellow Bellied Sea Snakes.mp4
+  anthology: true
+  season: 4
+  episodes: [17]
+  status: auto
+
+# S04E18: The Loneliest Whale
+- file: The Octonauts/The Octonauts-S04E07-The Loneliest Whale.mp4
+  anthology: true
+  season: 4
+  episodes: [18]
+  status: auto
+
+# S04E19: The Spinner Dolphins
+- file: The Octonauts/The Octonauts-S04E20-The Spinner Dolphins.mp4
+  anthology: true
+  season: 4
+  episodes: [19]
+  status: auto
+
+# S04E20: The Coelacanth
+- file: The Octonauts/The Octonauts-S04E23-The Coelacanth.mp4
+  anthology: true
+  season: 4
+  episodes: [20]
+  status: auto
+
+# S04E21: The Emperor Penguins
+- file: The Octonauts/The Octonauts-S04E10-The Emperor Penguins.mp4
+  anthology: true
+  season: 4
+  episodes: [21]
+  status: auto
+
+# S04E22: The Tiger Shark
+- file: The Octonauts/The Octonauts-S04E21-Octonauts And The Tiger Shark.mp4
+  anthology: true
+  season: 4
+  episodes: [22]
+  status: auto
+
+# S04E23: The Coconut Crisis
+- file: The Octonauts/The Octonauts-S04E19-Octonauts And The Coconut Crisis.mp4
+  anthology: true
+  season: 4
+  episodes: [23]
+  status: auto
+
+# S04E24: The Sunfish (season finale)
+- file: The Octonauts/The Octonauts-S04E24-Octonauts And The Sunfish.mp4
+  anthology: true
+  season: 4
+  episodes: [24]
+  status: auto
+
+# The Octonauts Season 5 - Special case anthology show
+# Directory and files prefixed with "The" but canonical title is "Octonauts"
+# Season 5 has 5 episodes total, each in its own file (unusual for anthology)
+# All episodes are 11 minutes each
+# Educational underwater adventure series for children
+# S05E05 "Feeding Frenzy" is the series finale
+# Each episode focuses on a different sea creature or marine environment
+
+# S05E01: Blue Fin Tuna
+- file: The Octonauts/The Octonauts-S05E01-Blue Fin Tuna.mp4
+  anthology: true
+  season: 5
+  episodes: [1]
+  status: auto
+
+# S05E02: Blue Whale Rescue
+- file: The Octonauts/The Octonauts-S05E02-Blue Whale Rescue.mp4
+  anthology: true
+  season: 5
+  episodes: [2]
+  status: auto
+
+# S05E03: Whales of Mystery
+- file: The Octonauts/The Octonauts-S05E03-Whales of Mystery.mp4
+  anthology: true
+  season: 5
+  episodes: [3]
+  status: auto
+
+# S05E04: Ghost Ship
+- file: The Octonauts/The Octonauts-S05E04-Ghost Ship.mp4
+  anthology: true
+  season: 5
+  episodes: [4]
+  status: auto
+
+# S05E05: Feeding Frenzy (series finale)
+- file: The Octonauts/The Octonauts-S05E05-Feeding Frenzy.mp4
+  anthology: true
+  season: 5
+  episodes: [5]
+  status: auto
