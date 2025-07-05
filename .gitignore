@@ -198,6 +198,13 @@ test_final_patch.log
 mypy*.txt
 paw_patrol_*.txt
 segment_debug_*.txt
+
+# Debug scripts and temporary files (should not be committed)
+debug_*.py
+fetch_*.py
+*_debug.py
+debug_*.log
+orchestration_*.log
 forced_anthology_test_output.txt
 trace_debug_test_output.txt
 
