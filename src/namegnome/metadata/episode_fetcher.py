@@ -12,7 +12,7 @@ _EPISODE_CACHE: dict[
     tuple[str, int | None, int | None, str | None], tuple[float, List[Dict[str, Any]]]
 ] = {}
 
-_PROVIDER_KEYS: tuple[str, ...] = ("tvdb", "tmdb", "anilist")
+_PROVIDER_KEYS: tuple[str, ...] = ("tvdb", "tmdb", "omdb", "anilist")
 
 # Track unhealthy providers for the lifetime of the process – cleared by tests as needed.
 _UNHEALTHY_PROVIDERS: set[str] = set()
@@ -47,6 +47,14 @@ def _provider_tmdb(
     return _build_dummy_episodes(f"TMDB {show}", season or 1)
 
 
+def _provider_omdb(
+    show: str, season: int | None, year: int | None = None
+) -> List[Dict[str, Any]]:  # noqa: D401
+    """Return a dummy OMDb episode list."""
+
+    return _build_dummy_episodes(f"OMDb {show}", season or 1)
+
+
 def _provider_anilist(
     show: str, season: int | None, year: int | None = None
 ) -> List[Dict[str, Any]]:  # noqa: D401
@@ -66,7 +74,7 @@ def _safe_call_provider(
     """Attempt to fetch episodes from *provider_key* with retries.
 
     Args:
-        provider_key: One of "tvdb", "tmdb", "anilist".
+        provider_key: One of "tvdb", "tmdb", "omdb", "anilist".
         show: Series title.
         season: Season number (optional).
         year: Release year (optional).

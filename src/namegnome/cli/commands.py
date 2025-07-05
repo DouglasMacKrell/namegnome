@@ -110,6 +110,7 @@ class ExitCode(int, Enum):
     SUCCESS = 0
     ERROR = 1
     MANUAL_NEEDED = 2
+    UNSUPPORTED = 3
 
 
 def validate_media_type(value: str) -> MediaType:
