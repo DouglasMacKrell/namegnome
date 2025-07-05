@@ -219,30 +219,26 @@ def _anthology_split_segments_anthology_mode(
         # first episode in the list.  Otherwise, locate the corresponding
         # TVEpisode object so that pairing starts from there.
         i = 0
-        if start_ep_num is not None:
+        if start_ep_num is not None and episode_list:
             for idx, _ep in enumerate(episode_list):
                 if _ep.episode_number == start_ep_num:
                     i = idx
                     break
 
-        n = len(episode_list)
+        n = len(episode_list) if episode_list else 0
         if i < n:
             ep1 = episode_list[i]
 
-            # If single episode matches (or nearly matches) max duration, treat as single first.
+            # Helper to get episode duration in milliseconds
             def _dur(e):
-                val = getattr(e, "duration_ms", None)
-                if val is None:
-                    # Pydantic v2 stores unknown fields in __pydantic_extra__.
-                    extra = getattr(e, "__pydantic_extra__", {}) or {}
-                    val = extra.get("duration_ms")
-                if val is None:
-                    runtime = getattr(e, "runtime", None)
-                    if runtime is not None:
-                        val = runtime * 60 * 1000
-                return val or 0
+                runtime = getattr(e, "runtime", None)
+                if runtime is not None:
+                    return runtime * 60 * 1000
+                return 0
 
             dur1 = _dur(ep1)
+
+            # If single episode matches (or nearly matches) max duration, treat as single first.
             if dur1 >= max_dur_ms * 0.95:
                 # Single long episode – no pairing.
                 episode_span = f"E{ep1.episode_number:02d}"
@@ -306,45 +302,11 @@ def _anthology_split_segments_anthology_mode(
                     except Exception:
                         pass
                     ctx.plan.items.append(plan_item)
-                    i += 2
                     debug(
-                        f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+                        f"[PLAN ITEM] Creating paired plan item: episode_span={episode_span}, joined_titles={joined_titles}"
                     )
                     return
-            # If single episode matches max duration, treat as single
-            dur1 = _dur(ep1)
-            if dur1 >= max_dur_ms * 0.95:  # allow small margin
-                season_num = season or ep1.season_number or 1
-                episode_span = f"E{ep1.episode_number:02d}"
-                episode_span = _strip_span_prefix(episode_span)
-                joined_titles = ep1.title
-                plan_item = RenamePlanItem(
-                    source=media_file.path,
-                    destination=rule_set.target_path(
-                        media_file,
-                        base_dir=ctx.plan.root_dir,
-                        config=config,
-                        episode_span=episode_span,
-                        joined_titles=joined_titles,
-                    ).resolve(),
-                    media_file=media_file,
-                    season=season,
-                    episode=episode_span,
-                    episode_title=joined_titles,
-                    manual=False,
-                )
-                try:
-                    extra = getattr(media_file, "__pydantic_extra__", None)
-                    if extra is not None:
-                        extra["episode_title"] = joined_titles
-                except Exception:
-                    pass
-                ctx.plan.items.append(plan_item)
-                i += 1
-                debug(
-                    f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
-                )
-                return
+
             # Fallback: treat as single episode
             season_num = season or ep1.season_number or 1
             episode_span = f"E{ep1.episode_number:02d}"
@@ -372,11 +334,11 @@ def _anthology_split_segments_anthology_mode(
             except Exception:
                 pass
             ctx.plan.items.append(plan_item)
-            i += 1
             debug(
-                f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+                f"[PLAN ITEM] Creating fallback plan item: episode_span={episode_span}, joined_titles={joined_titles}"
             )
             return
+
     # Robust fallback: If there are two segments and two episodes in the episode_list, always use both episodes for the span and joined titles
     if episode_list and len(segments) == 2 and len(episode_list) == 2:
         matched_episodes = sorted(episode_list, key=lambda ep: ep.episode_number)

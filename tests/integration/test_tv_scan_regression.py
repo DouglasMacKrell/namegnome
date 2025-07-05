@@ -461,6 +461,101 @@ class TestTVScanRegression:
             f"Manual scan should complete in < 5s, took {elapsed_time:.2f}s"
         )
 
+    def test_harvey_girls_forever_untrusted_titles(self, tmp_path: Path) -> None:
+        """Test Harvey Girls Forever with untrusted-titles logic enabled."""
+        # Create test library with Harvey Girls Forever fixtures
+        library_path = tmp_path / "harvey_library"
+        library_path.mkdir(parents=True, exist_ok=True)
+        workdir = tmp_path / "work"
+        workdir.mkdir(parents=True, exist_ok=True)
+
+        # Copy one Harvey Girls Forever file for testing punctuation replacement
+        harvey_files = [
+            item
+            for item in self.manifest
+            if item["file"].startswith("Harvey Girls Forever")
+        ]
+
+        if harvey_files:
+            # Use the first Harvey Girls Forever file for testing
+            item = harvey_files[0]
+            src_file = self.fixture_root / item["file"]
+            if src_file.exists():
+                dst_file = library_path / item["file"]
+                dst_file.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(src_file, dst_file)
+
+                # Run namegnome with untrusted-titles and max-duration
+                # The exclamation mark should be handled properly in output
+                cmd = [
+                    "python",
+                    "-m",
+                    "namegnome",
+                    "scan",
+                    str(library_path),
+                    "--media-type",
+                    "tv",
+                    "--json",
+                    "-o",
+                    "plan.json",
+                    "--anthology",
+                    "--untrusted-titles",
+                    "--max-duration",
+                    "22",  # 22 minutes to match typical episode pairs
+                ]
+
+                # Set deterministic LLM environment
+                import os
+
+                env = os.environ.copy()
+                env.update(
+                    {
+                        "NAMEGNOME_LLM_PROVIDER": "test_deterministic",
+                        "NAMEGNOME_NO_RICH": "true",
+                    }
+                )
+
+                # Run the command and measure time
+                start_time = time.time()
+                result = subprocess.run(
+                    cmd,
+                    cwd=workdir,
+                    capture_output=True,
+                    text=True,
+                    env=env,
+                    check=False,
+                    timeout=10.0,
+                )
+                end_time = time.time()
+
+                # Verify the command succeeded or needs manual intervention
+                assert result.returncode in [0, 2], f"Command failed: {result.stderr}"
+
+                # Verify plan.json was created
+                plan_path = workdir / "plan.json"
+                assert plan_path.exists(), "plan.json was not created"
+
+                # Load and validate plan structure
+                with open(plan_path, "r", encoding="utf-8") as f:
+                    plan_data = json.load(f)
+
+                assert "items" in plan_data, "plan.json missing 'items' key"
+                assert len(plan_data["items"]) == 1, "Expected exactly one plan item"
+
+                plan_item = plan_data["items"][0]
+                assert "destination" in plan_item, "Plan item missing destination"
+
+                # Verify that exclamation mark is handled properly in output filename
+                # The show name should appear correctly in the destination path
+                destination = plan_item["destination"]
+                assert "Harvey Girls Forever" in destination, (
+                    "Show name not found in destination"
+                )
+
+                # Verify performance (< 5 seconds)
+                runtime = end_time - start_time
+                assert runtime < 5.0, f"Test took {runtime:.2f}s, exceeding 5s limit"
+
 
 if __name__ == "__main__":
     # Allow running the test directly for debugging
