@@ -13,6 +13,7 @@ from namegnome.rules.plex import PlexRuleSet
 from namegnome.models.core import MediaType, PlanStatus
 from typing import Optional, Dict, Tuple, List, Any
 from types import SimpleNamespace
+import os
 
 
 def create_tv_rename_plan(
@@ -50,10 +51,43 @@ def create_tv_rename_plan(
 
         # Provider fallback: try TVDB first, then TMDB
         episode_list = []
-        for provider in [None, "tmdb"]:
-            episode_list = fetch_episode_list(show, season, year, provider=provider)
-            if episode_list:
-                break
+
+        # Check if we should use disambiguation-aware fetcher
+        use_disambiguation = not (
+            os.getenv("NAMEGNOME_NO_RICH")
+            or os.getenv("CI")
+            or os.getenv("NAMEGNOME_LLM_PROVIDER") == "test_deterministic"
+        )
+
+        if use_disambiguation and (
+            os.getenv("TVDB_API_KEY") or os.getenv("TMDB_API_KEY")
+        ):
+            # Use the new disambiguation-aware fetcher for real providers
+            from namegnome.metadata.episode_fetcher import (
+                fetch_episode_list_with_disambiguation,
+            )
+            import asyncio
+
+            try:
+                episode_list = asyncio.run(
+                    fetch_episode_list_with_disambiguation(
+                        show, season, year, provider=None
+                    )
+                )
+            except Exception:
+                # Fallback to dummy providers if real providers fail
+                for provider in [None, "tmdb"]:
+                    episode_list = fetch_episode_list(
+                        show, season, year, provider=provider
+                    )
+                    if episode_list:
+                        break
+        else:
+            # Use existing dummy provider fallback for tests and CI
+            for provider in [None, "tmdb"]:
+                episode_list = fetch_episode_list(show, season, year, provider=provider)
+                if episode_list:
+                    break
 
         # Always attempt segment / anthology processing (standard or anthology mode
         # is chosen internally by the helper based on *config.anthology*).

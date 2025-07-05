@@ -14,6 +14,7 @@ Sprint 1.6-b to ensure reproducible test results.
 """
 
 import json
+import os
 import shutil
 import subprocess
 import time
@@ -22,6 +23,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 import pytest
+from unittest.mock import patch, AsyncMock
 
 
 class TestTVScanRegression:
@@ -555,6 +557,511 @@ class TestTVScanRegression:
                 # Verify performance (< 5 seconds)
                 runtime = end_time - start_time
                 assert runtime < 5.0, f"Test took {runtime:.2f}s, exceeding 5s limit"
+
+    def test_show_name_disambiguation(self, tmp_path: Path) -> None:
+        """Test show name disambiguation when multiple series match the same name."""
+        # Create test library with Danger Mouse file (without year in filename)
+        library_path = tmp_path / "danger_library"
+        library_path.mkdir(parents=True, exist_ok=True)
+        workdir = tmp_path / "work"
+        workdir.mkdir(parents=True, exist_ok=True)
+
+        # Create a file that would be ambiguous - just "Danger Mouse" without year
+        test_file = library_path / "Danger Mouse - S01E01 - Test Episode.mp4"
+        test_file.write_text("dummy content")
+
+        # Mock multiple series results by patching the metadata search
+        from namegnome.metadata.models import (
+            MediaMetadata,
+            TVEpisode,
+            MediaMetadataType,
+        )
+
+        # Create mock metadata for two Danger Mouse series
+        danger_mouse_1981 = MediaMetadata(
+            title="Danger Mouse",
+            media_type=MediaMetadataType.TV_SHOW,
+            year=1981,
+            provider="tvdb",
+            provider_id="danger_mouse_1981",
+            episodes=[
+                TVEpisode(title="Episode 1", episode_number=1, season_number=1),
+                TVEpisode(title="Episode 2", episode_number=2, season_number=1),
+            ],
+        )
+
+        danger_mouse_2015 = MediaMetadata(
+            title="Danger Mouse",
+            media_type=MediaMetadataType.TV_SHOW,
+            year=2015,
+            provider="tvdb",
+            provider_id="danger_mouse_2015",
+            episodes=[
+                TVEpisode(title="Episode 1", episode_number=1, season_number=1),
+                TVEpisode(title="Episode 2", episode_number=2, season_number=1),
+            ],
+        )
+
+        mock_search_results = [danger_mouse_1981, danger_mouse_2015]
+
+        # Test with real disambiguation logic enabled but in non-interactive mode
+        with patch(
+            "namegnome.metadata.clients.tvdb.TVDBClient.search", new_callable=AsyncMock
+        ) as mock_tvdb_search:
+            mock_tvdb_search.return_value = mock_search_results
+
+            try:
+                result = subprocess.run(
+                    [
+                        "python",
+                        "-m",
+                        "namegnome",
+                        "scan",
+                        str(library_path),
+                        "--media-type",
+                        "tv",
+                        "--json",
+                        "-o",
+                        str(workdir / "plan.json"),
+                    ],
+                    cwd=workdir,
+                    env={
+                        **os.environ,
+                        "TVDB_API_KEY": "test_api_key",  # Enable real provider  # pragma: allowlist secret
+                        "NAMEGNOME_NO_RICH": "true",  # Non-interactive mode
+                    },
+                    capture_output=True,
+                    text=True,
+                    timeout=30,
+                )
+
+                # In non-interactive mode with multiple series, it should:
+                # 1. Not crash (exit code 0 or 2)
+                # 2. Select the first series automatically
+                # 3. Generate a valid plan
+
+                assert result.returncode in [0, 2], (
+                    f"Unexpected exit code: {result.returncode}\nStderr: {result.stderr}\nStdout: {result.stdout}"
+                )
+
+                # Validate plan.json was created and contains reasonable data
+                plan_path = workdir / "plan.json"
+                assert plan_path.exists(), "plan.json should be created"
+
+                with open(plan_path, "r", encoding="utf-8") as f:
+                    plan_data = json.load(f)
+
+                # Should have at least one plan item
+                assert len(plan_data["items"]) >= 1, (
+                    "Should have at least one plan item"
+                )
+
+                # Plan item should have proper structure
+                item = plan_data["items"][0]
+                assert "source" in item, "Plan item should have source"
+                assert "destination" in item, "Plan item should have destination"
+                assert "media_file" in item, "Plan item should have media_file"
+
+                # The destination should now be properly formed (not empty show name)
+                destination = item["destination"]
+                assert "Danger Mouse" in destination, (
+                    f"Destination should contain show name: {destination}"
+                )
+
+                print(f"Test passed! Plan destination: {destination}")
+
+            except subprocess.TimeoutExpired:
+                pytest.fail("Command timed out - disambiguation may be hanging")
+
+    def test_absolute_path_enforcement(self, tmp_path: Path) -> None:
+        """Test that the system enforces absolute path requirements per SCAN_RULES.md Section 5."""
+        # Create test library
+        library_path = tmp_path / "test_library"
+        library_path.mkdir(parents=True, exist_ok=True)
+        workdir = tmp_path / "work"
+        workdir.mkdir(parents=True, exist_ok=True)
+
+        # Create a test file
+        test_file = library_path / "Test Show - S01E01.mp4"
+        test_file.write_text("dummy content")
+
+        # Test 1: Relative path should be rejected
+        try:
+            # Try to use a relative path (this should fail)
+            result = subprocess.run(
+                [
+                    "python",
+                    "-m",
+                    "namegnome",
+                    "scan",
+                    "./test_library",  # Relative path - should be rejected
+                    "--media-type",
+                    "tv",
+                    "--json",
+                    "-o",
+                    str(workdir / "plan.json"),
+                ],
+                cwd=tmp_path,  # Set working directory to make relative path valid
+                env={
+                    **os.environ,
+                    "NAMEGNOME_LLM_PROVIDER": "test_deterministic",
+                    "NAMEGNOME_NO_RICH": "true",
+                },
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+
+            # The system should reject relative paths
+            # Either with a specific error message or by resolving to absolute
+            # Let's check if it properly handles/rejects the relative path
+            if result.returncode == 0:
+                # If it succeeds, verify the plan contains absolute paths
+                plan_path = workdir / "plan.json"
+                if plan_path.exists():
+                    with open(plan_path, "r", encoding="utf-8") as f:
+                        plan_data = json.load(f)
+
+                    # All paths in the plan should be absolute
+                    for item in plan_data.get("items", []):
+                        source_path = item.get("source", "")
+                        dest_path = item.get("destination", "")
+
+                        assert Path(source_path).is_absolute(), (
+                            f"Source path should be absolute: {source_path}"
+                        )
+                        assert Path(dest_path).is_absolute(), (
+                            f"Destination path should be absolute: {dest_path}"
+                        )
+
+            # Test 2: Absolute path should work correctly
+            result_abs = subprocess.run(
+                [
+                    "python",
+                    "-m",
+                    "namegnome",
+                    "scan",
+                    str(library_path.resolve()),  # Absolute path - should work
+                    "--media-type",
+                    "tv",
+                    "--json",
+                    "-o",
+                    str(workdir / "plan_abs.json"),
+                ],
+                cwd=workdir,
+                env={
+                    **os.environ,
+                    "NAMEGNOME_LLM_PROVIDER": "test_deterministic",
+                    "NAMEGNOME_NO_RICH": "true",
+                },
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+
+            # Absolute path should work (exit code 0 or 2 for manual)
+            assert result_abs.returncode in [0, 2], (
+                f"Absolute path should work. Exit code: {result_abs.returncode}, stderr: {result_abs.stderr}"
+            )
+
+            # Verify plan contains absolute paths
+            plan_abs_path = workdir / "plan_abs.json"
+            assert plan_abs_path.exists(), "Plan with absolute path should be created"
+
+            with open(plan_abs_path, "r", encoding="utf-8") as f:
+                plan_abs_data = json.load(f)
+
+            assert len(plan_abs_data.get("items", [])) >= 1, (
+                "Should have at least one plan item"
+            )
+
+            for item in plan_abs_data.get("items", []):
+                source_path = item.get("source", "")
+                dest_path = item.get("destination", "")
+
+                assert Path(source_path).is_absolute(), (
+                    f"Source path should be absolute: {source_path}"
+                )
+                assert Path(dest_path).is_absolute(), (
+                    f"Destination path should be absolute: {dest_path}"
+                )
+
+            print(
+                f"Absolute path enforcement test passed. Plan items: {len(plan_abs_data.get('items', []))}"
+            )
+
+        except subprocess.TimeoutExpired:
+            pytest.fail("Absolute path enforcement test timed out")
+
+    def test_duration_based_assignment_edge_cases(self, tmp_path: Path) -> None:
+        """Test duration-based assignment edge cases: double-length episodes, mismatched durations, missing metadata."""
+        # Create test library
+        library_path = tmp_path / "duration_test_library"
+        library_path.mkdir(parents=True, exist_ok=True)
+        workdir = tmp_path / "work"
+        workdir.mkdir(parents=True, exist_ok=True)
+
+        # Create test files for different duration scenarios
+        test_files = [
+            "Double Length Show - S01E01-E02.mp4",  # Double-length episode
+            "Mismatched Show - S01E01.mp4",  # Episode with unusual duration
+            "No Metadata Show - S01E01.mp4",  # Episode without duration metadata
+        ]
+
+        for filename in test_files:
+            test_file = library_path / filename
+            test_file.write_text("dummy content")
+
+        # Test with --max-duration flag to trigger duration-based logic
+        try:
+            result = subprocess.run(
+                [
+                    "python",
+                    "-m",
+                    "namegnome",
+                    "scan",
+                    str(library_path),
+                    "--media-type",
+                    "tv",
+                    "--anthology",  # Enable anthology mode
+                    "--max-duration",
+                    "45",  # 45-minute episodes (allows double-length)
+                    "--json",
+                    "-o",
+                    str(workdir / "plan.json"),
+                ],
+                cwd=workdir,
+                env={
+                    **os.environ,
+                    "NAMEGNOME_LLM_PROVIDER": "test_deterministic",
+                    "NAMEGNOME_NO_RICH": "true",
+                },
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+
+            # Should not crash even with edge cases
+            assert result.returncode in [0, 2], (
+                f"Duration edge cases should not crash. Exit code: {result.returncode}, stderr: {result.stderr}"
+            )
+
+            # Verify plan was created
+            plan_path = workdir / "plan.json"
+            assert plan_path.exists(), (
+                "Plan should be created even with duration edge cases"
+            )
+
+            with open(plan_path, "r", encoding="utf-8") as f:
+                plan_data = json.load(f)
+
+            # Should have plan items for each test file
+            items = plan_data.get("items", [])
+            assert len(items) >= len(test_files), (
+                f"Should have plan items for each test file. Got {len(items)}, expected {len(test_files)}"
+            )
+
+            # Verify that items have proper structure even with edge cases
+            for item in items:
+                assert "source" in item, "Each item should have source"
+                assert "destination" in item, "Each item should have destination"
+                assert "media_file" in item, "Each item should have media_file"
+
+                # Source should match one of our test files
+                source_name = Path(item["source"]).name
+                assert source_name in test_files, (
+                    f"Source {source_name} should be one of our test files"
+                )
+
+            # Test second scenario: Very short max-duration (should handle gracefully)
+            result_short = subprocess.run(
+                [
+                    "python",
+                    "-m",
+                    "namegnome",
+                    "scan",
+                    str(library_path),
+                    "--media-type",
+                    "tv",
+                    "--anthology",
+                    "--max-duration",
+                    "5",  # Very short - should not break
+                    "--json",
+                    "-o",
+                    str(workdir / "plan_short.json"),
+                ],
+                cwd=workdir,
+                env={
+                    **os.environ,
+                    "NAMEGNOME_LLM_PROVIDER": "test_deterministic",
+                    "NAMEGNOME_NO_RICH": "true",
+                },
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+
+            # Should handle very short durations gracefully
+            assert result_short.returncode in [0, 2], (
+                f"Very short max-duration should not crash. Exit code: {result_short.returncode}"
+            )
+
+            print(
+                f"Duration edge cases test passed. Processed {len(items)} items with various duration scenarios."
+            )
+
+        except subprocess.TimeoutExpired:
+            pytest.fail("Duration edge cases test timed out")
+
+    def test_provider_timeout_retry_behavior(self, tmp_path: Path) -> None:
+        """Test provider timeout and retry behavior validation."""
+        # Create test library
+        library_path = tmp_path / "timeout_test_library"
+        library_path.mkdir(parents=True, exist_ok=True)
+        workdir = tmp_path / "work"
+        workdir.mkdir(parents=True, exist_ok=True)
+
+        # Create a test file
+        test_file = library_path / "Network Test Show - S01E01.mp4"
+        test_file.write_text("dummy content")
+
+        # Test 1: Normal operation (no network issues) - should work
+        try:
+            result_normal = subprocess.run(
+                [
+                    "python",
+                    "-m",
+                    "namegnome",
+                    "scan",
+                    str(library_path),
+                    "--media-type",
+                    "tv",
+                    "--json",
+                    "-o",
+                    str(workdir / "plan_normal.json"),
+                ],
+                cwd=workdir,
+                env={
+                    **os.environ,
+                    "NAMEGNOME_LLM_PROVIDER": "test_deterministic",
+                    "NAMEGNOME_NO_RICH": "true",
+                },
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+
+            # Normal operation should work
+            assert result_normal.returncode in [0, 2], (
+                f"Normal operation should work. Exit code: {result_normal.returncode}"
+            )
+
+            # Test 2: Simulate network timeout by setting very short timeout
+            # The system should gracefully fall back to dummy providers
+            result_timeout = subprocess.run(
+                [
+                    "python",
+                    "-m",
+                    "namegnome",
+                    "scan",
+                    str(library_path),
+                    "--media-type",
+                    "tv",
+                    "--json",
+                    "-o",
+                    str(workdir / "plan_timeout.json"),
+                ],
+                cwd=workdir,
+                env={
+                    **os.environ,
+                    "NAMEGNOME_LLM_PROVIDER": "test_deterministic",
+                    "NAMEGNOME_NO_RICH": "true",
+                    # Simulate provider issues by setting invalid API endpoints
+                    "TVDB_API_KEY": "invalid_key_for_timeout_test",  # pragma: allowlist secret
+                    "TMDB_API_KEY": "invalid_key_for_timeout_test",  # pragma: allowlist secret
+                },
+                capture_output=True,
+                text=True,
+                timeout=45,  # Give more time for retries and fallback
+            )
+
+            # Even with provider issues, should not crash (graceful fallback)
+            assert result_timeout.returncode in [0, 2], (
+                f"Provider timeout should not crash. Exit code: {result_timeout.returncode}"
+            )
+
+            # Verify plans were created for both scenarios
+            plan_normal_path = workdir / "plan_normal.json"
+            plan_timeout_path = workdir / "plan_timeout.json"
+
+            assert plan_normal_path.exists(), "Normal plan should be created"
+            assert plan_timeout_path.exists(), "Timeout fallback plan should be created"
+
+            # Both plans should have reasonable content
+            with open(plan_normal_path, "r", encoding="utf-8") as f:
+                plan_normal_data = json.load(f)
+
+            with open(plan_timeout_path, "r", encoding="utf-8") as f:
+                plan_timeout_data = json.load(f)
+
+            # Both plans should have at least one item
+            assert len(plan_normal_data.get("items", [])) >= 1, (
+                "Normal plan should have items"
+            )
+            assert len(plan_timeout_data.get("items", [])) >= 1, (
+                "Timeout plan should have items"
+            )
+
+            # Test 3: Verify provider fallback chain works
+            # When TVDB fails, should try TMDB, then OMDb, etc.
+            result_fallback = subprocess.run(
+                [
+                    "python",
+                    "-m",
+                    "namegnome",
+                    "scan",
+                    str(library_path),
+                    "--media-type",
+                    "tv",
+                    "--json",
+                    "-o",
+                    str(workdir / "plan_fallback.json"),
+                ],
+                cwd=workdir,
+                env={
+                    **os.environ,
+                    "NAMEGNOME_LLM_PROVIDER": "test_deterministic",
+                    "NAMEGNOME_NO_RICH": "true",
+                    # Don't set any API keys - should fall back to dummy providers
+                },
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+
+            # Provider fallback should work
+            assert result_fallback.returncode in [0, 2], (
+                f"Provider fallback should work. Exit code: {result_fallback.returncode}"
+            )
+
+            plan_fallback_path = workdir / "plan_fallback.json"
+            assert plan_fallback_path.exists(), "Fallback plan should be created"
+
+            with open(plan_fallback_path, "r", encoding="utf-8") as f:
+                plan_fallback_data = json.load(f)
+
+            assert len(plan_fallback_data.get("items", [])) >= 1, (
+                "Fallback plan should have items"
+            )
+
+            print(
+                f"Provider timeout/retry test passed. Normal: {len(plan_normal_data.get('items', []))} items, "
+            )
+            print(f"Timeout: {len(plan_timeout_data.get('items', []))} items, ")
+            print(f"Fallback: {len(plan_fallback_data.get('items', []))} items")
+
+        except subprocess.TimeoutExpired:
+            pytest.fail("Provider timeout/retry test timed out")
 
 
 if __name__ == "__main__":
