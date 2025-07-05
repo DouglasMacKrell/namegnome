@@ -70,7 +70,63 @@ This document defines the **requirements, expected behaviors, and rules** for th
 
 ---
 
-## 4. Cross-Platform & Safety Rules
+## 4. Confidence Thresholds & Exit Code Semantics
+
+### Confidence Thresholds
+NameGnome uses confidence scores to determine the appropriate action for each file during the scan process:
+
+- **≥ 0.75**: Auto-processed (high confidence)
+  - Files with clear patterns and strong metadata matches
+  - Items are automatically included in the plan without manual review
+  - Status: `auto`
+
+- **0.40 - 0.74**: Manual review required (medium confidence)
+  - Files with ambiguous patterns or weak metadata matches
+  - Items are flagged for manual review and highlighted in CLI output
+  - Status: `manual`
+
+- **< 0.40**: Unsupported (low confidence)
+  - Files with unclear patterns or no metadata matches
+  - Items are marked as unsupported and may be skipped
+  - Status: `unsupported`
+
+### Exit Code Semantics
+The scan command returns specific exit codes to indicate the result and required next actions:
+
+- **0**: Success
+  - All files processed successfully with auto or manual status
+  - No critical errors encountered
+  - Plan JSON created successfully
+
+- **1**: Error
+  - Critical errors encountered during scan
+  - Provider failures (all providers failed)
+  - File system errors or permission issues
+  - Invalid command arguments
+
+- **2**: Manual intervention needed
+  - Some files require manual review (confidence 0.40-0.74)
+  - Plan contains items flagged as manual
+  - User intervention required before applying plan
+
+- **3**: Unsupported input
+  - Files with unsupported extensions or formats
+  - Malformed filenames that cannot be processed
+  - Invalid directory structures
+
+### Provider Fallback Chain
+When primary providers fail, the system follows this fallback sequence:
+
+1. **TVDB** (primary) - The Movie Database for TV shows
+2. **TMDB** (secondary) - The Movie Database for movies and TV
+3. **OMDb** (tertiary) - Open Movie Database
+4. **AniList** (quaternary) - Anime and manga database
+
+If all providers fail, items are marked for manual review and exit code 2 is returned.
+
+---
+
+## 5. Cross-Platform & Safety Rules
 - All paths must be absolute.
 - All logic must work on Windows, macOS, and Linux.
 - No OS-specific path or file handling.
@@ -78,49 +134,49 @@ This document defines the **requirements, expected behaviors, and rules** for th
 
 ---
 
-## 5. Extensibility & Modularity
+## 6. Extensibility & Modularity
 - All scan logic must be modular and testable.
 - TV/movie/music rules must be easily extendable for new platforms or naming conventions.
 - All configuration must be explicit via `ScanOptions`.
 
 ---
 
-## 6. Testability & Coverage
+## 7. Testability & Coverage
 - Every function/class must have:
   - 1 expected-flow test
   - 1 edge case test
   - 1 failure case test
 - All edge cases and regressions must be covered by tests.
-- Coverage threshold: 80% minimum.
+- Coverage threshold: 85% minimum (updated for Sprint 1.6).
 
 ---
 
-## 7. Error Handling & Reporting
+## 8. Error Handling & Reporting
 - All errors (file access, parse failures, etc.) must be logged and included in `ScanResult.errors`.
 - No silent failures.
 - Manual/ambiguous cases must be clearly flagged for downstream review.
 
 ---
 
-## 8. Naming & Metadata Rules
+## 9. Naming & Metadata Rules
 - Follow the MEDIA-SERVER FILE-NAMING & METADATA GUIDE for all pattern matching and classification.
 - Use platform presets and naming conventions for all output and classification.
 
 ---
 
-## 9. CLI/UX Rules
+## 10. CLI/UX Rules
 - All scan options must be available via CLI flags.
 - Output must be clear, colorized (unless disabled), and suitable for both human and script consumption (JSON mode).
 
 ---
 
-## 10. Documentation & Maintainability
+## 11. Documentation & Maintainability
 - All scan logic must be documented with module-level and function-level docstrings.
 - All rules, edge cases, and platform-specific behaviors must be documented in this file and/or the codebase.
 
 ---
 
-## 11. TO-DO
+## 12. TO-DO
 - Absolute numbering leveraging client AniList and AniDB
   - reimplement AniDB client (lost at some point in refactoring)
 - Subtitle support for Movies and TV Shows

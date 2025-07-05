@@ -606,6 +606,129 @@ See the full API, advanced usage, and guarantees in
 - **TMDB, TVDB, MusicBrainz, OMDb, Fanart.tv, AniList, TheAudioDB**: Pluggable metadata/artwork providers (API compliant)
 - **pipx**: Recommended for isolated CLI installs
 
+## Regression Suite
+
+NameGnome includes a comprehensive regression test suite that ensures TV scan functionality remains reliable across different platforms and edge cases. The regression suite prevents future changes from breaking expected behavior and provides confidence in the scan pipeline.
+
+### Test Structure
+
+The regression suite is organized into several key test modules:
+
+- **`tests/integration/test_tv_scan_regression.py`**: Core TV scan regression tests
+- **`tests/integration/test_provider_fallback.py`**: Provider fallback scenarios  
+- **`tests/integration/test_unsupported_inputs.py`**: Unsupported and malformed file handling
+
+### Running the Regression Suite
+
+#### Run Locally with Poetry
+```bash
+# Run all integration tests
+poetry run pytest tests/integration/ -v
+
+# Run specific regression test
+poetry run pytest tests/integration/test_tv_scan_regression.py -v
+
+# Run with performance monitoring
+poetry run pytest tests/integration/ -v --tb=short
+```
+
+#### CI Integration
+The regression suite runs automatically in CI:
+
+- **Fast Integration Job**: Runs on every PR (Ubuntu, ~1-2 minutes)
+- **Nightly Matrix**: Cross-platform testing (Ubuntu, macOS, Windows)
+- **Coverage Gate**: Maintains 85% coverage threshold
+
+### Fixture Manifest
+
+The regression suite uses a comprehensive fixture manifest (`tests/mocks/tv/fixture_manifest.yaml`) that defines:
+
+#### Manifest Structure
+```yaml
+- file: "Paw Patrol/Paw Patrol-S01E01-Pups And The Kitty Tastrophe Pups Save A Train.mp4"
+  anthology: true
+  season: 1
+  episodes: [5, 6]
+  status: auto
+  
+- file: "Harvey Girls Forever/Harvey Girls Forever! - S01E01 - War and Trees WEBDL-1080p.mkv"
+  anthology: true
+  title_trusted: false
+  season: 1
+  episodes: [1, 2]
+  status: auto
+```
+
+#### Manifest Fields
+- **`file`**: Relative path to the test file
+- **`anthology`**: Whether the file contains multiple episodes  
+- **`season`**: Season number for the episodes
+- **`episodes`**: List of episode numbers (single number or span)
+- **`status`**: Expected processing status (`auto`, `manual`, `unsupported`)
+- **`title_trusted`**: Whether input titles should be trusted (optional)
+
+#### Test Coverage
+The manifest includes:
+- **4,950+ entries** covering real-world edge cases
+- **5 TV shows** with diverse naming patterns
+- **Anthology shows**: Paw Patrol, Firebuds, Martha Speaks, The Octonauts
+- **Complex patterns**: Multi-episode spans, untrusted titles, special characters
+- **Unsupported files**: 23 test files with problematic patterns
+
+### Performance Requirements
+
+- **< 5 seconds**: Maximum scan time for regression tests
+- **Mocked network calls**: All provider API calls use fixture data
+- **Guard rail tests**: Automatically fail if scan time exceeds threshold
+
+### Exit Code Testing
+
+The regression suite validates all exit codes:
+
+- **Exit 0**: Successful scans with auto-processed files
+- **Exit 1**: Critical errors (provider failures, file system issues)
+- **Exit 2**: Manual intervention needed (ambiguous files)
+- **Exit 3**: Unsupported input (malformed files)
+
+### Provider Fallback Testing
+
+Tests ensure robust provider fallback behavior:
+
+1. **TVDB → TMDB → OMDb → AniList**
+2. Failure scenarios for each provider
+3. Manual review when all providers fail
+4. Performance within requirements even with failures
+
+### Running Specific Test Scenarios
+
+```bash
+# Test happy path (successful scan)
+poetry run pytest tests/integration/test_tv_scan_regression.py::TestTVScanRegression::test_happy_path -v
+
+# Test performance guard rail
+poetry run pytest tests/integration/test_tv_scan_regression.py::TestTVScanRegression::test_performance_guard_rail -v
+
+# Test manual intervention scenarios
+poetry run pytest tests/integration/test_tv_scan_regression.py::TestTVScanRegression::test_manual_required_path -v
+
+# Test provider fallback matrix
+poetry run pytest tests/integration/test_provider_fallback.py -v
+
+# Test unsupported file handling
+poetry run pytest tests/integration/test_unsupported_inputs.py -v
+```
+
+### Adding New Test Cases
+
+To add new test cases to the regression suite:
+
+1. **Add test files** to `tests/mocks/tv/[ShowName]/`
+2. **Update manifest** with new entries in `fixture_manifest.yaml`
+3. **Run tests** to validate the new scenarios
+4. **Update CI** if new test categories are needed
+
+The regression suite ensures that NameGnome's TV scan functionality remains reliable, performant, and handles edge cases gracefully across all supported platforms.
+
 ## Metadata Providers
 
 NameGnome supports pluggable metadata providers:
