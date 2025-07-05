@@ -488,6 +488,9 @@ def scan(  # noqa: PLR0913, C901, PLR0915
             console.log("Saving plan...")
             plan_id = save_plan(plan, model_scan_options, extra_args={"verify": verify})
             console.log(f"Plan stored with ID: {plan_id}")
+        # Check for manual items first (applies to both JSON and diff output)
+        manual_items = [item for item in plan.items if item.manual]
+
         if json_output:
             json_str = json.dumps(plan.model_dump(), cls=DateTimeEncoder, indent=2)
 
@@ -509,14 +512,17 @@ def scan(  # noqa: PLR0913, C901, PLR0915
             if not artwork:
                 render_diff(plan, console=console)
 
-            manual_items = [item for item in plan.items if item.manual]
-            if manual_items and not artwork:
+        # Check for manual items and exit with MANUAL_NEEDED if found (regardless of output format)
+        if manual_items and not artwork:
+            if (
+                not json_output
+            ):  # Only print warning for non-JSON output to avoid polluting JSON
                 console.print(
                     f"\n[bold yellow]Warning:[/bold yellow] {len(manual_items)} "
                     f"item(s) require manual confirmation. "
                     f"Use --force to override or fix these issues manually."
                 )
-                raise typer.Exit(ExitCode.MANUAL_NEEDED)
+            raise typer.Exit(ExitCode.MANUAL_NEEDED)
         if artwork:
             # Ensure stub poster exists for unit-tests, even when the exception
             # occurred before we reached the earlier artwork block.
