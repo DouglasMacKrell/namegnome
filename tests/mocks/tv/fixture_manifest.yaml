@@ -4849,3 +4849,101 @@
   season: 5
   episodes: [5]
   status: auto
+
+# Unsupported files for testing - Sprint 1.6-f
+# These files should be ignored by the scanner or marked as unsupported
+
+# Files with ignored extensions (should be skipped entirely)
+- file: unsupported/Show.S01E01.nfo
+  status: ignored
+  reason: "NFO metadata files are explicitly ignored"
+
+- file: unsupported/Show.S01E01.srt
+  status: ignored
+  reason: "Subtitle files are explicitly ignored"
+
+- file: unsupported/Show.S01E01.txt
+  status: ignored
+  reason: "Text files are explicitly ignored"
+
+- file: unsupported/Show.S01E01.jpg
+  status: ignored
+  reason: "Image files are explicitly ignored"
+
+- file: unsupported/Show.S01E01.bak
+  status: ignored
+  reason: "Backup files are explicitly ignored"
+
+- file: unsupported/Show.S01E01.tmp
+  status: ignored
+  reason: "Temporary files are explicitly ignored"
+
+- file: unsupported/Show.S01E01.ini
+  status: ignored
+  reason: "Configuration files are explicitly ignored"
+
+# Files with unknown extensions (should be classified as UNKNOWN)
+- file: unsupported/Show.S01E01.xyz
+  status: unsupported
+  reason: "Unknown file extension"
+
+- file: unsupported/Show.S01E01.dat
+  status: unsupported
+  reason: "Unknown file extension"
+
+- file: unsupported/Show.S01E01.rar
+  status: unsupported
+  reason: "Archive file, not media"
+
+- file: unsupported/malware.exe
+  status: unsupported
+  reason: "Executable file, not media"
+
+- file: unsupported/document.docx
+  status: unsupported
+  reason: "Office document, not media"
+
+- file: unsupported/readme.pdf
+  status: unsupported
+  reason: "PDF document, not media"
+
+# Files with malformed names (media extensions but unparseable names)
+- file: unsupported/Random_File_Name.mp4
+  status: unsupported
+  reason: "No recognizable TV episode pattern"
+
+- file: unsupported/ShowName.E01.mkv
+  status: unsupported
+  reason: "Missing season information"
+
+- file: unsupported/ShowName.S01.avi
+  status: unsupported
+  reason: "Missing episode information"
+
+- file: unsupported/ShowName.1234.mp4
+  status: unsupported
+  reason: "Invalid episode numbering pattern"
+
+- file: unsupported/ShowName.S01E01
+  status: unsupported
+  reason: "Missing file extension"
+
+- file: unsupported/ShowName.S01E01.mp4.old
+  status: unsupported
+  reason: "Double extension, .old is ignored"
+
+- file: unsupported/.S01E01.mp4
+  status: unsupported
+  reason: "Empty show title"
+
+- file: unsupported/Show@#$%^&*().S01E01.mp4
+  status: unsupported
+  reason: "Invalid characters in filename"
+
+- file: unsupported/Very_Long_Filename_That_Exceeds_Normal_Limits_And_Contains_Lots_Of_Characters_That_Might_Cause_Parsing_Issues_Show_S01E01.mp4
+  status: unsupported
+  reason: "Extremely long filename may cause parsing issues"
+
+- file: unsupported/电视剧.S01E01.mp4
+  status: unsupported
+  reason: "Non-ASCII characters in show title"
