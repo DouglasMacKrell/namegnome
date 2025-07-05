@@ -84,6 +84,68 @@ dev = [
 requires = ["poetry-core>=1.9.0"]
 build-backend = "poetry.core.masonry.api"
 
+# -------------------------
+# Pytest configuration
+# -------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*", "*Tests"]
+python_functions = ["test_*"]
+addopts = [
+  "--strict-markers",
+  "--tb=short",
+  "--cov=namegnome",
+  "--cov-report=term-missing",
+  "--cov-report=xml",
+  "--cov-fail-under=85",
+]
+markers = [
+  "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+  "integration: marks tests as integration tests",
+  "unit: marks tests as unit tests",
+]
+filterwarnings = [
+  "ignore::DeprecationWarning",
+  "ignore::PendingDeprecationWarning",
+]
+
+# -------------------------
+# Coverage configuration
+# -------------------------
+[tool.coverage.run]
+source = ["namegnome"]
+branch = true
+omit = [
+  "tests/*",
+  "*/tests/*",
+  "*/test_*",
+  "*/__pycache__/*",
+  "*/.*",
+  "setup.py",
+  "conftest.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "def __repr__",
+  "if self.debug:",
+  "if settings.DEBUG",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if 0:",
+  "if __name__ == .__main__.:",
+  "class .*\\bProtocol\\):",
+  "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+skip_covered = false
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
+
 [tool.deptry.per_rule_ignores]
 # These dependencies are either:
 # • used indirectly by higher-level libraries (e.g. Typer vendoring Click),

@@ -110,10 +110,11 @@ if [[ $MYPY_STATUS -ne 0 ]]; then
     print_message "$YELLOW" "Type checking issues detected but continuing..."
 fi
 
-# Run tests with coverage
-print_message "$YELLOW" "Running tests with coverage..."
+# Run tests with coverage including integration tests
+print_message "$YELLOW" "Running tests with coverage (including integration tests)..."
 TEST_STATUS=0
-python -m pytest --cov=namegnome --cov-report=term-missing || TEST_STATUS=$?
+# Use pytest configuration from pyproject.toml which includes coverage settings
+python -m pytest tests/ || TEST_STATUS=$?
 
 # Check test results
 if [[ $TEST_STATUS -eq 0 ]]; then
