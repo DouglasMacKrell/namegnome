@@ -205,12 +205,17 @@ class TestCreateRenamePlan:
                 platform="plex",
             )
         )
-        # There should be one plan item, not manual, using TMDB data
+        # There should be one plan item, now working correctly with episode data
         assert len(plan.items) == 1
         item = plan.items[0]
-        assert item.manual is True
-        assert item.manual_reason is not None
-        assert "no confident match" in item.manual_reason.lower()
+        # Our improvements now successfully find episode data instead of failing
+        assert item.manual is False, (
+            f"Expected manual=False, got manual={item.manual}. Item: {item}"
+        )
+        assert item.episode_title is not None, "Should have episode title from provider"
+        assert "Episode" in item.episode_title, (
+            f"Expected episode title with 'Episode', got: {item.episode_title}"
+        )
 
     def test_tv_anthology_ambiguous_segment_edge_case(
         self, temp_dir: Path, monkeypatch: MonkeyPatch

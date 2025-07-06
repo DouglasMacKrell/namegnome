@@ -205,11 +205,19 @@ def _prompt_user_series_selection(metadata_results):
     """Prompt user to select from multiple series."""
     from namegnome.cli.console import console
 
-    # Check if we're in a non-interactive environment (tests, CI, etc.)
+    # Check if we're in a non-interactive environment (tests, CI, agent mode, etc.)
     import os
 
-    if os.getenv("NAMEGNOME_NO_RICH") or os.getenv("CI"):
+    if (
+        os.getenv("NAMEGNOME_NO_RICH")
+        or os.getenv("CI")
+        or os.getenv("NAMEGNOME_NON_INTERACTIVE")
+        or not os.isatty(0)
+    ):  # stdin is not a terminal (piped/redirected)
         # In non-interactive mode, just return the first result
+        console.print(
+            f"[yellow]Multiple series found, auto-selecting first result: {metadata_results[0].title} ({metadata_results[0].year})[/yellow]"
+        )
         return metadata_results[0] if metadata_results else None
 
     console.print("\n[bold red]Multiple series found with the same name![/bold red]")

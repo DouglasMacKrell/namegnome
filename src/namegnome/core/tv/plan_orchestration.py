@@ -5,15 +5,20 @@ and robust conflict detection for planned destinations.
 """
 
 from pathlib import Path
+import asyncio
+import os
+from typing import Optional, Dict, Tuple, List, Any
+from types import SimpleNamespace
+
 from namegnome.models.plan import RenamePlan, RenamePlanItem
 from namegnome.core.tv.tv_plan_context import TVRenamePlanBuildContext, TVPlanContext
 from namegnome.core.tv.anthology.tv_anthology_split import _anthology_split_segments
+from namegnome.core.episode_parser import _extract_show_season_year
+from namegnome.metadata.episode_fetcher import fetch_episode_list_with_disambiguation
 from namegnome.rules.base import RuleSetConfig
 from namegnome.rules.plex import PlexRuleSet
 from namegnome.models.core import MediaType, PlanStatus
-from typing import Optional, Dict, Tuple, List, Any
-from types import SimpleNamespace
-import os
+from namegnome.utils.debug import debug
 
 
 def create_tv_rename_plan(
@@ -45,9 +50,11 @@ def create_tv_rename_plan(
         if media_file.media_type != MediaType.TV:
             continue
 
-        show = getattr(media_file, "title", None) or ""
-        season = getattr(media_file, "season", None)
-        year = None
+        # Extract show name, season, and year using proper parsing functions
+        show, season, year = _extract_show_season_year(
+            media_file, getattr(ctx, "config", RuleSetConfig())
+        )
+        debug(f"[ORCHESTRATION] Extracted: show={show!r}, season={season}, year={year}")
 
         # Provider fallback: try TVDB first, then TMDB
         episode_list = []
@@ -58,51 +65,68 @@ def create_tv_rename_plan(
             or os.getenv("CI")
             or os.getenv("NAMEGNOME_LLM_PROVIDER") == "test_deterministic"
         )
+        debug(f"[ORCHESTRATION] use_disambiguation={use_disambiguation}")
 
         if use_disambiguation and (
             os.getenv("TVDB_API_KEY") or os.getenv("TMDB_API_KEY")
         ):
             # Use the new disambiguation-aware fetcher for real providers
-            from namegnome.metadata.episode_fetcher import (
-                fetch_episode_list_with_disambiguation,
-            )
-            import asyncio
-
             try:
                 episode_list = asyncio.run(
                     fetch_episode_list_with_disambiguation(
                         show, season, year, provider=None
                     )
                 )
-            except Exception:
+                debug(
+                    f"[ORCHESTRATION] Real provider returned {len(episode_list)} episodes:"
+                )
+                for ep in episode_list[:3]:  # Show first 3 episodes
+                    debug(f"  Episode: {ep}")
+            except Exception as e:
+                debug(f"[ORCHESTRATION] Real provider failed: {e}")
                 # Fallback to dummy providers if real providers fail
                 for provider in [None, "tmdb"]:
                     episode_list = fetch_episode_list(
                         show, season, year, provider=provider
                     )
                     if episode_list:
+                        debug(
+                            f"[ORCHESTRATION] Fallback provider returned {len(episode_list)} episodes"
+                        )
                         break
         else:
             # Use existing dummy provider fallback for tests and CI
+            debug("[ORCHESTRATION] Using dummy providers")
             for provider in [None, "tmdb"]:
                 episode_list = fetch_episode_list(show, season, year, provider=provider)
                 if episode_list:
+                    debug(
+                        f"[ORCHESTRATION] Dummy provider returned {len(episode_list)} episodes"
+                    )
                     break
 
         # Always attempt segment / anthology processing (standard or anthology mode
         # is chosen internally by the helper based on *config.anthology*).
         config = getattr(ctx, "config", RuleSetConfig())
 
+        episode_list_cache = (
+            episode_list_cache
+            if episode_list_cache is not None
+            else ({(show, season, year): episode_list} if episode_list else None)
+        )
+        debug(
+            f"[ORCHESTRATION] Passing episode_list_cache with key ({show}, {season}, {year}): {episode_list_cache}"
+        )
+
         _anthology_split_segments(
             media_file,
             ctx.rule_set if hasattr(ctx, "rule_set") else PlexRuleSet(),
             config,
             plan_ctx,
-            episode_list_cache=(
-                episode_list_cache
-                if episode_list_cache is not None
-                else ({(show, season, year): episode_list} if episode_list else None)
-            ),
+            episode_list_cache=episode_list_cache,
+            extracted_show=show,
+            extracted_season=season,
+            extracted_year=year,
         )
 
         # If the anthology helper did not create an item (common for regular

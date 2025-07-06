@@ -7,7 +7,7 @@ from typing import Optional, Dict, Tuple, List, Any
 from namegnome.models.core import MediaFile, PlanStatus
 from namegnome.models.plan import RenamePlanItem
 from namegnome.rules.base import RuleSet
-from namegnome.rules.plex import RuleSetConfig
+from namegnome.rules.base import RuleSetConfig
 from namegnome.core.tv.tv_plan_context import TVPlanContext
 from namegnome.metadata.models import TVEpisode
 from namegnome.utils.debug import debug
@@ -15,6 +15,7 @@ from namegnome.core.tv.segment_splitter import _split_segments
 from namegnome.core.tv.utils import _strip_preamble
 import string
 from namegnome.core.tv.plan_helpers import _find_best_episode_match as _best
+
 
 # For backward compatibility with existing tests, strip leading season prefix
 # from spans like "S01E01-E02" -> "01-E02", "S01E03" -> "E03".
@@ -70,6 +71,7 @@ def _anthology_split_segments_anthology_mode(
     episode_list_cache: Optional[
         Dict[Tuple[str, Optional[int], Optional[int]], List[Dict[str, Any]]]
     ] = None,
+    **kwargs,
 ) -> Optional[List[str]]:
     """Split segments in anthology mode."""
     debug(f"[ANTHOLOGY] Processing file: {media_file.path}")
@@ -111,18 +113,48 @@ def _anthology_split_segments_anthology_mode(
     if episode_list_cache:
         show = getattr(media_file, "title", None) or getattr(media_file, "show", None)
         year = getattr(media_file, "year", None)
+
+        debug("[ANTHOLOGY] media_file attributes:")
+        debug(f"  title: {getattr(media_file, 'title', 'NOT_SET')}")
+        debug(f"  show: {getattr(media_file, 'show', 'NOT_SET')}")
+        debug(f"  year: {getattr(media_file, 'year', 'NOT_SET')}")
+        debug(f"  season: {getattr(media_file, 'season', 'NOT_SET')}")
+        debug(f"  episode: {getattr(media_file, 'episode', 'NOT_SET')}")
+        debug(f"[ANTHOLOGY] Using show={show!r}, year={year}, season={season}")
+
         key_variants = [
             (show, season, year),
             (show, season, None),
             (show, None, year),
             (show, None, None),
         ]
+        debug(f"[ANTHOLOGY] Looking for episode list with key variants: {key_variants}")
+        debug(
+            f"[ANTHOLOGY] Available cache keys: {list(episode_list_cache.keys()) if episode_list_cache else 'None'}"
+        )
+
         for k in key_variants:
             episode_list = episode_list_cache.get(k)
             if episode_list:
+                debug(
+                    f"[ANTHOLOGY] Found episode list with key {k}: {len(episode_list)} episodes"
+                )
+                for ep in episode_list[:3]:  # Show first 3 episodes
+                    debug(f"  Raw episode: {ep}")
                 break
 
+        if not episode_list:
+            debug("[ANTHOLOGY] No episode list found in cache")
+
     episode_list = _normalize_episode_list(episode_list)
+    debug(
+        f"[ANTHOLOGY] After normalization: {len(episode_list) if episode_list else 0} episodes"
+    )
+    if episode_list:
+        for ep in episode_list[:3]:  # Show first 3 episodes
+            debug(f"  Normalized episode: {ep}")
+    else:
+        debug("[ANTHOLOGY] No episodes after normalization")
 
     if episode_list and len(segments) >= 2:
         matched_eps = []
@@ -669,11 +701,37 @@ def _anthology_split_segments_standard_mode(
     year = getattr(media_file, "year", None)
     episode_list = None
     if episode_list_cache:
-        key = (show, None, year)
-        episode_list = episode_list_cache.get(key)
+        # Get extracted values from kwargs, fallback to media_file attributes
+        show = (
+            kwargs.get("extracted_show")
+            or getattr(media_file, "title", None)
+            or getattr(media_file, "show", None)
+        )
+        season = kwargs.get("extracted_season") or getattr(media_file, "season", None)
+        year = kwargs.get("extracted_year") or getattr(media_file, "year", None)
+
+        debug(
+            f"[STANDARD] Looking for episodes for show={show!r}, season={season}, year={year}"
+        )
+        debug(f"[STANDARD] Available cache keys: {list(episode_list_cache.keys())}")
+
+        key_variants = [
+            (show, season, year),
+            (show, season, None),
+            (show, None, year),
+            (show, None, None),
+        ]
+
+        for k in key_variants:
+            episode_list = episode_list_cache.get(k)
+            if episode_list:
+                debug(
+                    f"[STANDARD] Found episode list with key {k}: {len(episode_list)} episodes"
+                )
+                break
+
         if not episode_list:
-            key = (show, None, None)
-            episode_list = episode_list_cache.get(key)
+            debug("[STANDARD] No episode list found in cache")
     # Normalize episode_list to TVEpisode objects if needed
     if episode_list:
         normalized = []
@@ -703,6 +761,7 @@ def _anthology_split_segments_standard_mode(
             config,
             ctx,
             episode_list_cache=episode_list_cache,
+            **kwargs,
         )
 
     # Dash-span logic
@@ -727,11 +786,21 @@ def _anthology_split_segments_standard_mode(
                 episode_span = f"E{matched_episodes[0].episode_number:02d}"
             debug(f"Constructed episode_span (dash-span): {episode_span}")
             joined_titles = " & ".join(ep.title for ep in matched_episodes)
+
+            # Get extracted show name from kwargs (passed from orchestration)
+            extracted_show = kwargs.get("extracted_show")
+            extracted_season = kwargs.get("extracted_season")
+
             try:
+                # Pass extracted show name via config so rule set uses it
+                config_with_show = config or RuleSetConfig()
+                if extracted_show:
+                    config_with_show.show_name = extracted_show
+
                 dest_dash = rule_set.target_path(
                     media_file,
                     base_dir=ctx.plan.root_dir,
-                    config=config,
+                    config=config_with_show,
                     episode_span=episode_span,
                     joined_titles=joined_titles,
                 ).resolve()
@@ -739,14 +808,14 @@ def _anthology_split_segments_standard_mode(
                 dest_dash = rule_set.target_path(
                     media_file,
                     base_dir=ctx.plan.root_dir,
-                    config=config,
+                    config=config_with_show,
                 ).resolve()
 
             plan_item = RenamePlanItem(
                 source=media_file.path,
                 destination=dest_dash,
                 media_file=media_file,
-                season=season,
+                season=extracted_season or season,
                 episode=episode_span,
                 episode_title=joined_titles,
                 manual=False,
@@ -756,6 +825,99 @@ def _anthology_split_segments_standard_mode(
                 f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
             )
             return
+
+    # Single episode logic - match episode number from filename to episode list
+    if episode_list:
+        # Try to extract episode number from the filename directly
+        episode_num = None
+
+        # First try to get from media_file if it was set during scan
+        episode_num = getattr(media_file, "episode", None)
+
+        # If not available, parse from filename
+        if episode_num is None:
+            filename = media_file.path.name
+            # Look for episode pattern like S01E01, S1E1, etc.
+            episode_match = re.search(r"S\d+E(\d+)", filename, re.IGNORECASE)
+            if episode_match:
+                try:
+                    episode_num = int(episode_match.group(1))
+                    debug(
+                        f"[STANDARD] Extracted episode number {episode_num} from filename: {filename}"
+                    )
+                except (ValueError, IndexError):
+                    debug(
+                        f"[STANDARD] Failed to parse episode number from: {episode_match.group(1)}"
+                    )
+
+        if episode_num:
+            try:
+                episode_num = int(episode_num)
+                # Find matching episode in the list
+                matching_episode = None
+                for ep in episode_list:
+                    if ep.episode_number == episode_num:
+                        matching_episode = ep
+                        break
+
+                if matching_episode:
+                    debug(
+                        f"[STANDARD] Found matching episode {episode_num}: {matching_episode.title}"
+                    )
+                    episode_span = f"E{matching_episode.episode_number:02d}"
+                    episode_span = _strip_span_prefix(episode_span)
+                    joined_titles = matching_episode.title
+
+                    # Get extracted show name from kwargs (passed from orchestration)
+                    extracted_show = kwargs.get("extracted_show")
+                    extracted_season = kwargs.get("extracted_season")
+
+                    # Create plan item with real episode data
+                    try:
+                        # Pass extracted show name via config so rule set uses it
+                        config_with_show = config or RuleSetConfig()
+                        if extracted_show:
+                            config_with_show.show_name = extracted_show
+
+                        dest_single = rule_set.target_path(
+                            media_file,
+                            base_dir=ctx.plan.root_dir,
+                            config=config_with_show,
+                            episode_span=episode_span,
+                            joined_titles=joined_titles,
+                        ).resolve()
+                    except TypeError:
+                        dest_single = rule_set.target_path(
+                            media_file,
+                            base_dir=ctx.plan.root_dir,
+                            config=config_with_show,
+                        ).resolve()
+
+                    plan_item = RenamePlanItem(
+                        source=media_file.path,
+                        destination=dest_single,
+                        media_file=media_file,
+                        season=extracted_season or season,
+                        episode=episode_span,
+                        episode_title=joined_titles,
+                        manual=False,
+                    )
+                    ctx.plan.items.append(plan_item)
+                    debug(
+                        f"[PLAN ITEM] Single episode: Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
+                    )
+                    return
+                else:
+                    debug(
+                        f"[STANDARD] No matching episode found for episode number {episode_num}"
+                    )
+            except (ValueError, TypeError):
+                debug(f"[STANDARD] Could not parse episode number: {episode_num}")
+        else:
+            debug(
+                f"[STANDARD] No episode number found in filename: {media_file.path.name}"
+            )
+
     return None
 
 

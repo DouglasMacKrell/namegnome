@@ -59,12 +59,17 @@ CANDIDATE_SPLIT_SEGMENTS = 2  # For candidate_splits length
 def _extract_show_name(media_file: MediaFile, config: RuleSetConfig) -> str | None:
     """Extract the show name from a MediaFile or RuleSetConfig.
 
-    Tries the media file's title, then the config's show_name, then the parent
-    folder name.
+    Tries the media file's title, then the config's show_name, then parsing
+    the filename, then the parent folder name.
     """
     show_name = getattr(media_file, "title", None)
     if not show_name:
         show_name = getattr(config, "show_name", None)
+    if not show_name:
+        # Try to parse show name from filename before falling back to parent directory
+        parsed_show, _ = _parse_show_season_from_filename(media_file.path.name)
+        if parsed_show:
+            show_name = parsed_show
     if not show_name:
         show_name = media_file.path.parent.name
     return show_name
@@ -73,11 +78,17 @@ def _extract_show_name(media_file: MediaFile, config: RuleSetConfig) -> str | No
 def _extract_season(media_file: MediaFile, config: RuleSetConfig) -> int | None:
     """Extract the season number from a MediaFile or RuleSetConfig.
 
-    Tries the media file's season, then the config's season.
+    Tries the media file's season, then the config's season, then parsing
+    the filename.
     """
     season = getattr(media_file, "season", None)
     if not season:
         season = getattr(config, "season", None)
+    if not season:
+        # Try to parse season from filename
+        _, parsed_season = _parse_show_season_from_filename(media_file.path.name)
+        if parsed_season:
+            season = parsed_season
     return season
 
 

@@ -279,7 +279,11 @@ class PlexRuleSet(RuleSet):
             season_val = 1
         if "episode_val" not in locals():
             episode_val = 1
-        if metadata and metadata.episodes:
+
+        # Use joined_titles if provided (from real episode data)
+        if joined_titles and joined_titles.strip():
+            episode_title = joined_titles.strip().replace(".", " ")
+        elif metadata and metadata.episodes:
             for ep in metadata.episodes:
                 if (
                     ep.season_number == season_val

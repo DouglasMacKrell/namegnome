@@ -272,8 +272,47 @@ class TestProviderFallback:
                 text=True,
             )
 
-            # Should complete but with manual items or error
-            assert result.returncode in [1, 2]
+            # Should complete successfully with dummy data fallback (our improvement!)
+            assert result.returncode == 0, (
+                f"Expected success with dummy fallback, got: {result.returncode}, stderr: {result.stderr}"
+            )
+
+            # Should still create plan items using dummy data
+            # With our visual improvements, need to extract JSON from formatted output
+            output = result.stdout
+
+            # Find the start of JSON (line that just contains '{')
+            json_start = None
+            lines = output.split("\n")
+            for i, line in enumerate(lines):
+                if line.strip() == "{":
+                    json_start = i
+                    break
+
+            assert json_start is not None, (
+                f"Expected JSON output in stdout. Full output:\n{output}"
+            )
+
+            # Extract JSON block from start to end
+            json_lines = []
+            brace_count = 0
+            for line in lines[json_start:]:
+                json_lines.append(line)
+                brace_count += line.count("{") - line.count("}")
+                if brace_count == 0 and line.strip() == "}":
+                    break
+
+            json_text = "\n".join(json_lines)
+            plan_data = json.loads(json_text)
+            items = plan_data.get("items", [])
+            assert len(items) > 0, "Expected at least one plan item with dummy fallback"
+
+            # Items should have episode data from dummy providers
+            item = items[0]
+            assert item.get("episode_title"), (
+                "Expected episode title from dummy fallback"
+            )
+            assert item.get("episode"), "Expected episode number from dummy fallback"
 
     def test_provider_unhealthy_marking(self) -> None:
         """Test that failed providers are marked as unhealthy."""

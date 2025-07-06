@@ -1,6 +1,7 @@
 # tests/cli/test_tv_scan_integration.py
 
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -51,12 +52,22 @@ def test_scan_tv_integration(tmp_path: Path) -> None:
         "plan.json",
     ]
 
+    # Set up test environment to use mocked providers instead of real API calls
+    test_env = os.environ.copy()  # Inherit parent environment
+    test_env.update(
+        {
+            "NAMEGNOME_LLM_PROVIDER": "test_deterministic",  # Force test mode
+            "NAMEGNOME_NO_RICH": "true",  # Disable rich output in tests
+        }
+    )
+
     result = subprocess.run(  # noqa: S603 – test input, S607 – no shell
         cmd,
         cwd=workdir,
         capture_output=True,
         text=True,
         check=False,
+        env=test_env,
     )
 
     # ------------------------------------------------------------------

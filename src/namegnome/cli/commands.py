@@ -61,10 +61,11 @@ from namegnome.utils.plan_store import list_plans, save_plan
 from namegnome.cli.console import (
     console,
     create_default_progress,
+    gnome_status,
 )
 
 # Visual helpers
-from namegnome.cli.utils.ascii_art import print_gnome_status
+from namegnome.cli.utils.ascii_art import print_gnome_status, print_title
 
 # Install rich traceback handler
 install_traceback(show_locals=True)
@@ -410,139 +411,148 @@ def scan(  # noqa: PLR0913, C901, PLR0915
     if not root.exists():
         console.print(f"[red]Error: Directory does not exist: {root}[/red]")
         raise typer.Exit(ExitCode.ERROR)
+
+    # Show NameGnome banner (unless disabled)
+    if not no_color:
+        print_title(console)
+
     try:
-        # Convert string media types to MediaType enum values
-        try:
-            validated_media_types = [validate_media_type(mt) for mt in media_type_list]
-        except typer.BadParameter as e:
-            console.print(f"[red]Error: {str(e)}[/red]")
-            raise typer.Exit(ExitCode.ERROR)
-        with create_default_progress() as progress:
-            task_id = None
-            if hasattr(progress, "add_task"):
-                task_id = progress.add_task(
-                    "Scanning directory...", total=None, filename=""
-                )
-            scan_options = ScanOptions(
-                recursive=True,
-                include_hidden=False,
-                verify_hash=verify,
-                platform=platform,
-            )
-            scan_result = scan_directory(
-                root,
-                validated_media_types,
-                options=scan_options,
-            )
-            # Surface filenames in progress bar once we have results
-            if task_id is not None:
-                for mf in scan_result.files[:50]:  # cap to avoid flooding terminal
-                    progress.update(task_id, filename=Path(mf.path).name)  # type: ignore[arg-type]
-            if not scan_result.files:
-                console.print("[yellow]No media files found.[/yellow]")
+        with gnome_status(console):
+            # Convert string media types to MediaType enum values
+            try:
+                validated_media_types = [
+                    validate_media_type(mt) for mt in media_type_list
+                ]
+            except typer.BadParameter as e:
+                console.print(f"[red]Error: {str(e)}[/red]")
                 raise typer.Exit(ExitCode.ERROR)
-            if hasattr(progress, "update") and task_id is not None:
-                progress.update(task_id, description="Generating rename plan...")
-            rule_set = PlexRuleSet()  # TODO: Make this configurable based on platform
-            with console.status("[cyan]Creating rename plan...", spinner="dots"):
-                config = RuleSetConfig(
-                    show_name=show_name,
-                    movie_year=movie_year,
-                    anthology=anthology,
-                    adjust_episodes=adjust_episodes,
-                    verify=verify,
-                    llm_model=llm_model,
-                    strict_directory_structure=strict_directory_structure,
-                    untrusted_titles=untrusted_titles,
-                    max_duration=max_duration,
-                )
-                plan = create_rename_plan(
-                    scan_result=scan_result,
-                    rule_set=rule_set,
-                    plan_id=str(uuid.uuid4()),
+            with create_default_progress() as progress:
+                task_id = None
+                if hasattr(progress, "add_task"):
+                    task_id = progress.add_task(
+                        "Scanning directory...", total=None, filename=""
+                    )
+                scan_options = ScanOptions(
+                    recursive=True,
+                    include_hidden=False,
+                    verify_hash=verify,
                     platform=platform,
-                    config=config,
                 )
-            if hasattr(progress, "update") and task_id is not None:
-                progress.update(task_id, description="Storing rename plan...")
-            model_scan_options = _convert_to_model_options(
-                ScanCommandOptions(
-                    root=root,
-                    media_type=media_type_list,
-                    platform=platform,
-                    show_name=show_name,
-                    movie_year=movie_year,
-                    anthology=anthology,
-                    adjust_episodes=adjust_episodes,
-                    verify=verify,
-                    json_output=json_output,
-                    llm_model=llm_model,
-                    no_color=no_color,
-                    strict_directory_structure=strict_directory_structure,
-                    untrusted_titles=untrusted_titles,
-                    max_duration=max_duration,
-                    artwork=artwork,
-                ),
-                validated_media_types,
-                scan_options,
-            )
-            console.log("Saving plan...")
-            plan_id = save_plan(plan, model_scan_options, extra_args={"verify": verify})
-            console.log(f"Plan stored with ID: {plan_id}")
-        # Check for manual items first (applies to both JSON and diff output)
-        manual_items = [item for item in plan.items if item.manual]
-
-        if json_output:
-            json_str = json.dumps(plan.model_dump(), cls=DateTimeEncoder, indent=2)
-
-            # If an explicit output path was provided write the JSON to disk.
-            if output is not None:
-                try:
-                    output.parent.mkdir(parents=True, exist_ok=True)
-                    output.write_text(json_str + "\n", encoding="utf-8")
-                except Exception as exc:  # noqa: BLE001 – surface unexpected IO errors
-                    console.print(f"[red]Failed to write plan to {output}: {exc}[/red]")
+                scan_result = scan_directory(
+                    root,
+                    validated_media_types,
+                    options=scan_options,
+                )
+                # Surface filenames in progress bar once we have results
+                if task_id is not None:
+                    for mf in scan_result.files[:50]:  # cap to avoid flooding terminal
+                        progress.update(task_id, filename=Path(mf.path).name)  # type: ignore[arg-type]
+                if not scan_result.files:
+                    console.print("[yellow]No media files found.[/yellow]")
                     raise typer.Exit(ExitCode.ERROR)
-
-            # Still emit to stdout so existing workflows aren't broken.
-            sys.stdout.write(json_str + "\n")
-        else:
-            # Skip diff rendering when --artwork flag is active – the tests only
-            # care about side-effects (poster download) and exit code, and Rich
-            # rendering can raise in headless CI environments.
-            if not artwork:
-                render_diff(plan, console=console)
-
-        # Check for manual items and exit with MANUAL_NEEDED if found (regardless of output format)
-        if manual_items and not artwork:
-            if (
-                not json_output
-            ):  # Only print warning for non-JSON output to avoid polluting JSON
-                console.print(
-                    f"\n[bold yellow]Warning:[/bold yellow] {len(manual_items)} "
-                    f"item(s) require manual confirmation. "
-                    f"Use --force to override or fix these issues manually."
+                if hasattr(progress, "update") and task_id is not None:
+                    progress.update(task_id, description="Generating rename plan...")
+                rule_set = PlexRuleSet()
+                with console.status("[cyan]Creating rename plan...", spinner="dots"):
+                    config = RuleSetConfig(
+                        show_name=show_name,
+                        movie_year=movie_year,
+                        anthology=anthology,
+                        adjust_episodes=adjust_episodes,
+                        verify=verify,
+                        llm_model=llm_model,
+                        strict_directory_structure=strict_directory_structure,
+                        untrusted_titles=untrusted_titles,
+                        max_duration=max_duration,
+                    )
+                    plan = create_rename_plan(
+                        scan_result=scan_result,
+                        rule_set=rule_set,
+                        plan_id=str(uuid.uuid4()),
+                        platform=platform,
+                        config=config,
+                    )
+                if hasattr(progress, "update") and task_id is not None:
+                    progress.update(task_id, description="Storing rename plan...")
+                model_scan_options = _convert_to_model_options(
+                    ScanCommandOptions(
+                        root=root,
+                        media_type=media_type_list,
+                        platform=platform,
+                        show_name=show_name,
+                        movie_year=movie_year,
+                        anthology=anthology,
+                        adjust_episodes=adjust_episodes,
+                        verify=verify,
+                        json_output=json_output,
+                        llm_model=llm_model,
+                        no_color=no_color,
+                        strict_directory_structure=strict_directory_structure,
+                        untrusted_titles=untrusted_titles,
+                        max_duration=max_duration,
+                        artwork=artwork,
+                    ),
+                    validated_media_types,
+                    scan_options,
                 )
-            raise typer.Exit(ExitCode.MANUAL_NEEDED)
-        if artwork:
-            # Ensure stub poster exists for unit-tests, even when the exception
-            # occurred before we reached the earlier artwork block.
-            stub_path = Path(".namegnome") / "artwork" / "12345" / "poster.jpg"
-            stub_path.parent.mkdir(parents=True, exist_ok=True)
-            if not stub_path.exists():
-                stub_path.write_bytes(b"FAKEIMAGE")
-            raise typer.Exit(ExitCode.SUCCESS)
+                console.log("Saving plan...")
+                plan_id = save_plan(
+                    plan, model_scan_options, extra_args={"verify": verify}
+                )
+                console.log(f"Plan stored with ID: {plan_id}")
+            # Check for manual items first (applies to both JSON and diff output)
+            manual_items = [item for item in plan.items if item.manual]
 
-        # Successful completion – celebrate 🎉
-        if not no_color:
-            print_gnome_status("happy", console=console)
+            if json_output:
+                json_str = json.dumps(plan.model_dump(), cls=DateTimeEncoder, indent=2)
+
+                # If an explicit output path was provided write the JSON to disk.
+                if output is not None:
+                    try:
+                        output.parent.mkdir(parents=True, exist_ok=True)
+                        output.write_text(json_str + "\n", encoding="utf-8")
+                    except Exception as exc:  # noqa: BLE001 – surface unexpected IO errors
+                        console.print(
+                            f"[red]Failed to write plan to {output}: {exc}[/red]"
+                        )
+                        raise typer.Exit(ExitCode.ERROR)
+
+                # Still emit to stdout so existing workflows aren't broken.
+                sys.stdout.write(json_str + "\n")
+            else:
+                # Skip diff rendering when --artwork flag is active – the tests only
+                # care about side-effects (poster download) and exit code, and Rich
+                # rendering can raise in headless CI environments.
+                if not artwork:
+                    render_diff(plan, console=console)
+
+            # Check for manual items and exit with MANUAL_NEEDED if found (regardless of output format)
+            if manual_items and not artwork:
+                if (
+                    not json_output
+                ):  # Only print warning for non-JSON output to avoid polluting JSON
+                    console.print(
+                        f"\n[bold yellow]Warning:[/bold yellow] {len(manual_items)} "
+                        f"item(s) require manual confirmation. "
+                        f"Use --force to override or fix these issues manually."
+                    )
+                raise typer.Exit(ExitCode.MANUAL_NEEDED)
+            if artwork:
+                # Ensure stub poster exists for unit-tests, even when the exception
+                # occurred before we reached the earlier artwork block.
+                stub_path = Path(".namegnome") / "artwork" / "12345" / "poster.jpg"
+                stub_path.parent.mkdir(parents=True, exist_ok=True)
+                if not stub_path.exists():
+                    stub_path.write_bytes(b"FAKEIMAGE")
+                raise typer.Exit(ExitCode.SUCCESS)
+
+            # Successful completion – gnome_status will show happy gnome automatically
     except typer.Exit:
         raise
     except Exception as e:
         console.print(f"[red]Error: An unexpected error occurred: {str(e)}[/red]")
         console.print_exception()
-        if not no_color:
-            print_gnome_status("error", console=console)
+        # gnome_status will show error gnome automatically
         # In test mode with --artwork we prefer a graceful exit rather than failing
         if artwork:
             # Ensure stub poster exists for unit-tests, even when the exception
