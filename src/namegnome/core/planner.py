@@ -31,9 +31,34 @@ if TYPE_CHECKING:
     from namegnome.models.plan import RenamePlan
     from namegnome.rules.base import RuleSet
 
-LLM_CONFIDENCE_THRESHOLD = 0.8
+# Confidence thresholds as per SCAN_RULES.md
+LLM_CONFIDENCE_AUTO_THRESHOLD = 0.75
+LLM_CONFIDENCE_MANUAL_THRESHOLD = 0.40
 
 MIN_WORD_LENGTH = 3  # For episode keyword matching
+
+
+def route_confidence_to_status(confidence: float) -> PlanStatus:
+    """Route LLM confidence scores to appropriate plan item status.
+
+    Implements confidence thresholds from SCAN_RULES.md:
+    - ≥0.75 → auto (PlanStatus.PENDING)
+    - 0.40-0.74 → manual (PlanStatus.MANUAL)
+    - <0.40 → unsupported (PlanStatus.FAILED)
+
+    Args:
+        confidence: Confidence score between 0.0 and 1.0
+
+    Returns:
+        Appropriate PlanStatus for the confidence level
+    """
+    if confidence >= LLM_CONFIDENCE_AUTO_THRESHOLD:
+        return PlanStatus.PENDING  # Auto-processed
+    elif confidence >= LLM_CONFIDENCE_MANUAL_THRESHOLD:
+        return PlanStatus.MANUAL  # Manual review required
+    else:
+        return PlanStatus.FAILED  # Unsupported/low confidence
+
 
 # Use shared TVPlanContext for consistency across modules (imported as alias)
 from namegnome.core.tv.tv_plan_context import TVPlanContext as PlanContext  # noqa: E402

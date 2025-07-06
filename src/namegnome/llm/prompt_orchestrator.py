@@ -215,10 +215,33 @@ def split_anthology(
     except Exception:
         mapping = {}
     filename = str(media_file.path.name)
-    episode_numbers = mapping.get(filename, [])
+
+    # Extract episode numbers and confidence (if provided)
+    result_data = mapping.get(filename, {})
+    if isinstance(result_data, list):
+        # Legacy format: just episode numbers
+        episode_numbers = result_data
+        confidence = _calculate_mapping_confidence(episode_numbers, episode_list)
+    elif isinstance(result_data, dict):
+        # New format: {"episodes": [...], "confidence": 0.85}
+        episode_numbers = result_data.get(
+            "episodes", result_data.get("episode_numbers", [])
+        )
+        confidence = result_data.get("confidence")
+        if confidence is None:
+            confidence = _calculate_mapping_confidence(episode_numbers, episode_list)
+    else:
+        episode_numbers = []
+        confidence = 0.0
+
     # Always return as strings for consistency
     episode_numbers = [str(e) for e in episode_numbers]
-    return {"episode_numbers": episode_numbers, "episode_list": episode_list}
+
+    return {
+        "episode_numbers": episode_numbers,
+        "episode_list": episode_list,
+        "confidence": float(confidence),
+    }
 
 
 def build_title_extraction_prompt(filename: str, episode_titles: list[str]) -> str:
@@ -305,6 +328,71 @@ def normalize_title_with_llm(
         return result
     except Exception:
         return segment
+
+
+def _calculate_mapping_confidence(
+    episode_numbers: list, episode_list: Optional[list] = None
+) -> float:
+    """Calculate confidence score for episode mapping based on heuristics.
+
+    Args:
+        episode_numbers: List of episode numbers mapped by LLM
+        episode_list: Optional list of official episodes for validation
+
+    Returns:
+        Confidence score between 0.0 and 1.0
+    """
+    # Base confidence assessment
+    if not episode_numbers:
+        return 0.0  # No mapping = no confidence
+
+    # Start with reasonable base confidence for having any mapping
+    confidence = 0.6
+
+    # Boost confidence for reasonable episode counts (1-3 episodes per file is typical)
+    if 1 <= len(episode_numbers) <= 3:
+        confidence += 0.2
+    elif len(episode_numbers) > 6:
+        # Too many episodes in one file is suspicious
+        confidence -= 0.3
+
+    # Validate against episode list if available
+    if episode_list:
+        try:
+            episode_set = set()
+            for ep in episode_list:
+                ep_num = None
+                if hasattr(ep, "episode"):
+                    ep_num = ep.episode
+                elif hasattr(ep, "episode_number"):
+                    ep_num = ep.episode_number
+                elif isinstance(ep, dict):
+                    ep_num = ep.get("episode") or ep.get("episode_number")
+
+                if ep_num is not None:
+                    episode_set.add(str(ep_num))
+
+            # Check if mapped episodes exist in official list
+            valid_episodes = 0
+            for ep_num in episode_numbers:
+                if str(ep_num) in episode_set:
+                    valid_episodes += 1
+
+            if len(episode_numbers) > 0:
+                validity_ratio = valid_episodes / len(episode_numbers)
+                if validity_ratio >= 1.0:
+                    confidence += 0.15  # All episodes are valid
+                elif validity_ratio >= 0.5:
+                    confidence += 0.05  # Most episodes are valid
+                else:
+                    confidence -= 0.2  # Many invalid episodes
+
+        except Exception:
+            # If validation fails, don't penalize confidence
+            pass
+
+    # Ensure confidence stays within bounds
+    return max(0.0, min(1.0, confidence))
 
 
 def llm_generate_variants(title: str, model: Optional[str] = None) -> list[str]:

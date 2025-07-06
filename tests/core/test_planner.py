@@ -208,9 +208,14 @@ class TestCreateRenamePlan:
         # There should be one plan item, now working correctly with episode data
         assert len(plan.items) == 1
         item = plan.items[0]
-        # Our improvements now successfully find episode data instead of failing
-        assert item.manual is False, (
-            f"Expected manual=False, got manual={item.manual}. Item: {item}"
+        # Our improvements now successfully find episode data, but with confidence routing
+        # A confidence of 0.60 routes to MANUAL, but may get CONFLICT status if conflicts detected
+        assert item.manual is True, (
+            f"Expected manual=True due to confidence routing, got manual={item.manual}. Item: {item}"
+        )
+        # Status can be MANUAL or CONFLICT depending on conflict detection
+        assert item.status in [PlanStatus.MANUAL, PlanStatus.CONFLICT], (
+            f"Expected status=MANUAL or CONFLICT, got status={item.status}. Item: {item}"
         )
         assert item.episode_title is not None, "Should have episode title from provider"
         assert "Episode" in item.episode_title, (
@@ -337,11 +342,11 @@ class TestCreateRenamePlan:
         _anthology_split_segments(
             media_file, rule_set, config, ctx, episode_list_cache=episode_list_cache
         )
-        # There should be one plan item, flagged as manual
+        # There should be one plan item, flagged as failed due to low confidence
         assert len(ctx.plan.items) == 1
         item = ctx.plan.items[0]
-        assert item.manual is True
-        assert item.status == PlanStatus.MANUAL
+        assert item.manual is False
+        assert item.status == PlanStatus.FAILED
         assert item.manual_reason or item.reason
         assert "No confident match" in (item.manual_reason or item.reason or "")
 
@@ -411,10 +416,11 @@ class TestCreateRenamePlan:
                 config=config,
             )
         )
-        # There should be one plan item, not manual, using TMDB data
+        # There should be one plan item, flagged as failed due to low confidence
         assert len(plan.items) == 1
         item = plan.items[0]
-        assert item.manual is True
+        assert item.manual is False
+        assert item.status == PlanStatus.FAILED
         assert item.manual_reason is not None
         assert (
             "no confident match" in item.manual_reason.lower()

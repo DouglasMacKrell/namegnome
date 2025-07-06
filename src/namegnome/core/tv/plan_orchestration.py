@@ -350,14 +350,36 @@ def _handle_normal_plan_item(media_file, rule_set, config, ctx, plan_ctx):
     if not hasattr(plan_ctx, "case_insensitive_destinations"):
         plan_ctx.case_insensitive_destinations = {}
 
+    # Get LLM confidence for routing
+    try:
+        from namegnome.llm.prompt_orchestrator import split_anthology
+        from namegnome.core.planner import route_confidence_to_status
+
+        show = getattr(media_file, "title", None) or getattr(media_file, "show", None)
+        season = getattr(media_file, "season", None)
+
+        if show and season:
+            llm_result = split_anthology(media_file, show, season, episode_list=[])
+            llm_confidence = llm_result.get("confidence", 0.6)
+        else:
+            llm_confidence = 0.6  # Default medium confidence
+
+        llm_status = route_confidence_to_status(llm_confidence)
+
+    except Exception:
+        llm_confidence = 0.6
+        llm_status = route_confidence_to_status(llm_confidence)
+
     destination = rule_set.target_path(mf_for_rules, base_dir, config)
     item = RenamePlanItem(
         source=media_file.path,
         destination=destination,
         media_file=media_file,
-        manual=True,
-        manual_reason="No confident match after LLM/manual fallback.",
-        status=PlanStatus.MANUAL,
+        status=llm_status,
+        manual=(llm_status == PlanStatus.MANUAL),
+        manual_reason=f"LLM confidence {llm_confidence:.2f}"
+        if llm_status == PlanStatus.MANUAL
+        else None,
     )
 
     # Use unified conflict-detection helper

@@ -15,6 +15,7 @@ from namegnome.core.tv.segment_splitter import _split_segments
 from namegnome.core.tv.utils import _strip_preamble
 import string
 from namegnome.core.tv.plan_helpers import _find_best_episode_match as _best
+from namegnome.core.planner import route_confidence_to_status
 
 
 # For backward compatibility with existing tests, strip leading season prefix
@@ -26,6 +27,26 @@ _SPAN_PREFIX_RE = re.compile(r"S\d{2}E(\d{2}(?:-E\d{2})?)")
 # intentionally unused in the current recovery sprint implementation.
 #
 # ruff: noqa: F841
+
+
+def _get_llm_confidence_for_plan_item(media_file, season, episode_list):
+    """Get LLM confidence score for plan item routing."""
+    try:
+        from namegnome.llm.prompt_orchestrator import split_anthology
+
+        show = getattr(media_file, "title", None) or getattr(media_file, "show", None)
+        if not show or not season:
+            return 0.6  # Default medium confidence for basic matching
+
+        llm_result = split_anthology(
+            media_file, show, season, episode_list=episode_list
+        )
+
+        return llm_result.get("confidence", 0.6)
+
+    except Exception:
+        # If LLM fails, return medium confidence for basic matching
+        return 0.6
 
 
 def _normalize(text):
@@ -206,6 +227,12 @@ def _anthology_split_segments_anthology_mode(
                     config=config,
                 ).resolve()
 
+            # Check LLM confidence for status routing
+            llm_confidence = _get_llm_confidence_for_plan_item(
+                media_file, season, episode_list
+            )
+            llm_status = route_confidence_to_status(llm_confidence)
+
             plan_item = RenamePlanItem(
                 source=media_file.path,
                 destination=dest,
@@ -213,15 +240,13 @@ def _anthology_split_segments_anthology_mode(
                 season=season,
                 episode=episode_span,
                 episode_title=joined_titles,
-                manual=False,
+                status=llm_status,
+                manual=(llm_status == PlanStatus.MANUAL),
+                manual_reason=f"LLM confidence {llm_confidence:.2f}"
+                if llm_status == PlanStatus.MANUAL
+                else None,
             )
             _ensure_plan_ctx = ctx if isinstance(ctx, TVPlanContext) else ctx
-            if plan_item.manual:
-                plan_item.status = PlanStatus.MANUAL
-                if not getattr(plan_item, "manual_reason", None):
-                    plan_item.manual_reason = (
-                        "No confident match after LLM/manual fallback."
-                    )
             _ensure_plan_ctx.plan.items.append(plan_item)
             debug(
                 f"[PLAN ITEM] Early-match span created: {episode_span} -> {joined_titles}"
@@ -276,6 +301,12 @@ def _anthology_split_segments_anthology_mode(
                 episode_span = f"E{ep1.episode_number:02d}"
                 episode_span = _strip_span_prefix(episode_span)
                 joined_titles = ep1.title
+                # Check LLM confidence for status routing
+                llm_confidence = _get_llm_confidence_for_plan_item(
+                    media_file, season, episode_list
+                )
+                llm_status = route_confidence_to_status(llm_confidence)
+
                 plan_item = RenamePlanItem(
                     source=media_file.path,
                     destination=rule_set.target_path(
@@ -289,7 +320,11 @@ def _anthology_split_segments_anthology_mode(
                     season=season,
                     episode=episode_span,
                     episode_title=joined_titles,
-                    manual=False,
+                    status=llm_status,
+                    manual=(llm_status == PlanStatus.MANUAL),
+                    manual_reason=f"LLM confidence {llm_confidence:.2f}"
+                    if llm_status == PlanStatus.MANUAL
+                    else None,
                 )
                 try:
                     extra = getattr(media_file, "__pydantic_extra__", None)
@@ -312,6 +347,12 @@ def _anthology_split_segments_anthology_mode(
                     episode_span = f"{ep1.episode_number:02d}-E{ep2.episode_number:02d}"
                     episode_span = _strip_span_prefix(episode_span)
                     joined_titles = f"{ep1.title} & {ep2.title}"
+                    # Check LLM confidence for status routing
+                    llm_confidence = _get_llm_confidence_for_plan_item(
+                        media_file, season, episode_list
+                    )
+                    llm_status = route_confidence_to_status(llm_confidence)
+
                     plan_item = RenamePlanItem(
                         source=media_file.path,
                         destination=rule_set.target_path(
@@ -325,7 +366,11 @@ def _anthology_split_segments_anthology_mode(
                         season=season,
                         episode=episode_span,
                         episode_title=joined_titles,
-                        manual=False,
+                        status=llm_status,
+                        manual=(llm_status == PlanStatus.MANUAL),
+                        manual_reason=f"LLM confidence {llm_confidence:.2f}"
+                        if llm_status == PlanStatus.MANUAL
+                        else None,
                     )
                     try:
                         extra = getattr(media_file, "__pydantic_extra__", None)
@@ -344,6 +389,12 @@ def _anthology_split_segments_anthology_mode(
             episode_span = f"E{ep1.episode_number:02d}"
             episode_span = _strip_span_prefix(episode_span)
             joined_titles = ep1.title
+            # Check LLM confidence for status routing
+            llm_confidence = _get_llm_confidence_for_plan_item(
+                media_file, season, episode_list
+            )
+            llm_status = route_confidence_to_status(llm_confidence)
+
             plan_item = RenamePlanItem(
                 source=media_file.path,
                 destination=rule_set.target_path(
@@ -357,7 +408,11 @@ def _anthology_split_segments_anthology_mode(
                 season=season,
                 episode=episode_span,
                 episode_title=joined_titles,
-                manual=False,
+                status=llm_status,
+                manual=(llm_status == PlanStatus.MANUAL),
+                manual_reason=f"LLM confidence {llm_confidence:.2f}"
+                if llm_status == PlanStatus.MANUAL
+                else None,
             )
             try:
                 extra = getattr(media_file, "__pydantic_extra__", None)
@@ -378,6 +433,12 @@ def _anthology_split_segments_anthology_mode(
         episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
         episode_span = _strip_span_prefix(episode_span)
         joined_titles = " & ".join([ep.title for ep in matched_episodes])
+        # Check LLM confidence for status routing
+        llm_confidence = _get_llm_confidence_for_plan_item(
+            media_file, season, episode_list
+        )
+        llm_status = route_confidence_to_status(llm_confidence)
+
         plan_item = RenamePlanItem(
             source=media_file.path,
             destination=rule_set.target_path(
@@ -391,7 +452,11 @@ def _anthology_split_segments_anthology_mode(
             season=season,
             episode=episode_span,
             episode_title=joined_titles,
-            manual=False,
+            status=llm_status,
+            manual=(llm_status == PlanStatus.MANUAL),
+            manual_reason=f"LLM confidence {llm_confidence:.2f}"
+            if llm_status == PlanStatus.MANUAL
+            else None,
         )
         try:
             extra = getattr(media_file, "__pydantic_extra__", None)
@@ -435,6 +500,12 @@ def _anthology_split_segments_anthology_mode(
             episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
             episode_span = _strip_span_prefix(episode_span)
             joined_titles = " & ".join([ep.title for ep in matched_episodes])
+            # Check LLM confidence for status routing
+            llm_confidence = _get_llm_confidence_for_plan_item(
+                media_file, season, episode_list
+            )
+            llm_status = route_confidence_to_status(llm_confidence)
+
             plan_item = RenamePlanItem(
                 source=media_file.path,
                 destination=media_file.path,  # Use source path as placeholder
@@ -442,7 +513,11 @@ def _anthology_split_segments_anthology_mode(
                 season=season,
                 episode=episode_span,
                 episode_title=joined_titles or "Unknown Title",
-                manual=False,
+                status=llm_status,
+                manual=(llm_status == PlanStatus.MANUAL),
+                manual_reason=f"LLM confidence {llm_confidence:.2f}"
+                if llm_status == PlanStatus.MANUAL
+                else None,
             )
             try:
                 extra = getattr(media_file, "__pydantic_extra__", None)
@@ -482,6 +557,11 @@ def _anthology_split_segments_anthology_mode(
             episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
             episode_span = _strip_span_prefix(episode_span)
             joined_titles = " & ".join([ep.title for ep in matched_episodes])
+            
+            # Check LLM confidence for status routing
+            llm_confidence = _get_llm_confidence_for_plan_item(media_file, season, episode_list)
+            llm_status = route_confidence_to_status(llm_confidence)
+            
             manual_flag = len(matched_episodes) < 2
             plan_item = RenamePlanItem(
                 source=media_file.path,
@@ -490,7 +570,11 @@ def _anthology_split_segments_anthology_mode(
                 season=season,
                 episode=episode_span,
                 episode_title=joined_titles or "Unknown Title",
-                manual=manual_flag,
+                status=llm_status,
+                manual=(llm_status == PlanStatus.MANUAL),
+                manual_reason=f"LLM confidence {llm_confidence:.2f}"
+                if llm_status == PlanStatus.MANUAL
+                else None,
             )
             try:
                 extra = getattr(media_file, "__pydantic_extra__", None)
@@ -546,6 +630,11 @@ def _anthology_split_segments_anthology_mode(
                     episode_span = f"{matched_episodes[0].episode_number:02d}-E{matched_episodes[-1].episode_number:02d}"
                     episode_span = _strip_span_prefix(episode_span)
                     joined_titles = " & ".join([ep.title for ep in matched_episodes])
+                
+                # Check LLM confidence for status routing
+                llm_confidence = _get_llm_confidence_for_plan_item(media_file, season, episode_list)
+                llm_status = route_confidence_to_status(llm_confidence)
+                
                 manual_flag = len(matched_episodes) < 2
                 plan_item = RenamePlanItem(
                     source=media_file.path,
@@ -554,7 +643,11 @@ def _anthology_split_segments_anthology_mode(
                     season=season,
                     episode=episode_span,
                     episode_title=joined_titles or "Unknown Title",
-                    manual=manual_flag,
+                    status=llm_status,
+                    manual=(llm_status == PlanStatus.MANUAL),
+                    manual_reason=f"LLM confidence {llm_confidence:.2f}"
+                    if llm_status == PlanStatus.MANUAL
+                    else None,
                 )
                 try:
                     extra = getattr(media_file, "__pydantic_extra__", None)
@@ -562,16 +655,120 @@ def _anthology_split_segments_anthology_mode(
                         extra["episode_title"] = joined_titles
                 except Exception:
                     pass
-                if plan_item.manual:
-                    plan_item.status = PlanStatus.MANUAL
-                    if not getattr(plan_item, "manual_reason", None):
-                        plan_item.manual_reason = (
-                            "No confident match after LLM/manual fallback."
-                        )
+
                 debug(
                     f"[PLAN ITEM] Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
                 )
                 ctx.plan.items.append(plan_item)
+    # LLM fallback: Try LLM-based episode mapping with confidence scoring
+    if not ctx.plan.items and episode_list:
+        debug("[LLM] Attempting LLM-based episode mapping for confident routing")
+        try:
+            from namegnome.llm.prompt_orchestrator import split_anthology
+
+            # Get show name for LLM context
+            show = getattr(media_file, "title", None) or getattr(
+                media_file, "show", None
+            )
+            if show and season:
+                llm_result = split_anthology(
+                    media_file, show, season, episode_list=episode_list
+                )
+
+                llm_confidence = llm_result.get("confidence", 0.0)
+                llm_episodes = llm_result.get("episode_numbers", [])
+
+                debug(f"[LLM] Confidence: {llm_confidence}, Episodes: {llm_episodes}")
+
+                # Route based on confidence thresholds
+                llm_status = route_confidence_to_status(llm_confidence)
+
+                if llm_episodes and llm_status != PlanStatus.FAILED:
+                    # Create plan item based on LLM results
+                    if len(llm_episodes) == 1:
+                        # Single episode
+                        ep_num = int(llm_episodes[0])
+                        matching_ep = next(
+                            (ep for ep in episode_list if ep.episode_number == ep_num),
+                            None,
+                        )
+                        if matching_ep:
+                            episode_span = f"E{matching_ep.episode_number:02d}"
+                            episode_span = _strip_span_prefix(episode_span)
+                            joined_titles = matching_ep.title
+                    elif len(llm_episodes) >= 2:
+                        # Multiple episodes - create span
+                        eps = []
+                        for ep_num_str in llm_episodes[:2]:  # Take first 2
+                            ep_num = int(ep_num_str)
+                            matching_ep = next(
+                                (
+                                    ep
+                                    for ep in episode_list
+                                    if ep.episode_number == ep_num
+                                ),
+                                None,
+                            )
+                            if matching_ep:
+                                eps.append(matching_ep)
+
+                        if len(eps) >= 2:
+                            eps = sorted(eps, key=lambda e: e.episode_number)
+                            episode_span = f"{eps[0].episode_number:02d}-E{eps[1].episode_number:02d}"
+                            episode_span = _strip_span_prefix(episode_span)
+                            joined_titles = " & ".join(ep.title for ep in eps)
+                        else:
+                            episode_span = None
+                            joined_titles = "Unknown Title"
+
+                    if episode_span:
+                        try:
+                            dest_llm = rule_set.target_path(
+                                media_file,
+                                base_dir=ctx.plan.root_dir,
+                                config=config,
+                                episode_span=episode_span,
+                                joined_titles=joined_titles,
+                            ).resolve()
+                        except TypeError:
+                            dest_llm = rule_set.target_path(
+                                media_file,
+                                base_dir=ctx.plan.root_dir,
+                                config=config,
+                            ).resolve()
+
+                        # Create plan item with LLM-determined status
+                        plan_item = RenamePlanItem(
+                            source=media_file.path,
+                            destination=dest_llm,
+                            media_file=media_file,
+                            season=season,
+                            episode=episode_span,
+                            episode_title=joined_titles,
+                            status=llm_status,
+                            manual=(llm_status == PlanStatus.MANUAL),
+                            manual_reason=f"LLM confidence {llm_confidence:.2f}"
+                            if llm_status == PlanStatus.MANUAL
+                            else None,
+                        )
+
+                        try:
+                            extra = getattr(media_file, "__pydantic_extra__", None)
+                            if extra is not None:
+                                extra["episode_title"] = joined_titles
+                        except Exception:
+                            pass
+
+                        ctx.plan.items.append(plan_item)
+                        debug(
+                            f"[LLM] Created plan item with status {llm_status}: {episode_span} -> {joined_titles}"
+                        )
+                        return
+
+        except Exception as e:
+            debug(f"[LLM] LLM fallback failed: {e}")
+            # Continue to traditional fallback
+
     # Final fallback: If no plan items were created but we have episode data, use it
     if not ctx.plan.items:
         debug(
@@ -662,6 +859,12 @@ def _anthology_split_segments_anthology_mode(
         else:
             dest_fallback = media_file.path
 
+        # Check LLM confidence for status routing
+        llm_confidence = _get_llm_confidence_for_plan_item(
+            media_file, season, episode_list
+        )
+        llm_status = route_confidence_to_status(llm_confidence)
+
         plan_item = RenamePlanItem(
             source=media_file.path,
             destination=dest_fallback,
@@ -669,8 +872,11 @@ def _anthology_split_segments_anthology_mode(
             season=season,
             episode=episode_span,
             episode_title=joined_titles,
-            manual=True,
-            manual_reason="No confident match after LLM/manual fallback.",
+            status=llm_status,
+            manual=(llm_status == PlanStatus.MANUAL),
+            manual_reason=f"LLM confidence {llm_confidence:.2f}"
+            if llm_status == PlanStatus.MANUAL
+            else "No confident match after LLM/manual fallback.",
         )
         try:
             extra = getattr(media_file, "__pydantic_extra__", None)
@@ -678,8 +884,6 @@ def _anthology_split_segments_anthology_mode(
                 extra["episode_title"] = joined_titles
         except Exception:
             pass
-        if plan_item.manual:
-            plan_item.status = PlanStatus.MANUAL
         debug(
             f"[PLAN ITEM] Fallback: Creating plan item: episode_span={episode_span}, joined_titles={joined_titles}"
         )
@@ -811,6 +1015,12 @@ def _anthology_split_segments_standard_mode(
                     config=config_with_show,
                 ).resolve()
 
+            # Check LLM confidence for status routing
+            llm_confidence = _get_llm_confidence_for_plan_item(
+                media_file, season, episode_list
+            )
+            llm_status = route_confidence_to_status(llm_confidence)
+
             plan_item = RenamePlanItem(
                 source=media_file.path,
                 destination=dest_dash,
@@ -818,7 +1028,11 @@ def _anthology_split_segments_standard_mode(
                 season=extracted_season or season,
                 episode=episode_span,
                 episode_title=joined_titles,
-                manual=False,
+                status=llm_status,
+                manual=(llm_status == PlanStatus.MANUAL),
+                manual_reason=f"LLM confidence {llm_confidence:.2f}"
+                if llm_status == PlanStatus.MANUAL
+                else None,
             )
             ctx.plan.items.append(plan_item)
             debug(
@@ -893,6 +1107,12 @@ def _anthology_split_segments_standard_mode(
                             config=config_with_show,
                         ).resolve()
 
+                    # Check LLM confidence for status routing
+                    llm_confidence = _get_llm_confidence_for_plan_item(
+                        media_file, season, episode_list
+                    )
+                    llm_status = route_confidence_to_status(llm_confidence)
+
                     plan_item = RenamePlanItem(
                         source=media_file.path,
                         destination=dest_single,
@@ -900,7 +1120,11 @@ def _anthology_split_segments_standard_mode(
                         season=extracted_season or season,
                         episode=episode_span,
                         episode_title=joined_titles,
-                        manual=False,
+                        status=llm_status,
+                        manual=(llm_status == PlanStatus.MANUAL),
+                        manual_reason=f"LLM confidence {llm_confidence:.2f}"
+                        if llm_status == PlanStatus.MANUAL
+                        else None,
                     )
                     ctx.plan.items.append(plan_item)
                     debug(

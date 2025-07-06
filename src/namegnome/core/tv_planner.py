@@ -359,17 +359,36 @@ def _handle_normal_plan_item(
         base_dir=ctx.plan.root_dir,
         config=config,
     ).resolve()
+    # Get LLM confidence for routing
+    try:
+        from namegnome.llm.prompt_orchestrator import split_anthology
+        from namegnome.core.planner import route_confidence_to_status
+
+        show = getattr(media_file, "title", None) or getattr(media_file, "show", None)
+        season = getattr(media_file, "season", None)
+
+        if show and season:
+            llm_result = split_anthology(media_file, show, season, episode_list=[])
+            llm_confidence = llm_result.get("confidence", 0.6)
+        else:
+            llm_confidence = 0.6  # Default medium confidence
+
+        llm_status = route_confidence_to_status(llm_confidence)
+
+    except Exception:
+        llm_confidence = 0.6
+        llm_status = route_confidence_to_status(llm_confidence)
+
     # Always create a plan item and check for conflicts, regardless of found_match
     item = RenamePlanItem(
         source=media_file.path,
         destination=target_path,
         media_file=media_file,
-        manual=not found_match,
-        manual_reason=(
-            None
-            if found_match
-            else ("No confident match for filename; missing episode number or title.")
-        ),
+        status=llm_status,
+        manual=(llm_status == PlanStatus.MANUAL),
+        manual_reason=f"LLM confidence {llm_confidence:.2f}"
+        if llm_status == PlanStatus.MANUAL
+        else None,
     )
     add_plan_item_with_conflict_detection(item, ctx, target_path)
 
