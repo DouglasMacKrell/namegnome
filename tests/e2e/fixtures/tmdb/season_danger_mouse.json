@@ -1,0 +1,46 @@
+{
+  "air_date": "2015-09-28",
+  "episodes": [
+    {
+      "air_date": "2015-09-28",
+      "episode_number": 1,
+      "id": 987654,
+      "name": "Danger Mouse Begins Again",
+      "overview": "After a year of inactivity, Danger Mouse is called back into action to stop Baron Greenback from taking over the world.",
+      "runtime": 11,
+      "season_number": 1,
+      "still_path": "/path/to/still.jpg",
+      "vote_average": 8.0,
+      "vote_count": 15
+    },
+    {
+      "air_date": "2015-09-28",
+      "episode_number": 2,
+      "id": 987655,
+      "name": "Danger At C Level",
+      "overview": "Baron Greenback's plan to flood London is put into action, and only Danger Mouse can stop him.",
+      "runtime": 11,
+      "season_number": 1,
+      "still_path": "/path/to/still2.jpg",
+      "vote_average": 7.8,
+      "vote_count": 12
+    },
+    {
+      "air_date": "2015-09-29",
+      "episode_number": 3,
+      "id": 987656,
+      "name": "Greenfinger",
+      "overview": "Baron Greenback uses his latest invention to take control of all the world's vegetation.",
+      "runtime": 11,
+      "season_number": 1,
+      "still_path": "/path/to/still3.jpg",
+      "vote_average": 7.9,
+      "vote_count": 14
+    }
+  ],
+  "name": "Season 1",
+  "overview": "The first season of the rebooted Danger Mouse series.",
+  "id": 89012,
+  "poster_path": "/path/to/season_poster.jpg",
+  "season_number": 1
+} 

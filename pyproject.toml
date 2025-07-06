@@ -50,6 +50,7 @@ types-PyYAML = "*"
 # that installation via classic `pip install -e ".[dev]"` (used by CI)
 # pulls them in even outside of Poetry. This keeps CI lightweight without
 # requiring a Poetry runtime while ensuring the right tooling is present.
+requests = "^2.32.4"
 [tool.poetry.extras]
 dev = [
   "black",

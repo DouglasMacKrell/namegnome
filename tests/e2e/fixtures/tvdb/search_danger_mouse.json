@@ -1,0 +1,26 @@
+[
+  {
+    "id": 290853,
+    "seriesName": "Danger Mouse",
+    "aliases": ["Danger Mouse (2015)"],
+    "banner": "",
+    "firstAired": "2015-09-28",
+    "network": "CBBC",
+    "overview": "The world's greatest secret agent is back! In this reboot of the classic 1980s cartoon, Danger Mouse is called back into action to save the world.",
+    "status": "Ended",
+    "slug": "danger-mouse-2015",
+    "zap2itId": ""
+  },
+  {
+    "id": 77853,
+    "seriesName": "Danger Mouse",
+    "aliases": ["Danger Mouse (1981)"],
+    "banner": "",
+    "firstAired": "1981-09-28",
+    "network": "ITV",
+    "overview": "Danger Mouse is a British animated television series produced by Cosgrove Hall Films for Thames Television. It featured the eponymous Danger Mouse, a white mouse who worked as a secret agent.",
+    "status": "Ended",
+    "slug": "danger-mouse-1981",
+    "zap2itId": ""
+  }
+] 

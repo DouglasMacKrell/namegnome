@@ -1,0 +1,22 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "backdrop_path": "/path/to/backdrop.jpg",
+      "first_air_date": "2015-09-28",
+      "genre_ids": [16, 35, 10759],
+      "id": 62715,
+      "name": "Danger Mouse",
+      "origin_country": ["GB"],
+      "original_language": "en",
+      "original_name": "Danger Mouse",
+      "overview": "The world's greatest secret agent is back! In this reboot of the classic 1980s cartoon, Danger Mouse is called back into action to save the world.",
+      "popularity": 12.345,
+      "poster_path": "/path/to/poster.jpg",
+      "vote_average": 7.8,
+      "vote_count": 42
+    }
+  ],
+  "total_pages": 1,
+  "total_results": 1
+} 

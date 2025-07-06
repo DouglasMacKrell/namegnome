@@ -1,0 +1,52 @@
+[
+  {
+    "id": 5280161,
+    "airedSeason": 1,
+    "airedEpisodeNumber": 1,
+    "episodeName": "Danger Mouse Begins Again",
+    "firstAired": "2015-09-28",
+    "overview": "After a year of inactivity, Danger Mouse is called back into action to stop Baron Greenback from taking over the world.",
+    "runtime": 11,
+    "absoluteNumber": 1
+  },
+  {
+    "id": 5280162,
+    "airedSeason": 1,
+    "airedEpisodeNumber": 2,
+    "episodeName": "Danger At C Level",
+    "firstAired": "2015-09-28",
+    "overview": "Baron Greenback's plan to flood London is put into action, and only Danger Mouse can stop him.",
+    "runtime": 11,
+    "absoluteNumber": 2
+  },
+  {
+    "id": 5280163,
+    "airedSeason": 1,
+    "airedEpisodeNumber": 3,
+    "episodeName": "Greenfinger",
+    "firstAired": "2015-09-29",
+    "overview": "Baron Greenback uses his latest invention to take control of all the world's vegetation.",
+    "runtime": 11,
+    "absoluteNumber": 3
+  },
+  {
+    "id": 5280164,
+    "airedSeason": 1,
+    "airedEpisodeNumber": 4,
+    "episodeName": "Planet Of The Toilets",
+    "firstAired": "2015-09-30",
+    "overview": "Professor Squawkencluck's new invention goes wrong, creating a planet populated entirely by toilets.",
+    "runtime": 11,
+    "absoluteNumber": 4
+  },
+  {
+    "id": 5280165,
+    "airedSeason": 1,
+    "airedEpisodeNumber": 5,
+    "episodeName": "Pink Dawn",
+    "firstAired": "2015-10-01",
+    "overview": "The world turns pink when Baron Greenback steals all the other colors.",
+    "runtime": 11,
+    "absoluteNumber": 5
+  }
+] 

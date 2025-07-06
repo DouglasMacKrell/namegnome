@@ -1,0 +1,170 @@
+name: End-to-End Tests
+
+on:
+  # Core E2E tests on every PR (no external dependencies)
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  
+  # Extended E2E tests nightly (with external dependencies)
+  schedule:
+    - cron: '0 3 * * *'  # 3 AM UTC, after nightly matrix tests
+  workflow_dispatch:     # Allow manual triggering
+
+jobs:
+  # Core E2E Tests - Run on every PR (no external dependencies)
+  core-e2e:
+    runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'  # Skip on scheduled runs
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e .
+        python -m pip install pytest pytest-mock pytest-asyncio pyyaml requests
+        
+    - name: Run Core E2E Tests (no external dependencies)
+      run: |
+        NAMEGNOME_E2E_TESTS=1 python -m pytest tests/e2e/ -m "not api and not llm" -v --tb=short
+      env:
+        CI: "true"
+        PYTHONPATH: ${{ github.workspace }}
+        NAMEGNOME_NON_INTERACTIVE: "true"
+        
+    - name: Create E2E test summary
+      if: always()
+      run: |
+        echo "## Core E2E Test Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- Tests: Core E2E (cached APIs + deterministic LLM)" >> $GITHUB_STEP_SUMMARY
+        echo "- Dependencies: None (fully self-contained)" >> $GITHUB_STEP_SUMMARY
+        echo "- Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+  # Extended E2E Tests - Run nightly with external dependencies
+  extended-e2e:
+    runs-on: ${{ matrix.os }}
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        include:
+          # Core E2E (baseline - should always work)
+          - os: ubuntu-latest
+            test-tier: "core"
+            markers: "not api and not llm"
+            description: "Core E2E (no dependencies)"
+            
+          # API E2E (requires API keys)
+          - os: ubuntu-latest  
+            test-tier: "api"
+            markers: "api and not llm"
+            description: "API E2E (requires TVDB/TMDB keys)"
+            
+          # LLM E2E (requires Ollama - skip in CI for now)
+          # - os: ubuntu-latest
+          #   test-tier: "llm" 
+          #   markers: "llm and not api"
+          #   description: "LLM E2E (requires Ollama)"
+            
+          # Full E2E (requires both - skip in CI for now)
+          # - os: ubuntu-latest
+          #   test-tier: "full"
+          #   markers: "api and llm"
+          #   description: "Full E2E (requires API keys + Ollama)"
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.12
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e .
+        python -m pip install pytest pytest-mock pytest-asyncio pyyaml requests
+        
+    - name: Run ${{ matrix.description }}
+      run: |
+        NAMEGNOME_E2E_TESTS=1 python -m pytest tests/e2e/ -m "${{ matrix.markers }}" -v --tb=short
+      env:
+        CI: "true"
+        PYTHONPATH: ${{ github.workspace }}
+        NAMEGNOME_NON_INTERACTIVE: "true"
+        # API keys (will be empty for non-API tests, which is fine)
+        TVDB_API_KEY: ${{ secrets.TVDB_API_KEY }}
+        TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        OMDB_API_KEY: ${{ secrets.OMDB_API_KEY }}
+        
+    - name: Create extended E2E summary
+      if: always()
+      run: |
+        echo "## Extended E2E Test Summary (${{ matrix.os }})" >> $GITHUB_STEP_SUMMARY
+        echo "- Test Tier: ${{ matrix.test-tier }}" >> $GITHUB_STEP_SUMMARY  
+        echo "- Description: ${{ matrix.description }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Markers: ${{ matrix.markers }}" >> $GITHUB_STEP_SUMMARY
+        echo "- Status: ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+
+  # Documentation job to explain tiered testing approach
+  document-tiers:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - name: Document E2E Testing Tiers
+      run: |
+        echo "# End-to-End Testing Tiers" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "NameGnome implements four tiers of E2E testing:" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🟢 Core E2E (Always runs)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Dependencies**: None" >> $GITHUB_STEP_SUMMARY
+        echo "- **What**: Cached API responses + deterministic LLM + real file operations" >> $GITHUB_STEP_SUMMARY
+        echo "- **When**: Every PR and push" >> $GITHUB_STEP_SUMMARY
+        echo "- **Purpose**: Validate core functionality without external dependencies" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🟡 API E2E (Nightly)" >> $GITHUB_STEP_SUMMARY  
+        echo "- **Dependencies**: Real API keys (TVDB, TMDB, OMDb)" >> $GITHUB_STEP_SUMMARY
+        echo "- **What**: Real API calls + deterministic LLM + real file operations" >> $GITHUB_STEP_SUMMARY
+        echo "- **When**: Nightly scheduled runs" >> $GITHUB_STEP_SUMMARY
+        echo "- **Purpose**: Validate API integration and metadata quality" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🟠 LLM E2E (Local/Manual)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Dependencies**: Real Ollama instance" >> $GITHUB_STEP_SUMMARY
+        echo "- **What**: Cached APIs + real LLM + real file operations" >> $GITHUB_STEP_SUMMARY
+        echo "- **When**: Local development and manual testing" >> $GITHUB_STEP_SUMMARY
+        echo "- **Purpose**: Validate LLM integration and confidence thresholds" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## 🔴 Full E2E (Local/Manual)" >> $GITHUB_STEP_SUMMARY
+        echo "- **Dependencies**: Real API keys + Real Ollama" >> $GITHUB_STEP_SUMMARY
+        echo "- **What**: Real APIs + real LLM + real file operations" >> $GITHUB_STEP_SUMMARY
+        echo "- **When**: Local development and comprehensive validation" >> $GITHUB_STEP_SUMMARY
+        echo "- **Purpose**: Complete end-to-end pipeline validation" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Usage Examples" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo '```bash' >> $GITHUB_STEP_SUMMARY
+        echo '# Run Core E2E (no dependencies)' >> $GITHUB_STEP_SUMMARY
+        echo 'NAMEGNOME_E2E_TESTS=1 pytest tests/e2e/ -m "not api and not llm"' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '# Run API E2E (requires API keys)' >> $GITHUB_STEP_SUMMARY
+        echo 'NAMEGNOME_E2E_TESTS=1 pytest tests/e2e/ -m "api and not llm"' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '# Run LLM E2E (requires Ollama)' >> $GITHUB_STEP_SUMMARY
+        echo 'NAMEGNOME_E2E_TESTS=1 pytest tests/e2e/ -m "llm and not api"' >> $GITHUB_STEP_SUMMARY
+        echo '' >> $GITHUB_STEP_SUMMARY
+        echo '# Run Full E2E (requires both)' >> $GITHUB_STEP_SUMMARY
+        echo 'NAMEGNOME_E2E_TESTS=1 pytest tests/e2e/ -m "api and llm"' >> $GITHUB_STEP_SUMMARY
+        echo '```' >> $GITHUB_STEP_SUMMARY 
