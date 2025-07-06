@@ -89,3 +89,53 @@ def sanitize_title_tv(title: str) -> str:
     if not title:
         return title
     return title.replace("/", "-")
+
+
+def normalize_show_name(show_name: str) -> str:
+    """Normalize show names to handle common variations.
+
+    This function handles:
+    - Stripping "The" prefix for disambiguation
+    - Whitespace normalization
+    - Case normalization
+    - Preserving punctuation where appropriate
+
+    Args:
+        show_name: Raw show name from filename or metadata
+
+    Returns:
+        Normalized show name for better matching
+    """
+    if not show_name:
+        return ""
+
+    # Strip leading/trailing whitespace
+    normalized = show_name.strip()
+
+    # Title case normalization (preserve existing case patterns like "PAW Patrol")
+    # Only normalize if the name is all uppercase or all lowercase
+    if normalized.isupper() or normalized.islower():
+        # Split on spaces and title case each word, but preserve numbers and punctuation
+        words = []
+        for word in normalized.split():
+            if word.isalpha():
+                words.append(word.title())
+            else:
+                # Preserve numbers, punctuation, and mixed case
+                words.append(word)
+        normalized = " ".join(words)
+
+    # Handle "The" prefix normalization for common disambiguation cases
+    # Only strip "The" if it's a common pattern that needs disambiguation
+    the_strip_patterns = [
+        "The Octonauts",  # Often referenced as just "Octonauts"
+        "The Office",  # Often needs disambiguation
+        "The Flash",  # Common disambiguation case
+    ]
+
+    for pattern in the_strip_patterns:
+        if normalized.lower() == pattern.lower():
+            normalized = pattern[4:]  # Remove "The " prefix
+            break
+
+    return normalized

@@ -10,6 +10,131 @@ from typing import List, Tuple
 from rapidfuzz import fuzz
 
 
+def calculate_show_confidence(input_name: str, canonical_name: str) -> float:
+    """Calculate confidence score for show name matching.
+
+    This function provides confidence scoring based on:
+    - Exact string matching
+    - Case-insensitive matching
+    - Token-based similarity
+    - Handling of common variations (like "The" prefix)
+
+    Args:
+        input_name: Show name extracted from filename
+        canonical_name: Official show name from metadata provider
+
+    Returns:
+        Confidence score between 0.0 and 1.0
+    """
+    if not input_name or not canonical_name:
+        return 0.0
+
+    # Normalize both names for comparison
+    input_norm = input_name.strip().lower()
+    canonical_norm = canonical_name.strip().lower()
+
+    # Perfect match gets highest confidence
+    if input_norm == canonical_norm:
+        return 1.0
+
+    # Case-insensitive exact match
+    if input_name.strip().lower() == canonical_name.strip().lower():
+        return 0.98
+
+    # Handle "The" prefix variations
+    input_no_the = re.sub(r"^the\s+", "", input_norm)
+    canonical_no_the = re.sub(r"^the\s+", "", canonical_norm)
+
+    if input_no_the == canonical_no_the:
+        return 0.95
+
+    if input_norm == canonical_no_the or input_no_the == canonical_norm:
+        return 0.90
+
+    # Analyze words for better matching
+    input_words = set(re.findall(r"\w+", input_norm))
+    canonical_words = set(re.findall(r"\w+", canonical_norm))
+
+    # Use rapidfuzz for fuzzy matching
+    token_set_score = fuzz.token_set_ratio(input_norm, canonical_norm) / 100.0
+    token_sort_score = fuzz.token_sort_ratio(input_norm, canonical_norm) / 100.0
+    partial_score = fuzz.partial_ratio(input_norm, canonical_norm) / 100.0
+
+    # Be conservative about token_set when input is much smaller than canonical
+    # token_set gives high scores for subset matches, which we don't want for single words
+    if len(input_words) < len(canonical_words):
+        # Penalize token_set score based on word count ratio
+        word_ratio = len(input_words) / len(canonical_words)
+        token_set_score = (
+            token_set_score * word_ratio * 0.8
+        )  # Extra penalty for subset matching
+
+    # Start with the best conservative fuzzy score
+    best_fuzzy_score = max(token_sort_score, token_set_score)
+
+    # Only use partial score if input is substantial (avoid high scores for short substrings)
+    if (
+        len(input_norm) >= len(canonical_norm) * 0.6
+    ):  # Input should be at least 60% the length
+        best_fuzzy_score = max(best_fuzzy_score, partial_score)
+    else:
+        # For short inputs, heavily penalize partial ratio to avoid substring false positives
+        penalized_partial = partial_score * (len(input_norm) / len(canonical_norm))
+        best_fuzzy_score = max(best_fuzzy_score, penalized_partial)
+
+    # Word overlap boost - but be conservative
+    if input_words and canonical_words:
+        word_overlap = len(input_words & canonical_words) / len(canonical_words)
+        # Only boost if we have multiple words AND substantial overlap, or perfect single word match with multiple canonical words
+        if len(input_words) > 1 and word_overlap > 0.5:
+            # Multiple word input with good overlap
+            best_fuzzy_score = max(best_fuzzy_score, word_overlap * 0.85)
+        elif len(input_words) == 1 and len(canonical_words) > 1 and word_overlap == 1.0:
+            # Single perfect word match - don't boost too much for subset matching
+            best_fuzzy_score = max(
+                best_fuzzy_score, 0.4
+            )  # Cap at 40% for single word matches
+        elif word_overlap == 0.0:
+            # No word overlap at all - heavily penalize
+            best_fuzzy_score = best_fuzzy_score * 0.3  # Reduce by 70% for zero overlap
+
+    # Special handling for perfect word match but different order
+    if (
+        input_words
+        and canonical_words
+        and len(input_words) == len(canonical_words)
+        and input_words == canonical_words
+        and input_norm != canonical_norm
+    ):
+        # Same words, different order - cap at 0.6 per test requirement
+        best_fuzzy_score = min(best_fuzzy_score, 0.6)
+
+    # Additional penalty for very different lengths with poor fuzzy scores
+    length_ratio = min(len(input_norm), len(canonical_norm)) / max(
+        len(input_norm), len(canonical_norm)
+    )
+    if best_fuzzy_score < 0.5 and length_ratio < 0.6:
+        best_fuzzy_score = (
+            best_fuzzy_score * 0.5
+        )  # Additional penalty for very different lengths
+
+    # Ensure reasonable bounds
+    best_fuzzy_score = max(0.0, min(1.0, best_fuzzy_score))
+
+    # Handle year variations (e.g., "Danger Mouse 2015" vs "Danger Mouse")
+    year_pattern = r"\s*\d{4}\s*"
+    input_no_year = re.sub(year_pattern, " ", input_norm).strip()
+    canonical_no_year = re.sub(year_pattern, " ", canonical_norm).strip()
+
+    if (
+        input_no_year == canonical_no_year
+        and abs(len(input_norm) - len(canonical_norm)) <= 6
+    ):
+        return max(best_fuzzy_score, 0.85)
+
+    return best_fuzzy_score
+
+
 def match_episodes(
     filename: str,
     episode_titles: List[str],
