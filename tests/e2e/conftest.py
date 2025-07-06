@@ -247,3 +247,90 @@ def e2e_test_files(e2e_temp_dir):
             test_file.write_text("fake video content")
             test_files.append(test_file)
         return test_files
+
+
+@pytest.fixture
+def e2e_anthology_test_files(e2e_temp_dir):
+    """Create comprehensive test files sampling all 6 shows for anthology edge case testing.
+
+    This fixture captures the unique characteristics of each show type:
+    - Danger Mouse 2015: Non-anthology control case
+    - Firebuds: Anthology with trusted episode titles, provider fallback needs
+    - Harvey Girls Forever!: Anthology with untrusted names from Sonarr
+    - Martha Speaks: Anthology with edge cases (apostrophes, same-name episodes)
+    - Paw Patrol: Anthology with complex episode mapping (single + double episodes)
+    - The Octonauts: Special case anthology (title disambiguation, single episodes)
+
+    Returns ~14 files total (2-3 per show) for comprehensive edge case coverage.
+    """
+    import shutil
+
+    mocks_dir = Path(__file__).parent.parent / "mocks" / "tv"
+    test_files = []
+
+    # Define representative samples from each show (2-3 files per show)
+    show_samples = {
+        # Non-anthology control case
+        "Danger Mouse 2015": [
+            "Danger Mouse 2015-S01E01-Danger Mouse Begins Again.mp4",
+            "Danger Mouse 2015-S01E02-Danger At C Level.mp4",
+        ],
+        # Anthology with trusted episode titles, provider fallback
+        "Firebuds": [
+            "Firebuds-S01E01-Car In A Tree Dalmatian Day.mp4",
+            "Firebuds-S01E02-Hubcap Heist Food Truck Fiasco.mp4",
+        ],
+        # Anthology with untrusted names from Sonarr, special characters
+        "Harvey Girls Forever": [
+            "Harvey Girls Forever! - S01E01 - War and Trees WEBDL-1080p.mkv",
+            "Harvey Girls Forever! - S01E02 - Trade Wreck WEBDL-1080p.mkv",
+        ],
+        # Anthology with edge cases (apostrophes, same-name episodes)
+        "Martha Speaks": [
+            "Martha Speaks-S01E01-Martha Speaks Martha Gives Advice.mp4",  # Same name as show
+            "Martha Speaks-S01E13-Ain T Nothin But A Pound Dog Part 1 Ain T Nothin But A Pound Dog Part 2.mp4",  # Apostrophe sanitization
+            "Martha Speaks-S01E07-Firedog Martha Martha S Pickle.mp4",  # Apostrophe in title
+        ],
+        # Anthology with complex episode mapping (single + double episodes)
+        "Paw Patrol": [
+            "Paw Patrol-S01E01-Pups And The Kitty Tastrophe Pups Save A Train.mp4",  # Double episode
+            "Paw Patrol-S01E12-Pups And The Ghost Pirate.mp4",  # Single episode (22min)
+            "Paw Patrol-S01E16-Pups Save Christmas.mp4",  # Another single episode
+        ],
+        # Special case anthology (title disambiguation, single episodes)
+        "The Octonauts": [
+            "The Octonauts-S01E01-The Whale Shark.mp4",  # Title disambiguation ("The" prefix)
+            "The Octonauts-S01E23-The Mixed Up Whales.mp4",  # Hyphen handling
+        ],
+    }
+
+    # Copy selected files from each show
+    for show_name, filenames in show_samples.items():
+        source_show_dir = mocks_dir / show_name
+        target_show_dir = e2e_temp_dir / show_name
+
+        if source_show_dir.exists():
+            target_show_dir.mkdir(parents=True, exist_ok=True)
+
+            for filename in filenames:
+                source_file = source_show_dir / filename
+                target_file = target_show_dir / filename
+
+                if source_file.exists():
+                    shutil.copy2(source_file, target_file)
+                    test_files.append(target_file)
+                else:
+                    # Create minimal test file if source doesn't exist
+                    target_file.write_text("fake video content for " + filename)
+                    test_files.append(target_file)
+        else:
+            # Create minimal test files if source directory doesn't exist
+            target_show_dir = e2e_temp_dir / show_name
+            target_show_dir.mkdir(parents=True, exist_ok=True)
+
+            for filename in filenames:
+                target_file = target_show_dir / filename
+                target_file.write_text("fake video content for " + filename)
+                test_files.append(target_file)
+
+    return test_files
