@@ -244,12 +244,67 @@ def _create_media_file(
                 # Log but continue if hash can't be computed
                 errors.append(f"Failed to compute hash for {file_path}: {str(e)}")
 
+        # Parse TV show information if this is a TV file
+        season = None
+        episode = None
+        episode_title = None
+        year = None
+        title = None
+
+        if media_type == MediaType.TV:
+            try:
+                # Parse using the same regex patterns from tv_planner.py
+                filename = file_path.name
+
+                # Primary pattern: ShowName-S##E##-Episode Title.ext
+                match = re.search(
+                    r"^(?P<show>.+)-S(?P<season>\d{1,2})E(?P<episode>\d{2,3})(?:-(?P<title>.+?))?\.(?P<ext>[^.]+)$",
+                    filename,
+                    re.IGNORECASE,
+                )
+                if not match:
+                    # Alternative pattern: ShowName S##E## Episode Title.ext
+                    match = re.search(
+                        r"^(?P<show>.+)[ ._-]+S(?P<season>\d{1,2})E(?P<episode>\d{2,3})(?:[ ._-]+(?P<title>.+?))?\.(?P<ext>[^.]+)$",
+                        filename,
+                        re.IGNORECASE,
+                    )
+
+                if match:
+                    # Extract show name and clean it up
+                    show_name = match.group("show").rstrip(" .-_")
+                    title = show_name  # Keep the original show name including year
+
+                    # Extract season and episode numbers
+                    season = int(match.group("season"))
+                    episode = int(match.group("episode"))
+
+                    # Extract episode title if present
+                    episode_title_raw = match.group("title")
+                    if episode_title_raw:
+                        episode_title = episode_title_raw.strip(" .-_")
+
+                    # Try to extract year from show name for metadata (but keep title intact)
+                    year_match = re.search(r"\b(19|20)\d{2}\b", show_name)
+                    if year_match:
+                        year = int(year_match.group())
+                        # Don't modify title - keep the original show name with year
+
+            except (ValueError, TypeError, AttributeError) as e:
+                # Log parsing errors but continue with basic MediaFile
+                logger.debug(f"Failed to parse TV filename {filename}: {e}")
+
         # Create the MediaFile object
         media_file = MediaFile(
             path=file_path.absolute(),
             size=size,
             media_type=media_type,
             modified_date=modified_date,
+            season=season,
+            episode=episode,
+            episode_title=episode_title,
+            year=year,
+            title=title,
             hash=file_hash,
         )
 
